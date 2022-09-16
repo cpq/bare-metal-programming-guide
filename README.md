@@ -125,12 +125,11 @@ Then, for setting GPIO pin mode, we can define a function:
 // Enum values will be per datasheet: 0, 1, 2, 3
 enum {GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG};
 
-static void gpio_set_mode(struct gpio *gpio, uint8_t pin, uint8_t mode) {
+static inline void gpio_set_mode(struct gpio *gpio, uint8_t pin, uint8_t mode) {
   gpio->MODER &= ~(3U << (pin * 2));        // Clear existing setting
   gpio->MODER |= (mode & 3) << (pin * 2);   // Set new mode
 }
 ```
-
 Now, we can rewrite the snippet for A3 like this:
 
 ```c
@@ -165,7 +164,7 @@ This way, we can specify pins for any GPIO bank:
 Let's rewrite the `gpio_set_mode()` function to take our pin specification:
 
 ```c
-static void gpio_set_mode(uint16_t pin, uint8_t mode) {
+static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
   struct gpio *gpio = GPIO(PINBANK(pin)); // GPIO bank
   uint8_t n = PINNO(pin);                 // Pin number
   gpio->MODER &= ~(3U << (n * 2));        // Clear existing setting
