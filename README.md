@@ -184,12 +184,239 @@ peripherals, like UART (serial communication) and others - can be implemented
 in a similar way. This is a good programming practice that makes code
 self-explanatory and human readable.
 
-## MCU boot process
+## MCU boot and vector table
+
+When STM32F429 MCU boots, it reads a so-called "vector table" from the
+beginning of flash memory. A vector table is a concept common to all ARM MCUs.
+That is a array of 32-bit addresses of interrupt handlers. First 16 entries
+are reserved by ARM and are common to all ARM MCUs. The rest of interrupt
+handlers are specific to the given MCU - these are interrupt handlers for
+peripherals. Simpler MCUs with few peripherals have few interrupt handlers,
+and more complex MCUs have many.
+
+Vector table for STM32F429 is documented in Table 62. From there we can learn
+that there are 91 peripheral handlers, in addition to the standard 16.
+
+At this point, we are interested in the first two entries of the vector table,
+because they play a key role in the MCU boot process. Those two first values
+are: initial stack pointer, and an address of the boot function to execute
+(a firmware entry point).
+
+So now we know, that we must make sure that our firmware should be composed in
+a way that the 2nd 32-bit value in the flash should contain an address of
+out boot function. When MCU boots, it'll read that address from flash, and
+jump to our boot function.
+
 
 ## Minimal firmware
 
+Let's create a file `main.c`, and specify our boot function that initially
+does nothing (falls into infinite loop), and specify a vector table that
+contains 16 standard entries and 91 STM32 entries:
+
+```c
+// Startup code
+__attribute__((naked, noreturn)) void _reset(void) {
+  for (;;) (void) 0;  // Infinite loop
+}
+
+// 16 standard and 91 STM32-specific handlers
+__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+  0, _reset
+};
+```
+
+For function `_reset()`, we have used GCC-specific attributes `naked` and
+`noreturn` - they mean, standard function's prologue and epilogue should not
+be created by the compiler, and that function does not return.
+
+The vector table `tab` we put in a separate section called `.vectors` - that
+we need later to tell the linker to put that section right at the beginning
+of the generated firmware - and consecutively, at the beginning of flash
+memory. We leave the rest of vector table filled with zeroes.
+
+Note that we do not set the first entry in the vector table, which is an
+initial value for the stack pointer. Why? Because we don't know it. We'll
+handle it later.
+
 ### Compilation
+
+Let's compile our code:
+
+```sh
+$ arm-none-eabi-gcc -mcpu=cortex-m4 main.c -c
+```
+
+That works! The compilation produced a file `main.o` which contains
+our minimal firmware that does nothing.  The `main.o` file is in ELF binary
+format, which contains several sections. Let's see them:
+
+```sh
+$ arm-none-eabi-objdump -h main.o
+...
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000002  00000000  00000000  00000034  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000036  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000036  2**0
+                  ALLOC
+  3 .vectors      000001ac  00000000  00000000  00000038  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, DATA
+  4 .comment      0000004a  00000000  00000000  000001e4  2**0
+                  CONTENTS, READONLY
+  5 .ARM.attributes 0000002e  00000000  00000000  0000022e  2**0
+                  CONTENTS, READONLY
+```
+
+Note that VMA/LMA addresses for sections are set to 0 - meaning, `main.o`
+is not yet a complete firmware, because it does not contain the information
+where those section should be loaded in the address space. We need to use
+a linker to produce a full firmware `firmware.elf` from `main.o`.
+
+The section .text contains firmware code, in our case it is just a _reset()
+function, 2-bytes long - a jump instruction to its own address. There is
+an empty `.data` section and an empty `.bss` section
+(data that is initialized to zero) . Our firmware will be copied
+to the flash region at offset 0x8000000, but our data section should reside
+in RAM - therefore our `reset` function should copy the contents of the
+`.data` section to RAM. Also it has to write zeroes to the whole `.bss`
+section. Our `.data` and `.bss` sections are empty, but let's modify our
+`reset()` function anyway to handle them properly.
+
+Also, our `_reset()` function should set the initial stack pointer, cause 
+our vector table has zero in the corresponding entry at index 0.
+
+In order to do all that, we must know where stack starts, and where data
+and bss section start. This we can specify in the file called "linker script".
+
 ### Linker script
+
+Create a minimal linker script `link.ld`, and copy-paste contents from
+[minimal/link.ld](minimal/link.ld). Below is the explanation:
+
+```
+ENTRY(_reset);
+```
+
+This line tells the linker, that the program's entry point.
+
+```
+MEMORY {
+  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 2048k
+  sram(rwx) : ORIGIN = 0x20000000, LENGTH = 192k  /* remaining 64k in a separate address space */
+}
+```
+This tells the linker that we have two memory regions in the address space,
+their addresses and sizes.
+
+```
+_estack     = ORIGIN(sram) + LENGTH(sram);    /* stack points to end of SRAM */
+```
+
+This tell a linker to create a symbol `estack` with value at the very end
+of the RAM memory region. That will be our initial stack value!
+
+```
+  .vectors  : { KEEP(*(.vectors)) }   > flash
+  .text     : { *(.text*) }           > flash
+  .rodata   : { *(.rodata*) }         > flash
+```
+
+These lines tell the linker to put vectors table on flash first,
+followed by `.text` section (firmware code), followed by the read only
+data `.rodata`.
+
+The next goes `.data` section:
+
+```
+  .data : {
+    _sdata = .;   /* .data section start */
+    *(.first_data)
+    *(.data SORT(.data.*))
+    _edata = .;  /* .data section end */
+  } > sram AT > flash
+  _sidata = LOADADDR(.data);
+```
+
+Note that we tell linker to create `_sdata` and `_edata` symbols. We'll
+use them to copy data section to RAM in the `_reset()` function.
+
+Same for `.bss` section:
+
+```
+  .bss : {
+    _sbss = .;              /* .bss section start */
+    *(.bss SORT(.bss.*) COMMON)
+    _ebss = .;              /* .bss section end */
+  } > sram
+```
+
+Now we can update our `_reset()` function. We initialize stack pointer,
+copy data section to RAM, and initialise bss section to zeroes. Then, we
+call main() function - and fall into infinite loop in case if main() returns:
+
+```c
+// Startup code
+__attribute__((naked, noreturn)) void _reset(void) {
+  asm("ldr sp, = _estack");  // Set initial stack pointer
+
+  // Initialise memory
+  extern long _sbss, _ebss, _sdata, _edata, _sidata;
+  for (long *src = &_sbss; src < &_ebss; src++) *src = 0;
+  for (long *src = &_sdata, *dst = &_sidata; src < &_edata;) *src++ = *dst++;
+
+  // Call main()
+  extern void main(void);
+  main();
+  for (;;) (void) 0;  // Infinite loop
+}
+```
+
+Now we are ready to produce a full firmware file `firmware.elf`:
+
+```sh
+$ arm-none-eabi-gcc -Tminimal/link.ld -nostdlib main.o -o firmware.elf
+```
+
+Let's examine sections in firmware.elf:
+
+```sh
+$ arm-none-eabi-objdump -h firmware.elf
+...
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .vectors      000001ac  08000000  08000000  00010000  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         00000058  080001ac  080001ac  000101ac  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+...
+```
+
+Now we can see that the .vectors section will be loaded at address 0x8000000,
+and .text section right after it, at 0x80001ac. Our code does not create any
+variables, so there is no data section.
+
+We're ready to flash this firmware! First, extract sections from the
+firmware.elf into a single contiguous binary blob:
+
+```sh
+$ arm-none-eabi-objcopy -O binary firmware.elf firmware.bin
+```
+
+And use `st-link` utility to flash the firmware.bin. Plug your board to the
+USB, and execute:
+
+```sh
+$ st-flash --reset write firmware.bin 0x8000000
+```
+
+Done! We've flashed a firmware that does nothing.
+
+
+## Flash firmware
+
 
 ## Makefile: build automation
 
