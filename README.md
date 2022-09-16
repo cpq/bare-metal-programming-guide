@@ -134,7 +134,50 @@ static void gpio_set_mode(struct gpio *gpio, uint8_t pin, uint8_t mode) {
 Now, we can rewrite the snippet for A3 like this:
 
 ```c
-gpio_set_mode(GPIOA, 3, GPIO_MODE_OUTPUT);  // Set A3 to output
+gpio_set_mode(GPIOA, 3 /* pin */, GPIO_MODE_OUTPUT);  // Set A3 to output
+```
+
+Our MCU has several GPIO peripherals (also called "banks"): A, B, C, ... K.
+From section 2.3 we can see that they are 1KB away from each other:
+GPIOA is at address 0x40020000, GPIOB is at 0x40020400, and so on:
+
+```c
+#define GPIO(bank) ((struct gpio *) (0x40020000 + 0x400 * (bank)))
+```
+
+We can create pin numbering that includes the bank and the pin number.
+To do that, we use 2-byte `uint16_t` value, where upper byte indicates
+GPIO bank, and lower byte indicates pin number:
+
+```c
+#define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
+#define PINNO(pin) (pin & 255)
+#define PINBANK(pin) (pin >> 8)
+```
+
+This way, we can specify pins for any GPIO bank:
+
+```c
+  uint16_t pin1 = PIN('A', 3);    // A3   - GPIOA pin 3
+  uint16_t pin2 = PIN('G', 11);   // G11  - GPIOG pin 11
+```
+
+Let's rewrite the `gpio_set_mode()` function to take our pin specification:
+
+```c
+static void gpio_set_mode(uint16_t pin, uint8_t mode) {
+  struct gpio *gpio = GPIO(PINBANK(pin)); // GPIO bank
+  uint8_t n = PINNO(pin);                 // Pin number
+  gpio->MODER &= ~(3U << (n * 2));        // Clear existing setting
+  gpio->MODER |= (mode & 3) << (n * 2);   // Set new mode
+}
+```
+
+Now the code for A3 is self-explanatory:
+
+```c
+  uint16_t pin = PIN('A', 3);            // Pin A3
+  gpio_set_mode(pin, GPIO_MODE_OUTPUT);  // Set to output
 ```
 
 ## MCU boot process
