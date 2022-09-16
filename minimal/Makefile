@@ -1,5 +1,3 @@
-TARGET  = firmware
-CROSS   ?= arm-none-eabi
 CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
 						-Wformat-truncation -fno-common -Wconversion \
 						-g3 -Os -ffunction-sections -fdata-sections -I. \
@@ -7,16 +5,16 @@ CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
 SOURCES = main.c 
 
-all build example: $(TARGET).bin
+build: firmware.elf
 
-$(TARGET).bin: $(TARGET).elf
+firmware.elf: $(SOURCES)
+	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -o $@
+
+firmware.bin: firmware.elf
 	$(DOCKER) $(CROSS)-objcopy -O binary $< $@
 
-$(TARGET).elf: $(SOURCES)
-	$(DOCKER) $(CROSS)-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -o $@
-
-flash: $(TARGET).bin
+flash: firmware.bin
 	st-flash --reset write $(TARGET).bin 0x8000000
 
 clean:
-	@rm -rf $(TARGET).* *.su
+	rm -rf firmware.*

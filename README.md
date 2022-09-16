@@ -280,10 +280,10 @@ function, 2-bytes long - a jump instruction to its own address. There is
 an empty `.data` section and an empty `.bss` section
 (data that is initialized to zero) . Our firmware will be copied
 to the flash region at offset 0x8000000, but our data section should reside
-in RAM - therefore our `reset` function should copy the contents of the
+in RAM - therefore our `_reset()` function should copy the contents of the
 `.data` section to RAM. Also it has to write zeroes to the whole `.bss`
 section. Our `.data` and `.bss` sections are empty, but let's modify our
-`reset()` function anyway to handle them properly.
+`_reset()` function anyway to handle them properly.
 
 Also, our `_reset()` function should set the initial stack pointer, cause 
 our vector table has zero in the corresponding entry at index 0.
@@ -360,6 +360,10 @@ copy data section to RAM, and initialise bss section to zeroes. Then, we
 call main() function - and fall into infinite loop in case if main() returns:
 
 ```c
+int main(void) {
+  return 0; // Do nothing
+}
+
 // Startup code
 __attribute__((naked, noreturn)) void _reset(void) {
   asm("ldr sp, = _estack");  // Set initial stack pointer
@@ -370,7 +374,6 @@ __attribute__((naked, noreturn)) void _reset(void) {
   for (long *src = &_sdata, *dst = &_sidata; src < &_edata;) *src++ = *dst++;
 
   // Call main()
-  extern void main(void);
   main();
   for (;;) (void) 0;  // Infinite loop
 }
@@ -419,6 +422,132 @@ $ st-flash --reset write firmware.bin 0x8000000
 Done! We've flashed a firmware that does nothing.
 
 ## Makefile: build automation
+
+Instead of typing those compilation, linking and flashing commands, we can
+use `make` command line tool to automate the whole process. `make` utility
+uses a configuration file named `Makefile` where it reads instructions
+how to execute actions. The format is simple:
+
+```make
+action1:
+  command ...     # Comments can go after hash symbol
+  command ....    # IMPORTANT: command must be preceded with the TAB character
+
+action2:
+	command ...     # Don't forget about TAB. Spaces won't work!
+```
+
+Now, we can invoke `make` with the action name (also called *target*) to execute
+a corresponding action:
+
+```sh
+$ make action1
+```
+
+It is possible to define variables and use them in commands. Also, actions
+can be file names that needs to be created:
+
+```make
+firmware.elf:
+  COMPILATION COMMAND .....
+```
+
+And, any action can have a list of dependencies. For example, `firmware.elf`
+depends on our source file `main.c`. Whenever `main.c` file changes, the
+`make build` command rebuilds `firmware.elf`:
+
+```
+build: firmware.elf
+
+firmware.elf: main.c
+  COMPILATION COMMAND
+```
+
+Now we are ready to write a Makefile for our firmware. We define a `build`
+action / target:
+
+```make
+CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
+						-Wformat-truncation -fno-common -Wconversion \
+						-g3 -Os -ffunction-sections -fdata-sections -I. \
+						-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS)
+LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
+SOURCES = main.c 
+
+build: firmware.elf
+
+firmware.elf: $(SOURCES)
+	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -o $@
+```
+
+There, we define compilation flags. The `?=` means that's a default value;
+we could override them from the command line like this:
+
+```sh
+$ make build CFLAGS="-O2 ...."
+```
+
+We specify `CFLAGS`, `LDFLAGS` and `SOURCES` variables.
+Then we tell `make`: if you're told to `build`, then create a `firmware.elf`
+file. It depends on the `main.c` file, and to create it, start
+`arm-none-eabi-gcc` compiler with a given flags. `$@` special variable
+expands to a target name - in our case, `firmware.elf`.
+
+Let's call `make`:
+
+```
+$ make build
+arm-none-eabi-gcc main.c  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -fno-common -Wconversion -g3 -Os -ffunction-sections -fdata-sections -I. -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16  -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=firmware.elf.map -o firmware.elf
+```
+
+If we run it again:
+
+```sh
+$ make build
+make: Nothing to be done for `build'.
+```
+
+The `make` utility examines modification times for `main.c` dependency and
+`firmware.elf` - and does not do anything if `firmware.elf` is up to date.
+But if we change `main.c`, then next `make build` will recompile:
+
+```sh
+$ touch main.c # Simulate changes in main.c
+$ make build
+```
+
+Now, what is left - is the `flash` target:
+
+
+```make
+firmware.bin: firmware.elf
+	$(DOCKER) $(CROSS)-objcopy -O binary $< $@
+
+flash: firmware.bin
+	st-flash --reset write $(TARGET).bin 0x8000000
+```
+
+That's it! Now, `make flash` terminal command creates a `firmware.bin` file,
+and flashes it to the board. It'll recompile the firmware if `main.c` changes,
+because `firmware.bin` depends on `firmware.elf`, and it in turn depends on
+`main.c`. So, now the development cycle would be these two actions in a loop:
+
+```sh
+# Develop code in main.c
+$ make flash
+```
+
+It is a good idea to add a clean target to remove build artifacts:
+
+
+```
+clean:
+	rm -rf firmware.*
+```
+
+That's it. The minimal `main.c`, `link.ld` and `Makefile` is in `minimal/` folder.
+
+## Blinky LED
 
 ## GCC, newlib and syscalls
 
