@@ -289,7 +289,9 @@ Also, our `_reset()` function should set the initial stack pointer, cause
 our vector table has zero in the corresponding entry at index 0.
 
 In order to do all that, we must know where stack starts, and where data
-and bss section start. This we can specify in the file called "linker script".
+and bss section start. This we can specify in the "linker script", which is
+a file with the instructions to the linker, where to put various sections
+in the address space, and which symbols to create.
 
 ### Linker script
 
