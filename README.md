@@ -426,7 +426,10 @@ Done! We've flashed a firmware that does nothing.
 Instead of typing those compilation, linking and flashing commands, we can
 use `make` command line tool to automate the whole process. `make` utility
 uses a configuration file named `Makefile` where it reads instructions
-how to execute actions. The format is simple:
+how to execute actions. This automation is great because it also documents the
+process of building firmware, used compilation flags, etc.
+
+The `Makefile` format is simple:
 
 ```make
 action1:
@@ -460,7 +463,7 @@ depends on our source file `main.c`. Whenever `main.c` file changes, the
 build: firmware.elf
 
 firmware.elf: main.c
-  COMPILATION COMMAND
+	COMPILATION COMMAND
 ```
 
 Now we are ready to write a Makefile for our firmware. We define a `build`
