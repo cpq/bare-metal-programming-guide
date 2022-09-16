@@ -400,6 +400,8 @@ Now we can see that the .vectors section will be loaded at address 0x8000000,
 and .text section right after it, at 0x80001ac. Our code does not create any
 variables, so there is no data section.
 
+## Flash firmware
+
 We're ready to flash this firmware! First, extract sections from the
 firmware.elf into a single contiguous binary blob:
 
@@ -415,10 +417,6 @@ $ st-flash --reset write firmware.bin 0x8000000
 ```
 
 Done! We've flashed a firmware that does nothing.
-
-
-## Flash firmware
-
 
 ## Makefile: build automation
 
