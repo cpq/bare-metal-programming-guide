@@ -5,7 +5,8 @@ microcontrollers using GCC compiler and bare metal approach.  We are going to
 use a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
 development board with STM32F429 microcontroller. But basic principles would be
-applicable to any other microcontroller. Install the following toosl:
+applicable to any other microcontroller. To proceed, please install the
+following tools:
 
 - ARM GCC, https://launchpad.net/gcc-arm-embedded
 - GNU make, http://www.gnu.org/software/make/
@@ -87,7 +88,18 @@ mode. For example, this snippet sets pin A3 to output mode:
 ```
 
 Some registers are not mapped to the MCU peripherals, but they are mapped to
-the ARM CPU configuration and control. For example, there is a "Reset at clock control"
-unit, described in section 6 of the datasheet. It describes registers that
-allow to set systems clock and other things.
+the ARM CPU configuration and control. For example, there is a "Reset at clock
+control" unit, described in section 6 of the datasheet. It describes registers
+that allow to set systems clock and other things.
+
+## MCU boot process
+
+## Minimal firmware
+
+### Compilation
+### Linker script
+
+## Makefile: build automation
+
+## GCC, newlib and syscalls
 
