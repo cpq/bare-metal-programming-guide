@@ -179,6 +179,11 @@ Now the code for A3 is self-explanatory:
   gpio_set_mode(pin, GPIO_MODE_OUTPUT);  // Set to output
 ```
 
+Note that we have created a useful initial API for the GPIO peripheral. Other
+peripherals, like UART (serial communication) and others - can be implemented
+in a similar way. This is a good programming practice that makes code
+self-explanatory and human readable.
+
 ## MCU boot process
 
 ## Minimal firmware
