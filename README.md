@@ -430,8 +430,8 @@ how to execute actions. The format is simple:
 
 ```make
 action1:
-  command ...     # Comments can go after hash symbol
-  command ....    # IMPORTANT: command must be preceded with the TAB character
+	command ...     # Comments can go after hash symbol
+	command ....    # IMPORTANT: command must be preceded with the TAB character
 
 action2:
 	command ...     # Don't forget about TAB. Spaces won't work!
@@ -449,7 +449,7 @@ can be file names that needs to be created:
 
 ```make
 firmware.elf:
-  COMPILATION COMMAND .....
+	COMPILATION COMMAND .....
 ```
 
 And, any action can have a list of dependencies. For example, `firmware.elf`
