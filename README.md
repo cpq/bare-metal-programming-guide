@@ -122,7 +122,7 @@ struct gpio {
 Then, for setting GPIO pin mode, we can define a function:
 
 ```c
-// Enum values will be per datasheet: 0, 1, 2, 3
+// Enum values are per datasheet: 0, 1, 2, 3
 enum {GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG};
 
 static inline void gpio_set_mode(struct gpio *gpio, uint8_t pin, uint8_t mode) {
