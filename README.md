@@ -92,6 +92,51 @@ the ARM CPU configuration and control. For example, there is a "Reset at clock
 control" unit, described in section 6 of the datasheet. It describes registers
 that allow to set systems clock and other things.
 
+## Human-readable peripherals programming
+
+In the previous section we have learned that we can read and write peripheral
+register by direct accessing certain memory addresses. Let's look at the
+snippet that sets pin A3 to output mode:
+
+```c
+  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bits 6-7
+  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bits 6-7 to 1
+```
+
+That is pretty cryptic. Without extensive comments, such code would be quite
+hard to understand. We can rewrite this code to a much more readable form.
+The idea is to represent the whole peripheral as a structure that contains
+32-bit fields. Let's see what are the first three registers for the GPIO
+peripheral in the section 8.4 of the datasheet. They are MODER, OTYPER, OSPEEDR
+with offsets 0, 4, 8 respectively. That means we can represent them as
+a structure, and make a define for GPIOA:
+
+```c
+struct gpio {
+  volatile uin32_t MODER, OTYPER, OSPEEDR;  // There are more registers ...
+};
+
+#define GPIOA ((struct gpio *) 0x40020000)
+```
+
+Then, for setting GPIO pin mode, we can define a function:
+
+```c
+// Enum values will be per datasheet: 0, 1, 2, 3
+enum {GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG};
+
+static void gpio_set_mode(struct gpio *gpio, uint8_t pin, uint8_t mode) {
+  gpio->MODER &= ~(3U << (pin * 2));        // Clear existing setting
+  gpio->MODER |= (mode & 3) << (pin * 2);   // Set new mode
+}
+```
+
+Now, we can rewrite the snippet for A3 like this:
+
+```c
+gpio_set_mode(GPIOA, 3, GPIO_MODE_OUTPUT);  // Set A3 to output
+```
+
 ## MCU boot process
 
 ## Minimal firmware
