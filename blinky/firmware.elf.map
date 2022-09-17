@@ -1,0 +1,159 @@
+Archive member included to satisfy reference by file (symbol)
+
+/Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+                              /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o (memcpy)
+/Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+                              /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o (memset)
+
+Discarded input sections
+
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .group         0x0000000000000000        0xc /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .text          0x0000000000000000        0x0 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .data          0x0000000000000000        0x0 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .bss           0x0000000000000000        0x0 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .text          0x0000000000000000        0x0 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+ .data          0x0000000000000000        0x0 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+ .bss           0x0000000000000000        0x0 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+ .text          0x0000000000000000        0x0 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+ .data          0x0000000000000000        0x0 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+ .bss           0x0000000000000000        0x0 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+flash            0x0000000008000000 0x0000000000200000 xr
+sram             0x0000000020000000 0x0000000000030000 xrw
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+LOAD /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a
+LOAD /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/libgcc.a
+                0x0000000020030000                _estack = (ORIGIN (sram) + LENGTH (sram))
+
+.vectors        0x0000000008000000      0x1ac
+ *(.vectors)
+ .vectors       0x0000000008000000      0x1ac /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+                0x0000000008000000                tab
+
+.text           0x00000000080001ac       0x9c
+ *(.text*)
+ .text.startup.main
+                0x00000000080001ac       0x1c /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+                0x00000000080001ac                main
+ .text._reset   0x00000000080001c8       0x54 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+                0x00000000080001c8                _reset
+ .text.memcpy   0x000000000800021c       0x1c /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+                0x000000000800021c                memcpy
+ .text.memset   0x0000000008000238       0x10 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+                0x0000000008000238                memset
+
+.glue_7         0x0000000008000248        0x0
+ .glue_7        0x0000000008000248        0x0 linker stubs
+
+.glue_7t        0x0000000008000248        0x0
+ .glue_7t       0x0000000008000248        0x0 linker stubs
+
+.vfp11_veneer   0x0000000008000248        0x0
+ .vfp11_veneer  0x0000000008000248        0x0 linker stubs
+
+.v4_bx          0x0000000008000248        0x0
+ .v4_bx         0x0000000008000248        0x0 linker stubs
+
+.iplt           0x0000000008000248        0x0
+ .iplt          0x0000000008000248        0x0 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.rel.dyn        0x0000000008000248        0x0
+ .rel.iplt      0x0000000008000248        0x0 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.rodata
+ *(.rodata*)
+
+.data           0x0000000020000000        0x0 load address 0x0000000008000248
+                0x0000000020000000                _sdata = .
+ *(.first_data)
+ *(.data SORT_BY_NAME(.data.*))
+                0x0000000020000000                _edata = .
+                0x0000000008000248                _sidata = LOADADDR (.data)
+
+.igot.plt       0x0000000020000000        0x0 load address 0x0000000008000248
+ .igot.plt      0x0000000020000000        0x0 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.bss            0x0000000020000000        0x0 load address 0x0000000008000248
+                0x0000000020000000                _sbss = .
+ *(.bss SORT_BY_NAME(.bss.*) COMMON)
+                0x0000000020000000                _ebss = .
+                0x0000000020000000                . = ALIGN (0x8)
+                0x0000000020000000                _end = .
+OUTPUT(firmware.elf elf32-littlearm)
+LOAD linker stubs
+
+.debug_info     0x0000000000000000      0x2c7
+ .debug_info    0x0000000000000000      0x2c7 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.debug_abbrev   0x0000000000000000      0x1d2
+ .debug_abbrev  0x0000000000000000      0x1d2 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.debug_loc      0x0000000000000000       0x5e
+ .debug_loc     0x0000000000000000       0x5e /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.debug_aranges  0x0000000000000000       0x28
+ .debug_aranges
+                0x0000000000000000       0x28 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.debug_ranges   0x0000000000000000       0x18
+ .debug_ranges  0x0000000000000000       0x18 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.debug_macro    0x0000000000000000     0x154e
+ .debug_macro   0x0000000000000000       0xc7 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x00000000000000c7      0xa6c /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000b33       0x22 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000b55       0x4c /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000ba1       0x1e /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000bbf       0x94 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000c53       0x3c /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000c8f      0x103 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000d92       0x3a /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000dcc       0x57 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000e23       0x6a /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x0000000000000e8d      0x1df /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x000000000000106c       0x82 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_macro   0x00000000000010ee      0x460 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.debug_line     0x0000000000000000      0x24a
+ .debug_line    0x0000000000000000      0x24a /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+
+.debug_str      0x0000000000000000     0x4ff6
+ .debug_str     0x0000000000000000     0x4ff6 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+                                       0x51a4 (size before relaxing)
+
+.comment        0x0000000000000000       0x49
+ .comment       0x0000000000000000       0x49 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+                                         0x4a (size before relaxing)
+
+.ARM.attributes
+                0x0000000000000000       0x34
+ .ARM.attributes
+                0x0000000000000000       0x34 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .ARM.attributes
+                0x0000000000000034       0x34 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+ .ARM.attributes
+                0x0000000000000068       0x34 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+
+.debug_frame    0x0000000000000000       0x78
+ .debug_frame   0x0000000000000000       0x30 /var/folders/fh/8t0x7_m166xgsp16y4d5j_440000gn/T//ccbxExKl.o
+ .debug_frame   0x0000000000000030       0x28 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+ .debug_frame   0x0000000000000058       0x20 /Applications/ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)

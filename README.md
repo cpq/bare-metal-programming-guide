@@ -113,7 +113,7 @@ a structure, and make a define for GPIOA:
 
 ```c
 struct gpio {
-  volatile uin32_t MODER, OTYPER, OSPEEDR;  // There are more registers ...
+  volatile uint32_t MODER, OTYPER, OSPEEDR;  // There are more registers ...
 };
 
 #define GPIOA ((struct gpio *) 0x40020000)
@@ -210,9 +210,10 @@ jump to our boot function.
 
 ## Minimal firmware
 
-Let's create a file `main.c`, and specify our boot function that initially
-does nothing (falls into infinite loop), and specify a vector table that
-contains 16 standard entries and 91 STM32 entries:
+Let's create a file `main.c`, and specify our boot function that initially does
+nothing (falls into infinite loop), and specify a vector table that contains 16
+standard entries and 91 STM32 entries. In your editor of choice, create
+`main.c` file and copy/paste the following into `main.c` file:
 
 ```c
 // Startup code
@@ -552,6 +553,54 @@ That's it. The minimal `main.c`, `link.ld` and `Makefile` is in `minimal/` folde
 
 ## Blinky LED
 
-## GCC, newlib and syscalls
+Now as we have the whole build / flash infrastructure set up, it is time to
+teach our firmware to do something useful. Something useful is of course blinking
+an LED. A Nucleo-F429ZI board has three built-in LEDs. We can open
+a [Nucleo-F429ZI datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
+and look into section 6.5, which tells which pins built-in LEDs are attached to:
 
-## CMSIS headers
+- PB0: green LED
+- PB7: blue LED
+- PB14: red LED
+
+Let's modify `main.c` file and add our definitions for PIN, `gpio_set_mode()`.
+In the main() function, we set the blue LED to output mode, and start an
+infinite loop:
+
+```c
+#include <inttypes.h>
+
+#define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
+#define PINNO(pin) (pin & 255)
+#define PINBANK(pin) (pin >> 8)
+
+struct gpio {
+  volatile uint32_t MODER, OTYPER, OSPEEDR;
+};
+#define GPIO(bank) ((struct gpio *) (0x40020000 + 0x400 * (bank)))
+
+// Enum values are per datasheet: 0, 1, 2, 3
+enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG };
+
+static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
+  struct gpio *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  gpio->MODER &= ~(3U << (n * 2));         // Clear existing setting
+  gpio->MODER |= (mode & 3) << (n * 2);    // Set new mode
+}
+
+int main(void) {
+  uint16_t led = PIN('B', 7);            // Blue LED
+  gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
+  for (;;) asm volatile("nop");          // Infinite loop
+  return 0;
+}
+```
+
+## Blinky with SysTick interrupt
+
+## Add UART debug output
+
+### GCC, newlib and syscalls: redirect printf() to UART
+
+## Blinky using CMSIS headers
