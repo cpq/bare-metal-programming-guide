@@ -106,14 +106,15 @@ snippet that sets pin A3 to output mode:
 That is pretty cryptic. Without extensive comments, such code would be quite
 hard to understand. We can rewrite this code to a much more readable form.
 The idea is to represent the whole peripheral as a structure that contains
-32-bit fields. Let's see what are the first three registers for the GPIO
-peripheral in the section 8.4 of the datasheet. They are MODER, OTYPER, OSPEEDR
-with offsets 0, 4, 8 respectively. That means we can represent them as
-a structure, and make a define for GPIOA:
+32-bit fields. Let's see what registers exist for the GPIO
+peripheral in the section 8.4 of the datasheet. They are MODER, OTYPER, OSPEEDR,
+PUPDR, IDR, ODR, BSRR, LCKR, AFR. Their offsets are
+with offsets 0, 4, 8, etc... . That means we can represent them as
+a structure with 32-bit fields, and make a define for GPIOA:
 
 ```c
 struct gpio {
-  volatile uint32_t MODER, OTYPER, OSPEEDR;  // There are more registers ...
+  volatile uint32_t MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR, LCKR, AFR[2];
 };
 
 #define GPIOA ((struct gpio *) 0x40020000)
@@ -575,7 +576,7 @@ infinite loop:
 #define PINBANK(pin) (pin >> 8)
 
 struct gpio {
-  volatile uint32_t MODER, OTYPER, OSPEEDR;
+  volatile uint32_t MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR, LCKR, AFR[2];
 };
 #define GPIO(bank) ((struct gpio *) (0x40020000 + 0x400 * (bank)))
 
@@ -597,7 +598,48 @@ int main(void) {
 }
 ```
 
+Now, what is left to do, is to find out how to set a GPIO pin on and off, and
+then modify the main loop to set an LED pin on, delay, off, delay.  Looking at
+the datasheet section 8.4.7, wee see that the register BSRR is responsible for
+setting voltage high or low. The low 16 bit are used to set the ODR register
+(i.e. set pin high), and high 16 bit are used  to reset the ODR
+register (i.e. set pin low). Let's define an API function for that:
+
+```c
+static inline void gpio_write(uint16_t pin, bool val) {
+  struct gpio *gpio = GPIO(PINBANK(pin));
+  gpio->BSRR |= (1U << PINNO(pin)) << (val ? 0 : 16);
+}
+```
+
+Next we need to implement a delay function. We do not require an accurate
+delay at this moment, so let's define a function `spin()` that just executes
+a NOP instruction a given number of times:
+
+```c
+static inline void spin(volatile uint32_t count) {
+  while (count--) asm("nop");
+}
+```
+
+Finally, we're ready to modify our main loop to implement LED blinking:
+
+```c
+  for (;;) {
+    gpio_write(pin, true);
+    spin(99999);
+    gpio_write(pin, false);
+    spin(99999);
+  }
+```
+
+Run `make flash` and enjoy blue LED flashing.
+A complete project source code you can find in a directory [blinky](blinky).
+
 ## Blinky with SysTick interrupt
+
+In order to implement an accurate time keeping, we should enable ARM's SysTick
+interrupt. SysTick is a configurable counter; it decrements its value 
 
 ## Add UART debug output
 

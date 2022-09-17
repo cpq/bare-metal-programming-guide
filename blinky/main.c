@@ -1,11 +1,12 @@
 #include <inttypes.h>
+#include <stdbool.h>
 
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
 #define PINNO(pin) (pin & 255)
 #define PINBANK(pin) (pin >> 8)
 
 struct gpio {
-  volatile uint32_t MODER, OTYPER, OSPEEDR;
+  volatile uint32_t MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR, LCKR, AFR[2];
 };
 #define GPIO(bank) ((struct gpio *) (0x40020000 + 0x400 * (bank)))
 
@@ -19,10 +20,24 @@ static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
   gpio->MODER |= (mode & 3) << (n * 2);    // Set new mode
 }
 
+static inline void gpio_write(uint16_t pin, bool val) {
+  struct gpio *gpio = GPIO(PINBANK(pin));
+  gpio->BSRR |= (1U << PINNO(pin)) << (val ? 0 : 16);
+}
+
+static inline void spin(volatile uint32_t count) {
+  while (count--) asm("nop");
+}
+
 int main(void) {
   uint16_t led = PIN('B', 7);            // Blue LED
   gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
-  for (;;) asm volatile("nop");          // Infinite loop
+  for (;;) {
+    gpio_write(led, true);
+    spin(99999);
+    gpio_write(led, false);
+    spin(99999);
+  }
   return 0;
 }
 
