@@ -550,7 +550,7 @@ clean:
 	rm -rf firmware.*
 ```
 
-That's it. The minimal `main.c`, `link.ld` and `Makefile` is in `minimal/` folder.
+A complete project source code you can find in [minimal](minimal) folder.
 
 ## Blinky LED
 
@@ -634,12 +634,102 @@ Finally, we're ready to modify our main loop to implement LED blinking:
 ```
 
 Run `make flash` and enjoy blue LED flashing.
-A complete project source code you can find in a directory [blinky](blinky).
+A complete project source code you can find in [blinky](blinky).
 
 ## Blinky with SysTick interrupt
 
 In order to implement an accurate time keeping, we should enable ARM's SysTick
-interrupt. SysTick is a configurable counter; it decrements its value 
+interrupt. SysTick a 24-bit hardware counter, and is part of ARM core,
+therefore it is documented by the ARM datasheet. Looking at the datasheet, we
+see that SysTick has four registers:
+
+- CTRL - used to enable/disable systick
+- LOAD - an initial counter value
+- VAL - a current counter value, decremented on each clock cycle
+- CALIB - calibration register
+
+Every time VAL drops to zero, a SysTick interrupt is generated. The SysTick
+interrupt index in the vector table is 15, so we need to set it. Upon boot,
+our board Nucleo-F429ZI runs at 16Mhz. We can configure the SysTick counter
+to trigger interrupt each millisecond.
+
+First, let's define a SysTick peripheral. We know 4 registers, and from the
+datasheet we can learn that the SysTick address is 0xe000e010. So:
+
+```c
+struct systick {
+  volatile uint32_t CTRL, LOAD, VAL, CALIB;
+};
+#define SYSTICK ((struct systick *) 0xe000e010)
+```
+
+Next, add an API function that configures it (TBD: describe RCC):
+
+```c
+#define BIT(x) (1UL << (x))
+static inline void systick_init(uint32_t ticks) {
+  if ((ticks - 1) > 0xffffff) return;  // Systick timer is 24 bit
+  SYSTICK->LOAD = ticks - 1;
+  SYSTICK->VAL = 0;
+  SYSTICK->CTRL = BIT(0) | BIT(1) | BIT(2);  // Enable systick
+  RCC->APB2ENR |= BIT(14);                   // Enable SYSCFG
+}
+```
+
+By default, Nucleo-F429ZI board runs at 16Mhz. That means, if we call
+`systick_init(16000000 / 1000);`, then SysTick interrupt will be generated
+every millisecond. We should have interrupt handler function defined - here
+it is, we simply increment a 32-bit millisecond counter:
+
+```c
+static volatile uint32_t s_ticks;
+void SysTick_Handler(void) {
+  s_ticks++;
+}
+```
+
+And we should add this handler to the vector table:
+
+```c
+__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+    0, _reset, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SysTick_Handler};
+```
+
+Now we have a precise millisecond clock! Let's create a helper function
+for arbitrary periodic timers:
+
+```c
+// t: expiration time, prd: period, now: current time. Return true if expired
+bool timer_expired(uint32_t *t, uint64_t prd, uint64_t now) {
+  if (now + prd < *t) *t = 0;                    // Time wrapped? Reset timer
+  if (*t == 0) *t = now + prd;                   // Firt poll? Set expiration
+  if (*t > now) return false;                    // Not expired yet, return
+  *t = (now - *t) > prd ? now + prd : *t + prd;  // Next expiration time
+  return true;                                   // Expired, return true
+}
+```
+
+Now we are ready to update our main loop and use a precise timer for LED blink.
+For example, let's use 250 milliseconds blinking interval:
+
+```c
+  uint32_t timer, period = 250;          // Declare timer and 250ms period
+  for (;;) {
+    if (timer_expired(&timer, period, s_ticks)) {
+      static bool on;       // This block is executed
+      gpio_write(led, on);  // Every `period` milliseconds
+      on = !on;             // Toggle LED state
+    }
+    // Here we could perform other activities!
+  }
+```
+
+Note that using SysTick, and a helper `timer_expired()` function, we made our
+main loop (also called superloop) non-blocking. That means that inside that
+loop we can perform many actions - for example, have different timers with
+different periods, and they all will be triggered in time.
+
+A complete project source code you can find in [blinky-systick](blinky-systick) folder.
 
 ## Add UART debug output
 
