@@ -11,7 +11,7 @@ firmware.elf: $(SOURCES)
 	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -o $@
 
 firmware.bin: firmware.elf
-	$(DOCKER) $(CROSS)-objcopy -O binary $< $@
+	$(DOCKER) arm-none-eabi-objcopy -O binary $< $@
 
 flash: firmware.bin
 	st-flash --reset write $(TARGET).bin 0x8000000

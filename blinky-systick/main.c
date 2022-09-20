@@ -68,6 +68,7 @@ bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
 
 int main(void) {
   uint16_t led = PIN('B', 7);            // Blue LED
+  RCC->AHB1ENR |= BIT(PINBANK(led));     // Enable GPIO clock for LED
   systick_init(16000000 / 1000);         // Tick every 1 ms
   gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
   uint32_t timer, period = 250;          // Declare timer and 250ms period

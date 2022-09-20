@@ -566,11 +566,14 @@ and look into section 6.5, which tells which pins built-in LEDs are attached to:
 
 Let's modify `main.c` file and add our definitions for PIN, `gpio_set_mode()`.
 In the main() function, we set the blue LED to output mode, and start an
-infinite loop:
+infinite loop. First, let's copy the definitions for pins and GPIO we have
+discussed earlier. Note we also add a convenience macro `BIT(position)`:
 
 ```c
 #include <inttypes.h>
+#include <stdbool.h>
 
+#define BIT(x) (1UL << (x))
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
 #define PINNO(pin) (pin & 255)
 #define PINBANK(pin) (pin >> 8)
@@ -589,9 +592,34 @@ static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
   gpio->MODER &= ~(3U << (n * 2));         // Clear existing setting
   gpio->MODER |= (mode & 3) << (n * 2);    // Set new mode
 }
+```
 
+Some microcontrollers, when they are powered, have all their peripherals
+powered and enabled, automatically. STM32 MCUs, however, by default have their
+peripherals disabled in order to save power. In order to enable a GPIO peripheral,
+it should be enabled (clocked) via the RCC (Reset and Clock Control) unit.
+In the datasheet section 7.3.10 we find that the AHB1ENR (AHB1 peripheral
+clock enable register) is responsible to turn GPIO banks on or off. First we
+add a definition for the whole RCC unit:
+
+```c
+struct rcc {
+  volatile uint32_t CR, PLLCFGR, CFGR, CIR, AHB1RSTR, AHB2RSTR, AHB3RSTR,
+      RESERVED0, APB1RSTR, APB2RSTR, RESERVED1[2], AHB1ENR, AHB2ENR, AHB3ENR,
+      RESERVED2, APB1ENR, APB2ENR, RESERVED3[2], AHB1LPENR, AHB2LPENR,
+      AHB3LPENR, RESERVED4, APB1LPENR, APB2LPENR, RESERVED5[2], BDCR, CSR,
+      RESERVED6[2], SSCGR, PLLI2SCFGR;
+};
+#define RCC ((struct rcc *) 0x40023800)
+```
+
+In the AHB1ENR register documentation we see that bits from 0 to 8 inclusive
+set the clock for GPIO banks GPIOA - GPIOE:
+
+```c
 int main(void) {
   uint16_t led = PIN('B', 7);            // Blue LED
+  RCC->AHB1ENR |= BIT(PINBANK(led));     // Enable GPIO clock for LED
   gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
   for (;;) asm volatile("nop");          // Infinite loop
   return 0;
@@ -627,9 +655,9 @@ Finally, we're ready to modify our main loop to implement LED blinking:
 ```c
   for (;;) {
     gpio_write(pin, true);
-    spin(99999);
+    spin(999999);
     gpio_write(pin, false);
-    spin(99999);
+    spin(999999);
   }
 ```
 
@@ -663,7 +691,9 @@ struct systick {
 #define SYSTICK ((struct systick *) 0xe000e010)
 ```
 
-Next, add an API function that configures it (TBD: describe RCC):
+Next, add an API function that configures it. We need to enable SysTick
+in the `SYSTICK->CTRL` register, and also we must clock it via the
+`RCC->APB2ENR`, described in the section 7.4.14:
 
 ```c
 #define BIT(x) (1UL << (x))

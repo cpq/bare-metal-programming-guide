@@ -1,9 +1,19 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define BIT(x) (1UL << (x))
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
 #define PINNO(pin) (pin & 255)
 #define PINBANK(pin) (pin >> 8)
+
+struct rcc {
+  volatile uint32_t CR, PLLCFGR, CFGR, CIR, AHB1RSTR, AHB2RSTR, AHB3RSTR,
+      RESERVED0, APB1RSTR, APB2RSTR, RESERVED1[2], AHB1ENR, AHB2ENR, AHB3ENR,
+      RESERVED2, APB1ENR, APB2ENR, RESERVED3[2], AHB1LPENR, AHB2LPENR,
+      AHB3LPENR, RESERVED4, APB1LPENR, APB2LPENR, RESERVED5[2], BDCR, CSR,
+      RESERVED6[2], SSCGR, PLLI2SCFGR;
+};
+#define RCC ((struct rcc *) 0x40023800)
 
 struct gpio {
   volatile uint32_t MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR, LCKR, AFR[2];
@@ -31,12 +41,13 @@ static inline void spin(volatile uint32_t count) {
 
 int main(void) {
   uint16_t led = PIN('B', 7);            // Blue LED
+  RCC->AHB1ENR |= BIT(PINBANK(led));     // Enable GPIO clock for LED
   gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
   for (;;) {
     gpio_write(led, true);
-    spin(99999);
+    spin(999999);
     gpio_write(led, false);
-    spin(99999);
+    spin(999999);
   }
   return 0;
 }
