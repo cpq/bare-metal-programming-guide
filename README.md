@@ -14,6 +14,10 @@ following tools:
 
 Also, download a [STM32F429 datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf).
 
+In the following sections I'll show how to program using just a compiler and
+a datasheet, nothing else. In the last section I'll explain and show how to
+use vendor's CMSIS headers.
+
 ## Introduction
 
 A microcontroller (uC, or MCU) is a small computer. Typically it has CPU, RAM,
