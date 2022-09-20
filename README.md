@@ -236,6 +236,11 @@ For function `_reset()`, we have used GCC-specific attributes `naked` and
 `noreturn` - they mean, standard function's prologue and epilogue should not
 be created by the compiler, and that function does not return.
 
+The `void (*tab[16 + 91])(void)` expression means: define an array of 16 + 91
+pointers to functions, that return nothing (void) and take to arguments. Each
+such function is an IRQ handler (Interrupt ReQuest handler). An array of those
+handlers is called a vector table.
+
 The vector table `tab` we put in a separate section called `.vectors` - that
 we need later to tell the linker to put that section right at the beginning
 of the generated firmware - and consecutively, at the beginning of flash
