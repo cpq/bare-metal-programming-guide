@@ -4,7 +4,7 @@ This guide is written for beginners who wish to start programming
 microcontrollers using GCC compiler and bare metal approach.  We are going to
 use a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
-development board with STM32F429 microcontroller ([buy Nucleo-F429ZI on
+development board with STM32F429 microcontroller ([buy on
 Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
 But basic principles would be applicable to any other microcontroller. To
 proceed, please install the following tools:
@@ -736,7 +736,7 @@ for arbitrary periodic timers:
 // t: expiration time, prd: period, now: current time. Return true if expired
 bool timer_expired(uint32_t *t, uint64_t prd, uint64_t now) {
   if (now + prd < *t) *t = 0;                    // Time wrapped? Reset timer
-  if (*t == 0) *t = now + prd;                   // Firt poll? Set expiration
+  if (*t == 0) *t = now + prd;                   // First poll? Set expiration
   if (*t > now) return false;                    // Not expired yet, return
   *t = (now - *t) > prd ? now + prd : *t + prd;  // Next expiration time
   return true;                                   // Expired, return true
