@@ -247,8 +247,8 @@ of the generated firmware - and consecutively, at the beginning of flash
 memory. We leave the rest of vector table filled with zeroes.
 
 Note that we do not set the first entry in the vector table, which is an
-initial value for the stack pointer. Why? Because we don't know it. We'll
-handle it later.
+initial value for the stack pointer. Why? Because we don't know a correct value
+for it. We'll handle it later.
 
 ### Compilation
 
