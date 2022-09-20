@@ -765,4 +765,6 @@ A complete project source code you can find in [blinky-systick](blinky-systick) 
 
 ### GCC, newlib and syscalls: redirect printf() to UART
 
+## Debug with Segger Ozone
+
 ## Blinky using CMSIS headers
