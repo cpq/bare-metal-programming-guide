@@ -4,9 +4,10 @@ This guide is written for beginners who wish to start programming
 microcontrollers using GCC compiler and bare metal approach.  We are going to
 use a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
-development board with STM32F429 microcontroller. But basic principles would be
-applicable to any other microcontroller. To proceed, please install the
-following tools:
+development board with STM32F429 microcontroller ([buy Nucleo-F429ZI on
+Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
+But basic principles would be applicable to any other microcontroller. To
+proceed, please install the following tools:
 
 - ARM GCC, https://launchpad.net/gcc-arm-embedded
 - GNU make, http://www.gnu.org/software/make/
@@ -108,13 +109,12 @@ snippet that sets pin A3 to output mode:
 ```
 
 That is pretty cryptic. Without extensive comments, such code would be quite
-hard to understand. We can rewrite this code to a much more readable form.
-The idea is to represent the whole peripheral as a structure that contains
-32-bit fields. Let's see what registers exist for the GPIO
-peripheral in the section 8.4 of the datasheet. They are MODER, OTYPER, OSPEEDR,
-PUPDR, IDR, ODR, BSRR, LCKR, AFR. Their offsets are
-with offsets 0, 4, 8, etc... . That means we can represent them as
-a structure with 32-bit fields, and make a define for GPIOA:
+hard to understand. We can rewrite this code to a much more readable form.  The
+idea is to represent the whole peripheral as a structure that contains 32-bit
+fields. Let's see what registers exist for the GPIO peripheral in the section
+8.4 of the datasheet. They are MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR,
+LCKR, AFR. Their offsets are with offsets 0, 4, 8, etc... . That means we can
+represent them as a structure with 32-bit fields, and make a define for GPIOA:
 
 ```c
 struct gpio {
