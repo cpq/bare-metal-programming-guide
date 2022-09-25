@@ -307,7 +307,7 @@ in the address space, and which symbols to create.
 ### Linker script
 
 Create a minimal linker script `link.ld`, and copy-paste contents from
-[minimal/link.ld](minimal/link.ld). Below is the explanation:
+[step-0-minimal/link.ld](step-0-minimal/link.ld). Below is the explanation:
 
 ```
 ENTRY(_reset);
@@ -394,7 +394,7 @@ __attribute__((naked, noreturn)) void _reset(void) {
 Now we are ready to produce a full firmware file `firmware.elf`:
 
 ```sh
-$ arm-none-eabi-gcc -Tminimal/link.ld -nostdlib main.o -o firmware.elf
+$ arm-none-eabi-gcc -T link.ld -nostdlib main.o -o firmware.elf
 ```
 
 Let's examine sections in firmware.elf:
@@ -560,7 +560,7 @@ clean:
 	rm -rf firmware.*
 ```
 
-A complete project source code you can find in [minimal](minimal) folder.
+A complete project source code you can find in [step-0-minimal](step-0-minimal) folder.
 
 ## Blinky LED
 
@@ -672,7 +672,7 @@ Finally, we're ready to modify our main loop to implement LED blinking:
 ```
 
 Run `make flash` and enjoy blue LED flashing.
-A complete project source code you can find in [blinky](blinky).
+A complete project source code you can find in [step-1-blinky](step-1-blinky).
 
 ## Blinky with SysTick interrupt
 
@@ -769,7 +769,7 @@ main loop (also called superloop) non-blocking. That means that inside that
 loop we can perform many actions - for example, have different timers with
 different periods, and they all will be triggered in time.
 
-A complete project source code you can find in [blinky-systick](blinky-systick) folder.
+A complete project source code you can find in [step-2-blinky-systick](step-2-blinky-systick) folder.
 
 ## Add UART debug output
 
