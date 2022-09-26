@@ -13,7 +13,9 @@ proceed, please install the following tools:
 - GNU make, http://www.gnu.org/software/make/
 - ST link, https://github.com/stlink-org/stlink
 
-Also, download a [STM32F429 datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf).
+Also, download two datasheets:
+- a [STM32F429 MCU datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
+- a [Nucleo-F429ZI board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
 
 In the following sections I'll show how to program using just a compiler and
 a datasheet, nothing else. In the last section I'll explain and show how to
@@ -566,9 +568,8 @@ A complete project source code you can find in [step-0-minimal](step-0-minimal) 
 
 Now as we have the whole build / flash infrastructure set up, it is time to
 teach our firmware to do something useful. Something useful is of course blinking
-an LED. A Nucleo-F429ZI board has three built-in LEDs. We can open
-a [Nucleo-F429ZI datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
-and look into section 6.5, which tells which pins built-in LEDs are attached to:
+an LED. A Nucleo-F429ZI board has three built-in LEDs. In a Nucleo board
+datasheet section 6.5 we can see which pins built-in LEDs are attached to:
 
 - PB0: green LED
 - PB7: blue LED
@@ -773,7 +774,309 @@ A complete project source code you can find in [step-2-blinky-systick](step-2-bl
 
 ## Add UART debug output
 
-### GCC, newlib and syscalls: redirect printf() to UART
+Now it's time to add a human-readable diagnostics to our firmware. One of the
+MCU peripherals is a serial UART interface. Looking at the datasheet section
+2.3, we see that there are several UART/USART controllers - i.e. pieces of
+circuitry inside MCU that, properly configured, can exchange data via
+certain pins. A mimimal UART setup uses two pins, RX (receive) and TX (transmit).
+
+In a Nucleo board datasheet section 6.9 we see that one of the
+controllers, USART3, is using pins PD8 (TX) and PD9 (RX) and is connected to
+the on-board ST-LINK debugger. That means that if we configure USART3 and
+output data via the PD9 pin, we can see it on our workstation via the ST-LINK
+USB connection.
+
+Thus, let us create a handy API for the UART, the way we did it for GPIO.
+Datasheet section 30.6 summarises UART registers - so here is our UART struct:
+
+```c
+struct uart {
+  volatile uint32_t SR, DR, BRR, CR1, CR2, CR3, GTPR;
+};
+#define UART1 ((struct uart *) 0x40011000)
+#define UART2 ((struct uart *) 0x40004400)
+#define UART3 ((struct uart *) 0x40004800)
+```
+
+To configure UART, we need to:
+- Enable UART clock by setting appropriate bit in `RCC->APB2ENR` register
+- Set "alternate function" pin mode for RX and TX pins. There can be several
+  alternate functions (AF) for any given pin, depending on the peripheral that
+  is used. The AF list can be found in the
+  [STM32F429ZI](https://www.st.com/resource/en/datasheet/stm32f429zi.pdf)
+  table 12
+- Set baud rate (receive/transmit clock frequency) via the BRR register
+- Enable the peripheral, receive and transmit via the CR1 register
+
+We already know how to set a GPIO pin into a specific mode. If a pin is in the
+AF mode, we also need to specify the "function number", i.e. which exactly
+peripheral takes control. This can be done via the "alternate function register",
+`AFR`, of the GPIO peripheral. Reading the AFR register description in the
+datasheet, we can see that the AF number occupies 4 bits, thus the whole setup
+for 16 pins occupies 2 registers. If a p
+
+```c
+static inline void gpio_set_af(uint16_t pin, uint8_t af_num) {
+  struct gpio *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  gpio->AFR[n >> 3] &= ~(15UL << ((n & 7) * 4));
+  gpio->AFR[n >> 3] |= ((uint32_t) af_num) << ((n & 7) * 4);
+}
+```
+
+In order to completely hide register-specific code from the GPIO API, let's
+move the GPIO clock init to the `gpio_set_mode()` function:
+
+```c
+static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
+  struct gpio *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  RCC->AHB1ENR |= BIT(PINBANK(pin));       // Enable GPIO clock
+  ...
+```
+
+Now we're ready to create a UART initialization API function:
+
+```c
+#define FREQ 16000000  // CPU frequency, 16 Mhz
+static inline void uart_init(struct uart *uart, unsigned long baud) {
+  // https://www.st.com/resource/en/datasheet/stm32f429zi.pdf
+  uint8_t af = 0;           // Alternate function
+  uint16_t rx = 0, tx = 0;  // pins
+
+  if (uart == UART1) RCC->APB2ENR |= BIT(4);
+  if (uart == UART2) RCC->APB1ENR |= BIT(17);
+  if (uart == UART3) RCC->APB1ENR |= BIT(18);
+
+  if (uart == UART1) af = 4, tx = PIN('A', 9), rx = PIN('A', 10);
+  if (uart == UART2) af = 4, tx = PIN('A', 2), rx = PIN('A', 3);
+  if (uart == UART3) af = 7, tx = PIN('D', 8), rx = PIN('D', 9);
+
+  gpio_set_mode(tx, GPIO_MODE_AF);
+  gpio_set_af(tx, af);
+  gpio_set_mode(rx, GPIO_MODE_AF);
+  gpio_set_af(rx, af);
+  uart->CR1 = 0;                           // Disable this UART
+  uart->BRR = FREQ / baud;                 // FREQ is a CPU frequency 
+  uart->CR1 |= BIT(13) | BIT(2) | BIT(3);  // Set UE, RE, TE
+}
+```
+
+And, finally, functions for reading and writing to the UART.
+The datasheet section 30.6.1 tells us that the status register SR tells us
+whether data is ready:
+```c
+static inline int uart_read_ready(struct uart *uart) {
+  return uart->SR & BIT(5);  // If RXNE bit is set, data is ready
+}
+```
+
+The data byte itself can be fetched from the data register DR:
+```c
+static inline uint8_t uart_read_byte(struct uart *uart) {
+  return (uint8_t) (uart->DR & 255);
+}
+```
+
+Transmitting a single byte can be done via the data register too. After
+setting a byte to write, we need to wait for the transmission to end, indicated
+via bit 7 in the status register:
+```c
+static inline void uart_write_byte(struct uart *uart, uint8_t byte) {
+  uart->DR = byte;
+  while ((uart->SR & BIT(7)) == 0) spin(1);
+}
+```
+
+And writing a buffer:
+```c
+static inline void uart_write_buf(struct uart *uart, char *buf, size_t len) {
+  while (len-- > 0) uart_write_byte(uart, *(uint8_t *) buf++);
+}
+```
+
+Now, initialise UART in our main() function:
+
+```c
+  ...
+  uart_init(UART3, 115200);              // Initialise UART
+```
+
+Now, we're ready to print a message "hi\r\n" every time LED blinks!
+```c
+    if (timer_expired(&timer, period, s_ticks)) {
+      ...
+      uart_write_buf(UART3, "hi\r\n", 4);  // Write message
+    }
+```
+
+Rebuild, reflash, and attach a terminal program to the ST-LINK port.
+On my Mac workstation, I use `cu`. It also can be used on Linux. On Windows,
+using `putty` utility can be a good idea. Run a terminal and see the messages:
+
+```sh
+$ cu -l /dev/cu.YOUR_SERIAL_PORT -s 115200
+hi
+hi
+```
+
+A complete project source code you can find in [step-0-minimal](step-0-minimal) folder.
+
+## Redirect printf() to UART
+
+In this section, we replace `uart_write_buf()` call by `printf()` call, which
+gives us an ability to do formatted output - and increase our abilities to
+print diagnostic information, implemeting so called "printf-style debugging".
+
+A GNU ARM toolchain that we're using comes not only with a GCC compiler and
+other tools, but with a C library called newlib,
+https://sourceware.org/newlib. A newlib library was developed by RedHat for
+embedded systems.
+
+If our firmware calls a standard C library function, for example `strcmp()`,
+then a newlib code will be added to our firmware by the GCC linker.
+
+Some of the standard C functions that newlib implements, specifically, file
+input/output (IO) operations, implemented by the newlib is a special fashion: those
+functions eventually call a set of low-level IO functions called "sycalls".
+
+For example:
+- `fopen()` eventually calls `_open()`
+- `fread()` eventually calls a low level `_read()`
+- `fwrite()`, `fprintf()`, `printf()` eventually call a low level `_write()`
+- `malloc()` eventually calls `_sbrk()`, and so on.
+
+Thus, by modifying a `_write()` syscall, we can redirect
+printf() to whatever we want. That mechanism is called "IO retargeting".
+
+Note that STM32 Cube uses ARM GCC with newlib, that's why Cube projects
+typically include that syscalls.c - that's because of newlib C library.
+
+Other toolchains, like TI's CCS, Keil's CC, might use a different  C library
+with a bit different retargeting mechanism. But in our case, this is newlib,
+so let's modify the `_write()` syscall to print to UART3.
+
+Before that, let's organise our source code in the following way:
+- move all API definitions to the file `mcu.h`
+- startup code we move to startup.c
+- for syscalls, create a separate file `syscalls.c` - empty at first
+- modify Makefile to addd `syscalls.c` and `startup.c` to the build
+
+After moving all API definitions to the `mcu.h`, our `main.c` file becomes
+quite compact. Note that it does not have any mention of the low-level
+registers, just a high level API functions that are easy to understand:
+
+```c
+#include "mcu.h"
+
+static volatile uint32_t s_ticks;
+void SysTick_Handler(void) {
+  s_ticks++;
+}
+
+int main(void) {
+  uint16_t led = PIN('B', 7);            // Blue LED
+  systick_init(16000000 / 1000);         // Tick every 1 ms
+  gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
+  uart_init(UART3, 115200);              // Initialise UART
+  uint32_t timer = 0, period = 250;      // Declare timer and 250ms period
+  for (;;) {
+    if (timer_expired(&timer, period, s_ticks)) {
+      static bool on;                      // This block is executed
+      gpio_write(led, on);                 // Every `period` milliseconds
+      on = !on;                            // Toggle LED state
+      uart_write_buf(UART3, "hi\r\n", 4);  // Write message
+    }
+    // Here we could perform other activities!
+  }
+  return 0;
+}
+```
+
+Great, now let's retarget printf to the UART3. In the empty syscalls.c,
+copy/paste the following code:
+
+```c
+#include "mcu.h"
+
+int _write(int fd, char *ptr, int len) {
+  (void) fd, (void) ptr, (void) len;
+  if (fd == 1) uart_write_buf(UART3, ptr, (size_t) len);
+  return -1;
+}
+```
+
+Here we say: if the file descriptor we're writing to is 1 (which is a
+standard output descriptor), then write the buffer to the UART3. Otherwise,
+ignore. This is the essence of retargeting!
+
+Rebuilding this firmware results in a bunch of linker errors:
+
+```sh
+../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-sbrkr.o): in function `_sbrk_r':
+sbrkr.c:(.text._sbrk_r+0xc): undefined reference to `_sbrk'
+closer.c:(.text._close_r+0xc): undefined reference to `_close'
+lseekr.c:(.text._lseek_r+0x10): undefined reference to `_lseek'
+readr.c:(.text._read_r+0x10): undefined reference to `_read'
+fstatr.c:(.text._fstat_r+0xe): undefined reference to `_fstat'
+isattyr.c:(.text._isatty_r+0xc): undefined reference to `_isatty'
+```
+
+Since we've used a newlib stdio function, we need to supply newlib with the rest
+of syscalls. Let's add just a simple stubs that do nothing:
+
+```c
+int _fstat(int fd, struct stat *st) {
+  (void) fd, (void) st;
+  return -1;
+}
+
+void *_sbrk(int incr) {
+  (void) incr;
+  return NULL;
+}
+
+int _close(int fd) {
+  (void) fd;
+  return -1;
+}
+
+int _isatty(int fd) {
+  (void) fd;
+  return 1;
+}
+
+int _read(int fd, char *ptr, int len) {
+  (void) fd, (void) ptr, (void) len;
+  return -1;
+}
+
+int _lseek(int fd, int ptr, int dir) {
+  (void) fd, (void) ptr, (void) dir;
+  return 0;
+}
+```
+
+Now, rebuild gives no errors. Last step: replace the `uart_write_buf()`
+call in the `main()` function with `printf()` call that prints something
+useful, e.g. a LED status and a current value of systick:
+
+```c
+printf("LED: %d, tick: %lu\r\n", on, s_ticks);  // Write message
+```
+
+The serial output looks like this:
+
+```sh
+LED: 1, tick: 250
+LED: 0, tick: 500
+LED: 1, tick: 750
+LED: 0, tick: 1000
+```
+
+Congratulations! We learned now IO retargeting works, and
+can now printf-debug our firmware.
+A complete project source code you can find in [step-0-printf](step-0-printf) folder.
 
 ## Debug with Segger Ozone
 
