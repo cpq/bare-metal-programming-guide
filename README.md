@@ -1089,8 +1089,8 @@ feed our `firmware.elf` directly to Ozone, and it'll pick up our source files.
 So, [download Ozone](https://www.segger.com/products/development-tools/ozone-j-link-debugger/)
 from the Segger website. Before we can use it with our Nucleo board,
 we need to convert ST-LINK firmware on the onboard debugger to the jlink firmware
-that Ozone understands. Follow https://www.segger.com/products/debug-probes/j-link/models/other-j-links/st-link-on-board/
-instructions on the Segger site.
+that Ozone understands. Follow the [instructions](https://www.segger.com/products/debug-probes/j-link/models/other-j-links/st-link-on-board/)
+on the Segger site.
 
 Now, run Ozone. Choose our device in the wizard:
 
