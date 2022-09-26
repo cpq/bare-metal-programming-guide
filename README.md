@@ -1094,40 +1094,40 @@ instructions on the Segger site.
 
 Now, run Ozone. Choose our device in the wizard:
 
-~[](images/ozone1.png)
+<img src="images/ozone1.png" width="50%" />
 
 Select a debugger we're going to use - that should be a ST-LINK:
 
-~[](images/ozone2.png)
+<img src="images/ozone2.png" width="50%" />
 
 Choose our firmware.elf file:
 
-~[](images/ozone3.png)
+<img src="images/ozone3.png" width="50%" />
 
 Leave the defaults on the next screen, click Finish, and we've got our
 debugger loaded (note the mcu.h source code is picked up):
 
-~[](images/ozone4.png)
+![](images/ozone4.png)
 
 Click the green button to download, run the firmware, and we're stopped here:
 
-~[](images/ozone5.png)
+![](images/ozone5.png)
 
 Now we can single-step through code, set breakpoints, and do the usual debugging
 stuff. One thing that could be noted, is a handy Ozone peripheral view:
 
-~[](images/ozone6.png)
+![](images/ozone6.png)
 
 Using it, we can directly examine or set the state of the peripherals. For
 example, let's turn on a green on-board LED (PB0):
 
 1. We need to clock GPIOB first. Find Peripherals -> RCC -> AHB1ENR,
    and enable GPIOBEN bit - set it to 1:
-  ~[](images/ozone7.png)
+  <img src="images/ozone7.png" width="75%" />
 2. Find Peripherals -> GPIO -> GPIOB -> MODER, set MODER0 to 1 (output): 
-  ~[](images/ozone8.png)
+  <img src="images/ozone8.png" width="75%" />
 3. Find Peripherals -> GPIO -> GPIOB -> ODR, set ODR0 to 1 (on): 
-  ~[](images/ozone9.png)
+  <img src="images/ozone9.png" width="75%" />
 
 Now, a green LED should be on! Happy debugging.
 
