@@ -1140,14 +1140,124 @@ manually, using datasheets.
 Now as you know how it all works, it is time to introduce CMSIS headers.
 What is it ? These are header files with all definitions, created and supplied
 by the MCU vendor. They contain definitions for everything that MCU contains,
-therefore they rather big. Since they are supplied by the MCU vendor, they
-are the source of authority and thus using them is a preferred way, rather
-than write your own - so after finishing this section, use vendor headers
-for all personal or commercial projects.
+therefore they rather big.
 
-CMSIS stands for Common Microcontroller Software Interface Standard, thus
-it is a common ground for the MCU manufacturers to specify peripheral API.
+CMSIS stands for Common Microcontroller Software Interface Standard, thus it is
+a common ground for the MCU manufacturers to specify peripheral API.  Since
+CMSIS is an ARM standard, and since CMSIS headers are supplied by the MCU
+vendor, they are the source of authority. Therefore, using vendor
+headers is is a preferred way, rather than writing definitions manually.
 
 In this section, we will replace our API functions in the `mcu.h` by the
 CMSIS vendor header, and leave the rest of the firmware intact.
 
+STM32 CMSIS headers for F4 family can be found at
+https://github.com/STMicroelectronics/cmsis_device_f4 repo. From there,
+copy the following files into our firmware directory,
+[step-5-cmsis](step-5-cmsis):
+- [stm32f429xx.h](https://raw.githubusercontent.com/STMicroelectronics/cmsis_device_f4/master/Include/stm32f429xx.h)
+- [system_stm32f4xx.h](https://raw.githubusercontent.com/STMicroelectronics/cmsis_device_f4/master/Include/system_stm32f4xx.h)
+
+Those two files depend on a standard ARM CMSIS includes, download them too:
+- [core_cm4.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/core_cm4.h)
+- [cmsis_gcc.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/cmsis_gcc.h)
+- [cmsis_version.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/cmsis_version.h)
+- [cmsis_compiler.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/cmsis_compiler.h)
+- [mpu_armv7.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/mpu_armv7.h)
+
+From the `mcu.h`, remove all peripheral API and definitions, and leave only
+standard C inludes, vendor CMSIS include, defines to PIN, BIT, FREQ, and
+`timer_expired()` helper function:
+
+```c
+#pragma once
+
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/stat.h>
+
+#include "stm32f429xx.h"
+
+#define FREQ 16000000  // CPU frequency, 16 Mhz
+#define BIT(x) (1UL << (x))
+#define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
+#define PINNO(pin) (pin & 255)
+#define PINBANK(pin) (pin >> 8)
+
+static inline void spin(volatile uint32_t count) {
+  while (count--) asm("nop");
+}
+
+static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
+  ...
+}
+```
+
+If we try to rebuild the firmware - `make clean build`, then GCC will fail
+complaining about missing `systick_init()`, `GPIO_MODE_OUTPUT`, `uart_init()`,
+and `UART3`. Let's add those using STM32 CMSIS files.
+
+Let's start from `systick_init()`. The `core_cm4.h` header defines
+`SysTick_Type` structure which is identical to our `struct systick`, and has
+an appropriate #define for `SysTick` peripheral. Also, `stm32f429xx.h` has
+a `RCC_TypeDef` structure and appropriate #define for the `RCC`. Therefore
+our `systick_init()` function remains almost unchanged: we only have to replace
+`SYSTICK` with `SysTick`:
+
+```c
+static inline void systick_init(uint32_t ticks) {
+  if ((ticks - 1) > 0xffffff) return;  // Systick timer is 24 bit
+  SysTick->LOAD = ticks - 1;
+  SysTick->VAL = 0;
+  SysTick->CTRL = BIT(0) | BIT(1) | BIT(2);  // Enable systick
+  RCC->APB2ENR |= BIT(14);                   // Enable SYSCFG
+}
+```
+
+Next goes `gpio_set_mode()` function. The  `stm32f429xx.h` header has
+`GPIO_TypeDef` structure, identical to our `struct gpio`. Let's use it:
+
+```c
+#define GPIO(bank) ((GPIO_TypeDef *) (GPIOA_BASE + 0x400 * (bank)))
+enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG };
+
+static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
+  GPIO_TypeDef *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  RCC->AHB1ENR |= BIT(PINBANK(pin));       // Enable GPIO clock
+  gpio->MODER &= ~(3U << (n * 2));         // Clear existing setting
+  gpio->MODER |= (mode & 3) << (n * 2);    // Set new mode
+}
+```
+
+The `gpio_set_af()` and `gpio_write()` functions is also trivial -
+simply replace `struct gpio` with `GPIO_TypeDef`, and that's all.
+
+Next goes UART. There is a `USART_TypeDef`, and defines for  USART1, USART2,
+USART3. Let's use them:
+
+```c
+#define UART1 USART1
+#define UART2 USART2
+#define UART3 USART3
+```
+
+In the `uart_init()` and the rest of UART functions, change `struct uart` to
+`USART_TypeDef`. The rest stays the same!
+
+And we are done. Rebuild, reflash the firmware. The LED blinks, the UART
+shows the output. Congratulations, we have adopted our firmware code to
+use vendor CMSIS header files. Now let's reorganise the repository a bit
+by moving all standard files into `include` directory and updating Makefile
+to let GCC know about it:
+
+```make
+...
+  -g3 -Os -ffunction-sections -fdata-sections -I. -Iinclude \
+```
+
+We have left with
+a project template that can be reused for the future projects.
+A complete project source code you can find in [step-5-cmsis](step-5-cmsis)
