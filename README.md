@@ -1080,4 +1080,55 @@ A complete project source code you can find in [step-4-printf](step-4-printf) fo
 
 ## Debug with Segger Ozone
 
+What if our firmware is stuck somewhere and printf debug does not work?
+What if even a startup code does not work? We would need a debugger. There
+are many options, but I'd recommend using an Ozone debugger from Segger.
+Why? Because it is stand-alone. It does not need any IDE set up. We can
+feed our `firmware.elf` directly to Ozone, and it'll pick up our source files.
+
+So, [download Ozone](https://www.segger.com/products/development-tools/ozone-j-link-debugger/)
+from the Segger website. Before we can use it with our Nucleo board,
+we need to convert ST-LINK firmware on the onboard debugger to the jlink firmware
+that Ozone understands. Follow https://www.segger.com/products/debug-probes/j-link/models/other-j-links/st-link-on-board/
+instructions on the Segger site.
+
+Now, run Ozone. Choose our device in the wizard:
+
+~[](images/ozone1.png)
+
+Select a debugger we're going to use - that should be a ST-LINK:
+
+~[](images/ozone2.png)
+
+Choose our firmware.elf file:
+
+~[](images/ozone3.png)
+
+Leave the defaults on the next screen, click Finish, and we've got our
+debugger loaded (note the mcu.h source code is picked up):
+
+~[](images/ozone4.png)
+
+Click the green button to download, run the firmware, and we're stopped here:
+
+~[](images/ozone5.png)
+
+Now we can single-step through code, set breakpoints, and do the usual debugging
+stuff. One thing that could be noted, is a handy Ozone peripheral view:
+
+~[](images/ozone6.png)
+
+Using it, we can directly examine or set the state of the peripherals. For
+example, let's turn on a green on-board LED (PB0):
+
+1. We need to clock GPIOB first. Find Peripherals -> RCC -> AHB1ENR,
+   and enable GPIOBEN bit - set it to 1:
+  ~[](images/ozone7.png)
+2. Find Peripherals -> GPIO -> GPIOB -> MODER, set MODER0 to 1 (output): 
+  ~[](images/ozone8.png)
+3. Find Peripherals -> GPIO -> GPIOB -> ODR, set ODR0 to 1 (on): 
+  ~[](images/ozone9.png)
+
+Now, a green LED should be on! Happy debugging.
+
 ## Blinky using CMSIS headers
