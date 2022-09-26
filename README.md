@@ -14,12 +14,12 @@ proceed, please install the following tools:
 - ST link, https://github.com/stlink-org/stlink
 
 Also, download two datasheets:
-- a [STM32F429 MCU datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
-- a [Nucleo-F429ZI board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
+- [STM32F429 MCU datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
+- [Nucleo-F429ZI board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
 
-In the following sections I'll show how to program using just a compiler and
-a datasheet, nothing else. In the last section I'll explain and show how to
-use vendor's CMSIS headers.
+In the following sections I'll show how to program using just a compiler and a
+datasheet, nothing else. In the last section I'll explain how to use vendor's
+CMSIS headers, and why they should be used.
 
 ## Introduction
 
