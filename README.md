@@ -920,7 +920,7 @@ hi
 hi
 ```
 
-A complete project source code you can find in [step-0-minimal](step-0-minimal) folder.
+A complete project source code you can find in [step-3-uart](step-3-uart) folder.
 
 ## Redirect printf() to UART
 
@@ -1074,9 +1074,9 @@ LED: 1, tick: 750
 LED: 0, tick: 1000
 ```
 
-Congratulations! We learned now IO retargeting works, and
+Congratulations! We learned how IO retargeting works, and
 can now printf-debug our firmware.
-A complete project source code you can find in [step-0-printf](step-0-printf) folder.
+A complete project source code you can find in [step-4-printf](step-4-printf) folder.
 
 ## Debug with Segger Ozone
 
