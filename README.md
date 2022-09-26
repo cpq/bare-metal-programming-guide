@@ -1131,4 +1131,23 @@ example, let's turn on a green on-board LED (PB0):
 
 Now, a green LED should be on! Happy debugging.
 
-## Blinky using CMSIS headers
+## Vendor CMSIS headers
+
+In the previous sections, we have developed the firmware using only datasheets,
+editor, and GCC compiler. We have created peripheral structure definitions
+manually, using datasheets.
+
+Now as you know how it all works, it is time to introduce CMSIS headers.
+What is it ? These are header files with all definitions, created and supplied
+by the MCU vendor. They contain definitions for everything that MCU contains,
+therefore they rather big. Since they are supplied by the MCU vendor, they
+are the source of authority and thus using them is a preferred way, rather
+than write your own - so after finishing this section, use vendor headers
+for all personal or commercial projects.
+
+CMSIS stands for Common Microcontroller Software Interface Standard, thus
+it is a common ground for the MCU manufacturers to specify peripheral API.
+
+In this section, we will replace our API functions in the `mcu.h` by the
+CMSIS vendor header, and leave the rest of the firmware intact.
+
