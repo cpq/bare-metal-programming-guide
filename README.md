@@ -315,7 +315,10 @@ Create a minimal linker script `link.ld`, and copy-paste contents from
 ENTRY(_reset);
 ```
 
-This line tells the linker, that the program's entry point.
+This line tells the linker, that the program's entry point. Linker's output is
+an executable ELF file, and one of the attributes in the ELF header is the
+program's entry point. It can be used  by a debugger (like Ozone, described
+below) to load the firmware.
 
 ```
 MEMORY {
