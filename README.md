@@ -312,6 +312,12 @@ Create a minimal linker script `link.ld`, and copy-paste contents from
 [step-0-minimal/link.ld](step-0-minimal/link.ld). Below is the explanation:
 
 ```
+ENTRY(_reset);
+```
+
+This line tells the linker, that the program's entry point.
+
+```
 MEMORY {
   flash(rx)  : ORIGIN = 0x08000000, LENGTH = 2048k
   sram(rwx) : ORIGIN = 0x20000000, LENGTH = 192k  /* remaining 64k in a separate address space */
