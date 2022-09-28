@@ -397,6 +397,10 @@ __attribute__((naked, noreturn)) void _reset(void) {
 }
 ```
 
+The following diagram visualises how `_reset()` initialises .data and .bss:
+
+![](images/mem2.svg)
+
 Now we are ready to produce a full firmware file `firmware.elf`:
 
 ```sh
