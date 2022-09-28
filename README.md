@@ -417,9 +417,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
 ...
 ```
 
-Now we can see that the .vectors section will be loaded at address 0x8000000,
-and .text section right after it, at 0x80001ac. Our code does not create any
-variables, so there is no data section.
+Now we can see that the .vectors section will reside at the very beginning of
+flash memory at address 0x8000000, then the .text section right after it, at
+0x80001ac. Our code does not create any variables, so there is no data section.
 
 ## Flash firmware
 
