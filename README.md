@@ -301,10 +301,10 @@ section. Our `.data` and `.bss` sections are empty, but let's modify our
 Also, our `_reset()` function should set the initial stack pointer, cause 
 our vector table has zero in the corresponding entry at index 0.
 
-In order to do all that, we must know where stack starts, and where data
-and bss section start. This we can specify in the "linker script", which is
-a file with the instructions to the linker, where to put various sections
-in the address space, and which symbols to create.
+In order to do all that, we must know where stack starts, and where data and
+bss section start. This we can specify in the "linker script", which is a file
+with the instructions to the linker, where to put various sections in the
+address space, and which symbols to create.
 
 ### Linker script
 
@@ -315,10 +315,11 @@ Create a minimal linker script `link.ld`, and copy-paste contents from
 ENTRY(_reset);
 ```
 
-This line tells the linker, that the program's entry point. Linker's output is
-an executable ELF file, and one of the attributes in the ELF header is the
-program's entry point. It can be used  by a debugger (like Ozone, described
-below) to load the firmware.
+This line tells the linker the value of the "entry point" attribute in the
+generated ELF header - so this is a duplicate to what a vector table has.  This
+is an aid for a debugger (like Ozone, described below) that helps to set a
+breakpoint at the beginning of the firmware.  A debugger does not know about a
+vector table, so it relies on the ELF header.
 
 ```
 MEMORY {
