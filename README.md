@@ -957,17 +957,16 @@ For example:
 Thus, by modifying a `_write()` syscall, we can redirect
 printf() to whatever we want. That mechanism is called "IO retargeting".
 
-Note that STM32 Cube uses ARM GCC with newlib, that's why Cube projects
-typically include that syscalls.c - that's because of newlib C library.
-
-Other toolchains, like TI's CCS, Keil's CC, might use a different  C library
-with a bit different retargeting mechanism. But in our case, this is newlib,
-so let's modify the `_write()` syscall to print to UART3.
+Note: STM32 Cube also uses ARM GCC with newlib, that's why Cube projects
+typically include `syscalls.c` file.  Other toolchains, like TI's CCS, Keil's
+CC, might use a different  C library with a bit different retargeting
+mechanism. We use newlib, so let's modify `_write()` syscall to print to the
+UART3.
 
 Before that, let's organise our source code in the following way:
 - move all API definitions to the file `mcu.h`
-- startup code we move to startup.c
-- for syscalls, create a separate file `syscalls.c` - empty at first
+- move startup code to `startup.c`
+- create an empty file `syscalls.c` for newlib "syscalls"
 - modify Makefile to addd `syscalls.c` and `startup.c` to the build
 
 After moving all API definitions to the `mcu.h`, our `main.c` file becomes
