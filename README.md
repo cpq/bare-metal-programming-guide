@@ -62,12 +62,23 @@ words, by writing a 32-bit value at a certain memory address, we can control
 how given peripheral should behave. By reading registers, we can read back
 peripheral's data or configuration.
 
-For example, a GPIO (General Purpose Input Output) peripheral allows to
-manipulate MCU pins by writing and reading to GPIO registers.  The GPIOA
+There are many different peripherals. One of the simpler ones are GPIO
+(General Purpose Input Output), which allow user to set MCU pins
+into "output mode" and set high or low voltage on them. Or, set pins into
+an "input mode" and read voltage values from them. There is a UART peripheral
+which can transmit and receive serial data over two pins using RS232 protocol.
+There are many other peripherals.
+
+Often, there are multiple "instances" of the same peripheral, for example
+GPIOA, GPIOB, ... which control different set of MCU pins. Likewise, there
+could be UART1, UART2, ... which allow to implement multiple UART channels.
+On Nucleo-F429, there are several GPIO and UART peripherals.
+
+For example, GPIOA
 peripheral starts at 0x40020000, and we can find GPIO register description in
-section 8.4. The datasheet says that `GPIOA_MODER` register has offset 0,
-that means that it's address is `0x40020000 + 0`, and this is the format of
-the register:
+section 8.4. The datasheet says that `GPIOA_MODER` register has offset 0, that
+means that it's address is `0x40020000 + 0`, and this is the format of the
+register:
 
 <img src="images/moder.png" style="max-width: 100%" />
 
