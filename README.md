@@ -789,7 +789,7 @@ main loop (also called superloop) non-blocking. That means that inside that
 loop we can perform many actions - for example, have different timers with
 different periods, and they all will be triggered in time.
 
-A complete project source code you can find in [step-2-blinky-systick](step-2-blinky-systick) folder.
+A complete project source code you can find in [step-2-systick](step-2-systick) folder.
 
 ## Add UART debug output
 
