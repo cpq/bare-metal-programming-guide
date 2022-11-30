@@ -1340,7 +1340,7 @@ What is left, is to call `clock_init()` from main, then rebuild and reflash.
 And our board runs at its maximum speed, 180Mhz!
 A complete project source code you can find in [step-6-clock](step-6-clock)
 
-## Web server
+## Web server with device dashboard
 
 The Nucleo-F429ZI comes with Ethernet on-board. Ethernet hardware needs
 two components: a PHY (which transmits/receives electrical signals to the
