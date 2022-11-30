@@ -1283,19 +1283,19 @@ A complete project source code you can find in [step-5-cmsis](step-5-cmsis)
 
 ## Setting up clocks
 
-After boot, Nucleo-F429ZI CPU runs at 16Mhz. The maximum frequency is 180Mhz.
+After boot, Nucleo-F429ZI CPU runs at 16MHz. The maximum frequency is 180MHz.
 Note that system clock frequency is not the only factor we need to care about.
 Peripherals are attached to different buses, APB1 and APB2 which are clocked
 differently.  Their clock speeds are configured by the frequency prescaler
-values, set in a scefific registers. The main CPU clock source can also be
+values, set in the RCC. The main CPU clock source can also be
 different - we can use either an external crystal oscillator (HSE) or an
 internal oscillator (HSI). In our case, we'll use HSI.
 
 When CPU executes instructions from flash, a flash read speed (which is around
-25Mhz) becomes a bottleneck if CPU clock gets higher. There are several tricks
+25MHz) becomes a bottleneck if CPU clock gets higher. There are several tricks
 that can help. Instruction prefetch is one. Also, we can give a clue to the
 flash controller, how faster the system clock is: that value is called flash
-latency. For 180Mhz system clock, the `FLASH_LATENCY` value is 5. Bits 8 and 9
+latency. For 180MHz system clock, the `FLASH_LATENCY` value is 5. Bits 8 and 9
 in the flash controller enable instruction and data caches:
 
 ```c
@@ -1305,7 +1305,7 @@ in the flash controller enable instruction and data caches:
 The clock source (HSI or HSE) goes through a piece of hardware called
 PLL, which multiplies source frequency by a certain value. Then, a set of
 frequency dividers are used to set the system clock and APB1, APB2 clocks.
-In order to obtain the maximum system clock of 180Mhz, multiple values
+In order to obtain the maximum system clock of 180MHz, multiple values
 of PLL dividers and APB prescalers are possible. Section 6.3.3 of the
 datasheet tells us the maximum values for APB1 clock: <= 45MHz,
 and the APB2 clock: <= 90MHz. That narrows down the list of possible
@@ -1343,7 +1343,7 @@ static inline void clock_init(void) {                 // Set clock frequency
 ```
 
 What is left, is to call `clock_init()` from main, then rebuild and reflash.
-And our board runs at its maximum speed, 180Mhz!
+And our board runs at its maximum speed, 180MHz!
 A complete project source code you can find in [step-6-clock](step-6-clock)
 
 ## Web server with device dashboard
@@ -1356,11 +1356,10 @@ On our Nucleo, the MAC controller is built-in, and the PHY is external
 
 MAC and PHY can talk several interfaces, we'll use RMII. For that, a bunch
 of pins must be configured to use their Alternative Function (AF).
-
 To implement a web server, we need 3 software components:
 - a network driver, which sends/receives Ethernet frames to/from MAC controller
 - a network stack, that parses frames and understands TCP/IP
-- a network library that undertands HTTP
+- a network library that understands HTTP
 
 We will use [Mongoose Network Library](https://github.com/cesanta/mongoose)
 which implements all of that in a single file. So, copy
