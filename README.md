@@ -1433,14 +1433,16 @@ observe that the board obtains an IP address over DHCP:
 859 2 mongoose.c:6819:onstatechange            Lease: 86363 sec
 LED: 1, tick: 2262
 LED: 0, tick: 2512
-LED: 1, tick: 2762
 ```
 
 Fire up a browser at that IP address, and get a working dashboard, with
 real-time graph over WebSocket, with MQTT, authentication, and other things!
 
+![Device dashboard](https://raw.githubusercontent.com/cesanta/mongoose/master/examples/device-dashboard/screenshots/dashboard.png)
+
 See
 [full description](https://github.com/cesanta/mongoose/tree/master/examples/device-dashboard).
 for more details.
 
-A complete project source code you can find in [step-7-webserver](step-7-webserver)
+A complete project source code you can find in
+[step-7-webserver](step-7-webserver) directory.
