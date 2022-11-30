@@ -1294,10 +1294,9 @@ internal oscillator (HSI). In our case, we'll use HSI.
 When CPU executes instructions from flash, a flash read speed (which is around
 25Mhz) becomes a bottleneck if CPU clock gets higher. There are several tricks
 that can help. Instruction prefetch is one. Also, we can give a clue to the
-flash controller, how faster the system clock is: this value is called flash
-latency. For 180Mhz system clock and ~25Mhz flash speed, the `FLASH_LATENCY`
-value is 5. Bits 8 and 9 in the flash controller enable instruction and 
-data caches:
+flash controller, how faster the system clock is: that value is called flash
+latency. For 180Mhz system clock, the `FLASH_LATENCY` value is 5. Bits 8 and 9
+in the flash controller enable instruction and data caches:
 
 ```c
   FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, caches
@@ -1340,3 +1339,108 @@ static inline void clock_init(void) {                 // Set clock frequency
 What is left, is to call `clock_init()` from main, then rebuild and reflash.
 And our board runs at its maximum speed, 180Mhz!
 A complete project source code you can find in [step-6-clock](step-6-clock)
+
+## Web server
+
+The Nucleo-F429ZI comes with Ethernet on-board. Ethernet hardware needs
+two components: a PHY (which transmits/receives electrical signals to the
+media like copper, optical cable, etc) and MAC (which drives PHY controller).
+On our Nucleo, the MAC controller is built-in, and the PHY is external
+(specifically, is is Microchip's LAN8720a).
+
+MAC and PHY can talk several interfaces, we'll use RMII. For that, a bunch
+of pins must be configured to use their Alternative Function (AF).
+
+To implement a web server, we need 3 software components:
+- a network driver, which sends/receives Ethernet frames to/from MAC controller
+- a network stack, that parses frames and understands TCP/IP
+- a network library that undertands HTTP
+
+We will use [Mongoose Network Library](https://github.com/cesanta/mongoose)
+which implements all of that in a single file. So, copy
+[mongoose.c](https://raw.githubusercontent.com/cesanta/mongoose/master/mongoose.c)
+and
+[mongoose.h](https://raw.githubusercontent.com/cesanta/mongoose/master/mongoose.h)
+to our project. Now we have a driver, a network stack, and a library at hand.
+Mongoose also provides a large set of examples, and one of them is a
+[device dashboard example](https://github.com/cesanta/mongoose/tree/master/examples/device-dashboard).
+It implements lots of things - like dashboard login, real-time data exchange
+over WebSocket, embedded file system, MQTT communication, etcetera.  So let's
+use that example. Copy two extra files:
+- [net.c](https://raw.githubusercontent.com/cesanta/mongoose/master/examples/device-dashboard/net.c) - implements dashboard functionality
+- [packed_fs.c](https://raw.githubusercontent.com/cesanta/mongoose/master/examples/device-dashboard/packed_fs.c) - contains HTML/CSS/JS GUI files
+
+What we need is to tell Mongoose which functionality to enable. That can
+be done via compilation flags, by setting preprocessor constants. Alternatively,
+the same constants can be set in the `mongoose_custom.h` file. Let's go
+the second way. Create `mongoose_custom.h` file with the following contents:
+
+```c
+#pragma once
+#define MG_ARCH MG_ARCH_NEWLIB
+#define MG_ENABLE_MIP 1
+#define MG_IO_SIZE 512
+```
+
+Now it's time to add some networking code to main.c. We `#include "mongoose.c"`,
+initialise Ethernet RMII pins and enable Ethernet in the RCC:
+
+```c
+  uint16_t pins[] = {PIN('A', 1),  PIN('A', 2),  PIN('A', 7),
+                     PIN('B', 13), PIN('C', 1),  PIN('C', 4),
+                     PIN('C', 5),  PIN('G', 11), PIN('G', 13)};
+  for (size_t i = 0; i < sizeof(pins) / sizeof(pins[0]); i++) {
+    gpio_init(pins[i], GPIO_MODE_AF, GPIO_OTYPE_PUSH_PULL, GPIO_SPEED_INSANE,
+              GPIO_PULL_NONE, 11);
+  }
+  nvic_enable_irq(61);                          // Setup Ethernet IRQ handler
+  RCC->APB2ENR |= BIT(14);                      // Enable SYSCFG
+  SYSCFG->PMC |= BIT(23);                       // Use RMII. Goes first!
+  RCC->AHB1ENR |= BIT(25) | BIT(26) | BIT(27);  // Enable Ethernet clocks
+  RCC->AHB1RSTR |= BIT(25);                     // ETHMAC force reset
+  RCC->AHB1RSTR &= ~BIT(25);                    // ETHMAC release reset
+```
+
+Mongoose's driver uses Ethernet interrupt, thus we need to update `startup.c`
+and add `ETH_IRQHandler` to the vector table.
+
+The next step is to initialise Mongoose library: create an event manager,
+setup network driver, and start a listening HTTP connection:
+
+```c
+  struct mg_mgr mgr;        // Initialise Mongoose event manager
+  mg_mgr_init(&mgr);        // and attach it to the MIP interface
+  mg_log_set(MG_LL_DEBUG);  // Set log level
+  mg_timer_add(&mgr, 500, MG_TIMER_REPEAT, blink_cb, &mgr);
+
+  struct mip_cfg c = {.mac = {0, 0, 1, 2, 3, 5}, .ip = 0, .mask = 0, .gw = 0};
+  struct mip_driver_stm32 driver_data = {.mdc_cr = 4};  // See driver_stm32.h
+  mip_init(&mgr, &c, &mip_driver_stm32, &driver_data);
+  mg_http_listen(&mgr, "http://0.0.0.0", fn, &mgr); // HTTP listener
+  MG_INFO(("Init done, starting main loop"));
+```
+
+What is left, is to add a `mg_mgr_poll()` call into the main loop.
+
+Now, add `mongoose.c`, `net.c` and `packed_fs.c` files to the Makefile.
+Rebuild, reflash the board.  Attach a serial console to the debug output,
+observe that the board obtains an IP address over DHCP:
+
+```
+847 3 mongoose.c:6784:arp_cache_add     ARP cache: added 0xc0a80001 @ 90:5c:44:55:19:8b
+84e 2 mongoose.c:6817:onstatechange     READY, IP: 192.168.0.24
+854 2 mongoose.c:6818:onstatechange            GW: 192.168.0.1
+859 2 mongoose.c:6819:onstatechange            Lease: 86363 sec
+LED: 1, tick: 2262
+LED: 0, tick: 2512
+LED: 1, tick: 2762
+```
+
+Fire up a browser at that IP address, and get a working dashboard, with
+real-time graph over WebSocket, with MQTT, authentication, and other things!
+
+See
+[full description](https://github.com/cesanta/mongoose/tree/master/examples/device-dashboard).
+for more details.
+
+A complete project source code you can find in [step-7-webserver](step-7-webserver)
