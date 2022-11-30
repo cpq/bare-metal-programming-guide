@@ -1309,7 +1309,7 @@ In order to obtain the maximum system clock of 180Mhz, multiple values
 of PLL dividers and APB prescalers are possible. Section 6.3.3 of the
 datasheet tells us the maximum values for APB1 clock: <= 45MHz,
 and the APB2 clock: <= 90MHz. That narrows down the list of possible
-combinations. Here we chose the values manually. note that tools like
+combinations. Here we chose the values manually. Note that tools like
 CubeMX can automate the process and make it easy and visual.
 
 ```c
