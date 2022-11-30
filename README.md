@@ -1362,7 +1362,11 @@ To implement a web server, we need 3 software components:
 - a network library that understands HTTP
 
 We will use [Mongoose Network Library](https://github.com/cesanta/mongoose)
-which implements all of that in a single file. So, copy
+which implements all of that in a single file. It is a dual-licensed library
+(GPLv2/commercial) that was designed to make network embedded development
+fast and easy.
+
+So, copy
 [mongoose.c](https://raw.githubusercontent.com/cesanta/mongoose/master/mongoose.c)
 and
 [mongoose.h](https://raw.githubusercontent.com/cesanta/mongoose/master/mongoose.h)
