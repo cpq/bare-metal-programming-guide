@@ -18,8 +18,8 @@ Also, download two datasheets:
 - [Nucleo-F429ZI board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
 
 In the following sections I'll show how to program using just a compiler and a
-datasheet, nothing else. In the last section I'll explain how to use vendor's
-CMSIS headers, and why they should be used.
+datasheet, nothing else. Later I'll explain what are the vendor's
+CMSIS headers, how and why they should be used.
 
 ## Introduction
 
@@ -1279,3 +1279,64 @@ to let GCC know about it:
 We have left with
 a project template that can be reused for the future projects.
 A complete project source code you can find in [step-5-cmsis](step-5-cmsis)
+
+
+## Clock
+
+After boot, Nucleo-F429ZI CPU runs at 16Mhz. The maximum frequency is 180Mhz.
+Note that system clock frequency is not the only factor we need to care about.
+Peripherals are attached to different buses, APB1 and APB2 which are clocked
+differently.  Their clock speeds are configured by the frequency prescaler
+values, set in a scefific registers. The main CPU clock source can also be
+different - we can use either an external crystal oscillator (HSE) or an
+internal oscillator (HSI). In our case, we'll use HSI.
+
+When CPU executes instructions from flash, a flash read speed (which is around
+25Mhz) becomes a bottleneck if CPU clock gets higher. There are several tricks
+that can help. Instruction prefetch is one. Also, we can give a clue to the
+flash controller, how faster the system clock is: this value is called flash
+latency. For 180Mhz system clock and ~25Mhz flash speed, the `FLASH_LATENCY`
+value is 5. Bits 8 and 9 in the flash controller enable instruction and 
+data caches:
+
+```c
+  FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, caches
+```
+
+The clock source (HSI or HSE) goes through a piece of hardware called
+PLL, which multiplies source frequency by a certain value. Then, a set of
+frequency dividers are used to set the system clock and APB1, APB2 clocks:
+
+```c
+enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
+enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 180, PLL_P = 2 };  // Run at 180 Mhz
+#define PLL_FREQ (PLL_HSI * PLL_N / PLL_M / PLL_P)
+#define FREQ (PLL_FREQ * 1000000)
+```
+
+Now we're ready for a simple algorithm to set up the clock for CPU and peripheral buses
+may look like this:
+
+- Optionally, enable FPU
+- Set flash latency
+- Decide on a clock source, and PLL, APB1 and APB2 prescalers
+- Configure RCC by setting respective values:
+
+```c
+static inline void clock_init(void) {                 // Set clock frequency
+  SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
+  FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, caches
+  RCC->PLLCFGR &= ~((BIT(17) - 1));                   // Clear PLL multipliers
+  RCC->PLLCFGR |= (((PLL_P - 2) / 2) & 3) << 16;      // Set PLL_P
+  RCC->PLLCFGR |= PLL_M | (PLL_N << 6);               // Set PLL_M and PLL_N
+  RCC->CR |= BIT(24);                                 // Enable PLL
+  while ((RCC->CR & BIT(25)) == 0) spin(1);           // Wait until done
+  RCC->CFGR = (APB1_PRE << 10) | (APB2_PRE << 13);    // Set prescalers
+  RCC->CFGR |= 2;                                     // Set clock source to PLL
+  while ((RCC->CFGR & 12) == 0) spin(1);              // Wait until done
+}
+```
+
+What is left, is to call `clock_init()` from main, then rebuild and reflash.
+And our board runs at its maximum speed, 180Mhz!
+A complete project source code you can find in [step-6-clock](step-6-clock)
