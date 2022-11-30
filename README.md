@@ -1437,12 +1437,11 @@ LED: 0, tick: 2512
 
 Fire up a browser at that IP address, and get a working dashboard, with
 real-time graph over WebSocket, with MQTT, authentication, and other things!
+See
+[full description](https://github.com/cesanta/mongoose/tree/master/examples/device-dashboard)
+for more details.
 
 ![Device dashboard](https://raw.githubusercontent.com/cesanta/mongoose/master/examples/device-dashboard/screenshots/dashboard.png)
-
-See
-[full description](https://github.com/cesanta/mongoose/tree/master/examples/device-dashboard).
-for more details.
 
 A complete project source code you can find in
 [step-7-webserver](step-7-webserver) directory.
