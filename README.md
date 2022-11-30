@@ -1304,7 +1304,13 @@ in the flash controller enable instruction and data caches:
 
 The clock source (HSI or HSE) goes through a piece of hardware called
 PLL, which multiplies source frequency by a certain value. Then, a set of
-frequency dividers are used to set the system clock and APB1, APB2 clocks:
+frequency dividers are used to set the system clock and APB1, APB2 clocks.
+In order to obtain the maximum system clock of 180Mhz, multiple values
+of PLL dividers and APB prescalers are possible. Section 6.3.3 of the
+datasheet tells us the maximum values for APB1 clock: <= 45MHz,
+and the APB2 clock: <= 90MHz. That narrows down the list of possible
+combinations. Here we chose the values manually. note that tools like
+CubeMX can automate the process and make it easy and visual.
 
 ```c
 enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
