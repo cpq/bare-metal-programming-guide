@@ -1281,7 +1281,7 @@ a project template that can be reused for the future projects.
 A complete project source code you can find in [step-5-cmsis](step-5-cmsis)
 
 
-## Clock
+## Setting up clocks
 
 After boot, Nucleo-F429ZI CPU runs at 16Mhz. The maximum frequency is 180Mhz.
 Note that system clock frequency is not the only factor we need to care about.
