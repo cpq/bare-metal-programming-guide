@@ -9,9 +9,9 @@ Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=
 But basic principles would be applicable to any other microcontroller. To
 proceed, please install the following tools:
 
-- ARM GCC, https://launchpad.net/gcc-arm-embedded
-- GNU make, http://www.gnu.org/software/make/
-- ST link, https://github.com/stlink-org/stlink
+- ARM GCC, https://launchpad.net/gcc-arm-embedded - for compiling and linking
+- GNU make, http://www.gnu.org/software/make/ - for build automation
+- ST link, https://github.com/stlink-org/stlink - for flashing
 
 Also, download two datasheets:
 - [STM32F429 MCU datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
