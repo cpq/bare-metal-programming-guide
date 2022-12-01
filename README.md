@@ -107,8 +107,8 @@ mode. For example, this snippet sets pin A3 to output mode:
 
 Some registers are not mapped to the MCU peripherals, but they are mapped to
 the ARM CPU configuration and control. For example, there is a "Reset at clock
-control" unit, described in section 6 of the datasheet. It describes registers
-that allow to set systems clock and other things.
+control" unit (RCC), described in section 6 of the datasheet. It describes
+registers that allow to set systems clock and other things.
 
 ## Human-readable peripherals programming
 
