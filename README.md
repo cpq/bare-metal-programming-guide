@@ -1447,12 +1447,17 @@ setup network driver, and start a listening HTTP connection:
   struct mg_mgr mgr;        // Initialise Mongoose event manager
   mg_mgr_init(&mgr);        // and attach it to the MIP interface
   mg_log_set(MG_LL_DEBUG);  // Set log level
-  mg_timer_add(&mgr, 500, MG_TIMER_REPEAT, blink_cb, &mgr);
 
-  struct mip_cfg c = {.mac = {0, 0, 1, 2, 3, 5}, .ip = 0, .mask = 0, .gw = 0};
   struct mip_driver_stm32 driver_data = {.mdc_cr = 4};  // See driver_stm32.h
-  mip_init(&mgr, &c, &mip_driver_stm32, &driver_data);
-  mg_http_listen(&mgr, "http://0.0.0.0", fn, &mgr); // HTTP listener
+  struct mip_if mif = {
+      .mac = {2, 0, 1, 2, 3, 5},
+      .use_dhcp = true,
+      .driver = &mip_driver_stm32,
+      .driver_data = &driver_data,
+  };
+  mip_init(&mgr, &mif);
+  extern void device_dashboard_fn(struct mg_connection *, int, void *, void *);
+  mg_http_listen(&mgr, "http://0.0.0.0", device_dashboard_fn, &mgr);
   MG_INFO(("Init done, starting main loop"));
 ```
 
