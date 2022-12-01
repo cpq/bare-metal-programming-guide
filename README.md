@@ -1413,7 +1413,32 @@ initialise Ethernet RMII pins and enable Ethernet in the RCC:
 ```
 
 Mongoose's driver uses Ethernet interrupt, thus we need to update `startup.c`
-and add `ETH_IRQHandler` to the vector table.
+and add `ETH_IRQHandler` to the vector table. Let's reorganise vector table
+definition in `startup.c` in a way that does not require any modification
+to add an interrupt handler function. The idea is to use a "weak symbol"
+concept:
+
+```c
+void __attribute__((weak)) DefaultIRQHandler(void) {
+  for (;;) (void) 0;
+}
+#define WEAK_ALIAS __attribute__((weak, alias("DefaultIRQHandler")))
+
+WEAK_ALIAS void NMI_Handler(void);
+WEAK_ALIAS void HardFault_Handler(void);
+WEAK_ALIAS void MemManage_Handler(void);
+...
+__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+    0, _reset, NMI_Handler, HardFault_Handler, MemManage_Handler,
+    ...
+```
+
+Notice that the vector table now has entries for every possible IRQ handler,
+but all of them are "aliased" to the function `DefaultIRQHandler` which is
+marked "weak". That means that if developer creates an IRQ handler somewhere
+in the code, for example, `ETH_IRQHandler()`, then the linker will not report
+symbol conflict - but instead, it'll use developer's function instead of
+the "weak" default one.
 
 The next step is to initialise Mongoose library: create an event manager,
 setup network driver, and start a listening HTTP connection:
