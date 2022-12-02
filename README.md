@@ -1,13 +1,20 @@
-# Bare metal programming guide
+# A bare metal programming guide
 
 This guide is written for beginners who wish to start programming
-microcontrollers using GCC compiler and bare metal approach.  We are going to
+microcontrollers using GCC compiler and bare metal approach. We are going to
 use a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
 development board with STM32F429 microcontroller ([buy on
 Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
-But basic principles would be applicable to any other microcontroller. To
-proceed, please install the following tools:
+But basic principles would be applicable to any other microcontroller. 
+
+In this guide, I'll show how to program a microcontroller using just a compiler
+and a datasheet, nothing else. Later I'll explain what are the vendor's CMSIS
+headers, how and why they should be used. We'll learn how to blink LEDs, how to
+redirect `printf()` to UART, how to set up the system clock, how to use
+interrupts, and even how to run a web server with device dashboard.
+
+To proceed, please install the following tools:
 
 - ARM GCC, https://launchpad.net/gcc-arm-embedded - for compiling and linking
 - GNU make, http://www.gnu.org/software/make/ - for build automation
@@ -16,10 +23,6 @@ proceed, please install the following tools:
 Also, download two datasheets:
 - [STM32F429 MCU datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
 - [Nucleo-F429ZI board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
-
-In the following sections I'll show how to program using just a compiler and a
-datasheet, nothing else. Later I'll explain what are the vendor's
-CMSIS headers, how and why they should be used.
 
 ## Introduction
 
