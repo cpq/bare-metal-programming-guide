@@ -1434,11 +1434,14 @@ __attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
 ```
 
 Notice that the vector table now has entries for every possible IRQ handler,
-but all of them are "aliased" to the function `DefaultIRQHandler()` which is
-marked weak. That means that if developer creates an IRQ handler somewhere in
-the code, for example, `ETH_IRQHandler()`, then the linker will not report
-symbol conflict - but instead, it'll use developer's `ETH_IRQHandler()` instead
-of the weak `DefaultIRQHandler()`.
+like `NMI_Handler()`, `HardFault_Handler()`, etcetera; but all of them are
+"aliased" to the function `DefaultIRQHandler()` which is marked weak. This
+mechanism allows to provide a default handler function for all interrupts.  If,
+however, user code defines a function with the same name as it appears in the
+vector table, then the linker will choose user function, not the default weak
+one.  In our case, there is a `ETH_IRQHandler()` weak handler defined in the
+vector table, and Mongoose's STM32 driver code defines its own
+`ETH_IRQHandler()` which replaces it.
 
 The next step is to initialise Mongoose library: create an event manager,
 setup network driver, and start a listening HTTP connection:
