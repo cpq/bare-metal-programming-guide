@@ -38,7 +38,7 @@ Tools setup instructions for Windows:
 - Verify installation:
   - Download this repository https://github.com/cpq/bare-metal-programming-guide/archive/refs/heads/main.zip into `c:\`
   - Start command prompt, and there execute the following commands:
-  <pre style="color: #aaa;">
+  <pre style="color: silver;">
   C:\Users\YOURNAME> <b style="color: black;">cd \</b>
   C:\> <b style="color: black;">cd bare-metal-programming-guide-main\step-0-minimal</b>
   C:\bare-metal-programming-guide-main\step-0-minimal> <b style="color: black;">make</b>
