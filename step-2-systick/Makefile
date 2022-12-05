@@ -5,6 +5,12 @@ CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
 SOURCES = main.c 
 
+ifeq ($(OS),Windows_NT)
+  RM = cmd /C del /Q /F
+else
+  RM = rm -f
+endif
+
 build: firmware.elf
 
 firmware.elf: $(SOURCES)
@@ -17,4 +23,4 @@ flash: firmware.bin
 	st-flash --reset write $(TARGET).bin 0x8000000
 
 clean:
-	rm -rf firmware.*
+	$(RM) firmware.*
