@@ -38,12 +38,12 @@ Tools setup instructions for Windows:
 - Verify installation:
   - Download this repository https://github.com/cpq/bare-metal-programming-guide/archive/refs/heads/main.zip into `c:\`
   - Start command prompt, and there execute the following commands:
-  ```text
-  C:\Users\YOURNAME> cd \
-  C:\> cd bare-metal-programming-guide-main\step-0-minimal
-  C:\bare-metal-programming-guide-main\step-0-minimal> make
-  arm-none-eabi-gcc main.c  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -fno-common -Wconversion -g3 -Os -ffunction-sections -fdata-sections -I. -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16  -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=firmware.elf.map -o firmware.elf
-  ```
+  <pre>
+  C:\Users\YOURNAME> <b>cd \</b>
+  C:\> <b>cd bare-metal-programming-guide-main\step-0-minimal</b>
+  C:\bare-metal-programming-guide-main\step-0-minimal> <b>make</b>
+  arm-none-eabi-gcc main.c  -W -Wall -Wextra -Werror ...
+  </pre>
 
 Also, download two datasheets:
 - [STM32F429 MCU datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
