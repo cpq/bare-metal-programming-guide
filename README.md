@@ -25,9 +25,9 @@ Tools setup instructions for Mac. Start a terminal, and execute:
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 $ brew install --cask gcc-arm-embedded make stlink
 ```
-Tools setup instructions for Linux. Start a terminal, and execute:
+Tools setup instructions for Linux (Ubuntu). Start a terminal, and execute:
 ```sh
-$ sudo apt -y install gcc-arm-embedded make stlink-tools
+$ sudo apt -y install gcc-arm-none-eabi make stlink-tools
 ```
 
 Tools setup instructions for Windows:
