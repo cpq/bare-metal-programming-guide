@@ -1007,7 +1007,7 @@ Before that, let's organise our source code in the following way:
 - move all API definitions to the file `mcu.h`
 - move startup code to `startup.c`
 - create an empty file `syscalls.c` for newlib "syscalls"
-- modify Makefile to addd `syscalls.c` and `startup.c` to the build
+- modify Makefile to add `syscalls.c` and `startup.c` to the build
 
 After moving all API definitions to the `mcu.h`, our `main.c` file becomes
 quite compact. Note that it does not have any mention of the low-level
