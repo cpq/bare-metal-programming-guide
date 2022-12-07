@@ -31,13 +31,14 @@ $ sudo apt -y install gcc-arm-none-eabi make stlink-tools
 ```
 
 Tools setup instructions for Windows:
-- Download and install [gcc-arm-none-eabi-10.3-2021.10-win32.exe](https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.exe?rev=29bb46cfa0434fbda93abb33c1d480e6&hash=3C58D05EA5D32EF127B9E4D13B3244D26188713C) there. Enable "Add path to environment variable" during installation.
-- Create `c:\tools` folder. Download [stlink-1.7.0-x86_64-w64-mingw32.zip](https://github.com/stlink-org/stlink/releases/download/v1.7.0/stlink-1.7.0-x86_64-w64-mingw32.zip). Unpack `bin/st-flash.exe` into `c:\tools`
+- Download and install [gcc-arm-none-eabi-10.3-2021.10-win32.exe](https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.exe?rev=29bb46cfa0434fbda93abb33c1d480e6&hash=3C58D05EA5D32EF127B9E4D13B3244D26188713C) there. Enable "Add path to environment variable" during the installation
+- Create `c:\tools` folder
+- Download [stlink-1.7.0-x86_64-w64-mingw32.zip](https://github.com/stlink-org/stlink/releases/download/v1.7.0/stlink-1.7.0-x86_64-w64-mingw32.zip) and unpack `bin/st-flash.exe` into `c:\tools`
 - Download [make-4.4-without-guile-w32-bin.zip](https://sourceforge.net/projects/ezwinports/files/make-4.4-without-guile-w32-bin.zip/download) and unpack `bin/make.exe` into `c:\tools`
 - Add `c:\tools` to the `Path` environment variable
 - Verify installation:
-  - Download this repository https://github.com/cpq/bare-metal-programming-guide/archive/refs/heads/main.zip into `c:\`
-  - Start command prompt, and there execute the following commands:
+  - Download and unzip [this repository](https://github.com/cpq/bare-metal-programming-guide/archive/refs/heads/main.zip) into `c:\`
+  - Start command prompt, and execute the following:
   <pre style="color: silver;">
   C:\Users\YOURNAME> <b style="color: black;">cd \</b>
   C:\> <b style="color: black;">cd bare-metal-programming-guide-main\step-0-minimal</b>
@@ -1444,7 +1445,20 @@ Mongoose's driver uses Ethernet interrupt, thus we need to update `startup.c`
 and add `ETH_IRQHandler` to the vector table. Let's reorganise vector table
 definition in `startup.c` in a way that does not require any modification
 to add an interrupt handler function. The idea is to use a "weak symbol"
-concept:
+concept.
+
+A function can be marked "weak" and it works like a normal function.  The
+difference comes when a source code defines a function with the same name
+elsewhere. Normally, two functions with the same name make a build fail.
+However if one function is marked weak, then a build succeeds and linker
+selects a non-weak function. This gives an ability to provide a "default"
+function in a boilerplate, with an ability to override it by simply creating a
+function with the same name elsewhere in the code.
+
+Here how it works in our case. We want to fill a vector table with default
+handlers, but give user an ability to override any handler. For that, we create
+a function `DefaultIRQHandler()` and mark it weak. Then, for every IRQ handler,
+we declare a handler name and make it an alias to `DefaultIRQHandler()`:
 
 ```c
 void __attribute__((weak)) DefaultIRQHandler(void) {
@@ -1461,15 +1475,9 @@ __attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
     ...
 ```
 
-Notice that the vector table now has entries for every possible IRQ handler,
-like `NMI_Handler()`, `HardFault_Handler()`, etcetera; but all of them are
-"aliased" to the function `DefaultIRQHandler()` which is marked weak. This
-mechanism allows to provide a default handler function for all interrupts.  If,
-however, user code defines a function with the same name as it appears in the
-vector table, then the linker will choose user function, not the default weak
-one.  In our case, there is a `ETH_IRQHandler()` weak handler defined in the
-vector table, and Mongoose's STM32 driver code defines its own
-`ETH_IRQHandler()` which replaces it.
+Now, we can define any IRQ handler in our code, and it will replace the default
+one. This is what happens in our case: there is a `ETH_IRQHandler()` defined
+by the Mongoose's STM32 driver which replaces a default handler.
 
 The next step is to initialise Mongoose library: create an event manager,
 setup network driver, and start a listening HTTP connection:
