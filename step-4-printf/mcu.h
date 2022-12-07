@@ -2,8 +2,8 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
 #define FREQ 16000000  // CPU frequency, 16 Mhz
@@ -51,7 +51,7 @@ static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
   int n = PINNO(pin);                      // Pin number
   RCC->AHB1ENR |= BIT(PINBANK(pin));       // Enable GPIO clock
   gpio->MODER &= ~(3U << (n * 2));         // Clear existing setting
-  gpio->MODER |= (mode & 3) << (n * 2);    // Set new mode
+  gpio->MODER |= (mode & 3U) << (n * 2);   // Set new mode
 }
 
 static inline void gpio_set_af(uint16_t pin, uint8_t af_num) {

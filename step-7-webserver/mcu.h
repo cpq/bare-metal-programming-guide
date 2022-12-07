@@ -36,7 +36,7 @@ static inline void systick_init(uint32_t ticks) {
   RCC->APB2ENR |= BIT(14);                   // Enable SYSCFG
 }
 
-#define GPIO(bank) ((GPIO_TypeDef *) (GPIOA_BASE + 0x400 * (bank)))
+#define GPIO(bank) ((GPIO_TypeDef *) (GPIOA_BASE + 0x400U * (bank)))
 enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG };
 enum { GPIO_OTYPE_PUSH_PULL, GPIO_OTYPE_OPEN_DRAIN };
 enum { GPIO_SPEED_LOW, GPIO_SPEED_MEDIUM, GPIO_SPEED_HIGH, GPIO_SPEED_INSANE };
@@ -47,7 +47,7 @@ static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
   int n = PINNO(pin);                       // Pin number
   RCC->AHB1ENR |= BIT(PINBANK(pin));        // Enable GPIO clock
   gpio->MODER &= ~(3U << (n * 2));          // Clear existing setting
-  gpio->MODER |= (mode & 3) << (n * 2);     // Set new mode
+  gpio->MODER |= (mode & 3U) << (n * 2);    // Set new mode
 }
 
 static inline void gpio_set_af(uint16_t pin, uint8_t af_num) {
