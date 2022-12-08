@@ -98,7 +98,7 @@ There are many different peripherals. One of the simpler ones are GPIO
 (General Purpose Input Output), which allow user to set MCU pins
 into "output mode" and set high or low voltage on them. Or, set pins into
 an "input mode" and read voltage values from them. There is a UART peripheral
-which can transmit and receive serial data over two pins using RS232 protocol.
+which can transmit and receive serial data over two pins using serial protocol.
 There are many other peripherals.
 
 Often, there are multiple "instances" of the same peripheral, for example
