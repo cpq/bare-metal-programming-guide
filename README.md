@@ -134,7 +134,7 @@ mode. For example, this snippet sets pin A3 to output mode:
 
 ```c
   * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bits 6-7
-  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bits 6-7 to 1
+  * (volatile uint32_t *) (0x40020000 + 0) |= 3 << 6;     // Set bits 6-7 to 1
 ```
 
 Some registers are not mapped to the MCU peripherals, but they are mapped to
