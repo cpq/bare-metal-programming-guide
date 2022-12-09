@@ -26,7 +26,7 @@ To proceed, the following tools are required:
 Tools setup instructions for Mac. Start a terminal, and execute:
 ```sh
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-$ brew install --cask gcc-arm-embedded make stlink
+$ brew install gcc-arm-embedded make stlink
 ```
 Tools setup instructions for Linux (Ubuntu). Start a terminal, and execute:
 ```sh

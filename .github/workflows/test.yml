@@ -1,12 +1,25 @@
 name: build
 on: [push, pull_request]
 jobs:
-  examples:
+  linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - run: sudo apt-get update
     - run: sudo apt -y install gcc-arm-none-eabi make stlink-tools
+    - run: make -C step-0-minimal
+    - run: make -C step-1-blinky
+    - run: make -C step-2-systick
+    - run: make -C step-3-uart
+    - run: make -C step-4-printf
+    - run: make -C step-5-cmsis
+    - run: make -C step-6-clock
+    - run: make -C step-7-webserver
+  macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: HOMEBREW_NO_AUTO_UPDATE=1 brew install gcc-arm-embedded make stlink
     - run: make -C step-0-minimal
     - run: make -C step-1-blinky
     - run: make -C step-2-systick
