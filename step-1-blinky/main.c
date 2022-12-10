@@ -1,3 +1,6 @@
+// Copyright (c) 2022 Cesanta Software Limited
+// All rights reserved
+
 #include <inttypes.h>
 #include <stdbool.h>
 

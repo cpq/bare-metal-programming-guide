@@ -1,3 +1,6 @@
+// Copyright (c) 2022 Cesanta Software Limited
+// All rights reserved
+
 // Startup code
 __attribute__((naked, noreturn)) void _reset(void) {
   asm("ldr sp, = _estack");  // Set initial stack pointer

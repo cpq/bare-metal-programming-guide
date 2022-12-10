@@ -1,3 +1,6 @@
+// Copyright (c) 2022 Cesanta Software Limited
+// All rights reserved
+
 #include <sys/stat.h>
 
 #include "mcu.h"

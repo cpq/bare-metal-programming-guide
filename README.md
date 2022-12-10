@@ -9,13 +9,22 @@ use a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
 development board with STM32F429 microcontroller ([buy on
 Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
-But basic principles would be applicable to any other microcontroller. 
 
 In this guide, I'll show how to program a microcontroller using just a compiler
 and a datasheet, nothing else. Later I'll explain what are the vendor's CMSIS
-headers, how and why they should be used. We'll learn how to blink LEDs, how to
-redirect `printf()` to UART, how to set up the system clock, how to use
-interrupts, and even how to run a web server with device dashboard.
+headers, how and why they should be used. 
+
+The guide covers the following topics: memory and registers, interrup vector
+table, startup code, linker script, build automation using `make`, GPIO
+peripheral and LED blinky, SysTick timer, UART peripheral and debug output,
+`printf` redirect to UART (IO retargeting), debugging with Segger Ozone,
+system clock setup, and web server implementation with device dashboard.
+
+Each chapter has a complete example project associated with it. Since every
+chapter extends the previous one, the last chapter's example project is the
+most complete, and could be used as a skeleton for the project of your own,
+dear reader. As such, I plan to provide, in addition to the Nucleo-F429ZI code,
+examples for the other boards too (RPI 2040, NXP, TI are in the short list).
 
 To proceed, the following tools are required:
 

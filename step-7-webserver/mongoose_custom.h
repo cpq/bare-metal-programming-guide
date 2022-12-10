@@ -1,3 +1,6 @@
+// Copyright (c) 2022 Cesanta Software Limited
+// All rights reserved
+
 #pragma once
 #define MG_ARCH MG_ARCH_NEWLIB
 #define MG_ENABLE_MIP 1

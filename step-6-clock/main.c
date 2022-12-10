@@ -1,3 +1,6 @@
+// Copyright (c) 2022 Cesanta Software Limited
+// All rights reserved
+
 #include "mcu.h"
 
 static volatile uint32_t s_ticks;
