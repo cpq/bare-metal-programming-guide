@@ -14,7 +14,7 @@ In this guide, I'll show how to program a microcontroller using just a compiler
 and a datasheet, nothing else. Later I'll explain what are the vendor's CMSIS
 headers, how and why they should be used. 
 
-The guide covers the following topics: memory and registers, interrup vector
+The guide covers the following topics: memory and registers, interrupt vector
 table, startup code, linker script, build automation using `make`, GPIO
 peripheral and LED blinky, SysTick timer, UART peripheral and debug output,
 `printf` redirect to UART (IO retargeting), debugging with Segger Ozone,
