@@ -14,7 +14,8 @@ jobs:
     - run: make -C step-4-printf
     - run: make -C step-5-cmsis
     - run: make -C step-6-clock
-    - run: make -C step-7-webserver
+    - run: make -C step-7-webserver/nucleo-f429zi
+    - run: make -C step-7-webserver/pico-w
   macos:
     runs-on: macos-latest
     steps:
@@ -27,4 +28,5 @@ jobs:
     - run: make -C step-4-printf
     - run: make -C step-5-cmsis
     - run: make -C step-6-clock
-    - run: make -C step-7-webserver
+    - run: make -C step-7-webserver/nucleo-f429zi
+    - run: make -C step-7-webserver/pico-w
