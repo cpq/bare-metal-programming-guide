@@ -453,6 +453,16 @@ The following diagram visualises how `_reset()` initialises .data and .bss:
 
 ![](images/mem2.svg)
 
+The `firmware.bin` file is just a concatenation of the two sections: `.text`
+(code) and `.data` (data).  Those two sections were built according to the
+linker script: addresses in `.text` are in the flash region, and addresses in
+`.data` are in the RAM region.  If some function has address e.g. `0x8000100`,
+then it it located exactly at that address on flash. But if the code accesses
+some variable in the `.data` section by the address e.g. `0x20000200`, then
+there is nothing at that address, because at boot, `.data` section in the
+`firmware.bin` resides in flash! That's why the startup code must relocate
+`.data` section from flash region to the RAM region.
+
 Now we are ready to produce a full firmware file `firmware.elf`:
 
 ```sh
