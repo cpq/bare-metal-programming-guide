@@ -319,7 +319,7 @@ firmware's entry point.  We leave the rest of vector table filled with zeroes.
 
 ### Compilation
 
-Let's compile our code:
+Let's compile our code. Start a terminal (or a command prompt on Windows) and execute:
 
 ```sh
 $ arm-none-eabi-gcc -mcpu=cortex-m4 main.c -c
