@@ -280,9 +280,11 @@ __attribute__((naked, noreturn)) void _reset(void) {
   for (;;) (void) 0;  // Infinite loop
 }
 
+extern void _estack(void);  // Defined in link.ld
+
 // 16 standard and 91 STM32-specific handlers
 __attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
-  0, _reset
+  _estack, _reset
 };
 ```
 
@@ -295,14 +297,11 @@ pointers to functions, that return nothing (void) and take to arguments. Each
 such function is an IRQ handler (Interrupt ReQuest handler). An array of those
 handlers is called a vector table.
 
-The vector table `tab` we put in a separate section called `.vectors` - that
-we need later to tell the linker to put that section right at the beginning
-of the generated firmware - and consecutively, at the beginning of flash
-memory. We leave the rest of vector table filled with zeroes.
-
-Note that we do not set the first entry in the vector table, which is an
-initial value for the stack pointer. Why? Because we don't know the correct
-value for it. We'll handle it later.
+The vector table `tab` we put in a separate section called `.vectors` - that we
+need later to tell the linker to put that section right at the beginning of the
+generated firmware - and consecutively, at the beginning of flash memory. The
+first two entries are: the value of the stack pointer register, and the
+firmware's entry point.  We leave the rest of vector table filled with zeroes.
 
 ### Compilation
 
@@ -349,9 +348,6 @@ in RAM - therefore our `_reset()` function should copy the contents of the
 `.data` section to RAM. Also it has to write zeroes to the whole `.bss`
 section. Our `.data` and `.bss` sections are empty, but let's modify our
 `_reset()` function anyway to handle them properly.
-
-Also, our `_reset()` function should set the initial stack pointer, cause 
-our vector table has zero in the corresponding entry at index 0.
 
 In order to do all that, we must know where stack starts, and where data and
 bss section start. This we can specify in the "linker script", which is a file
