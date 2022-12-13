@@ -3,8 +3,6 @@
 
 // Startup code
 __attribute__((naked, noreturn)) void _reset(void) {
-  asm("ldr sp, = _estack");  // Set initial stack pointer
-
   // Initialise memory
   extern long _sbss, _ebss, _sdata, _edata, _sidata;
   for (long *src = &_sbss; src < &_ebss; src++) *src = 0;
@@ -122,10 +120,12 @@ WEAK_ALIAS void LTDC_IRQHandler(void);
 WEAK_ALIAS void LTDC_ER_IRQHandler(void);
 WEAK_ALIAS void DMA2D_IRQHandler(void);
 
+extern void _estack(void);  // Defined in link.ld
+
 // IRQ table
 __attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
     // Cortex interrupts
-    0, _reset, NMI_Handler, HardFault_Handler, MemManage_Handler,
+    _estack, _reset, NMI_Handler, HardFault_Handler, MemManage_Handler,
     BusFault_Handler, UsageFault_Handler, 0, 0, 0, 0, SVC_Handler,
     DebugMon_Handler, 0, PendSV_Handler, SysTick_Handler,
 

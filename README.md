@@ -426,9 +426,9 @@ Same for `.bss` section:
 
 ### Startup code
 
-Now we can update our `_reset()` function. We initialize stack pointer,
-copy data section to RAM, and initialise bss section to zeroes. Then, we
-call main() function - and fall into infinite loop in case if main() returns:
+Now we can update our `_reset()` function. We copy `.data` section to RAM, and
+initialise bss section to zeroes. Then, we call main() function - and fall into
+infinite loop in case if main() returns:
 
 ```c
 int main(void) {
@@ -437,8 +437,6 @@ int main(void) {
 
 // Startup code
 __attribute__((naked, noreturn)) void _reset(void) {
-  asm("ldr sp, = _estack");  // Set initial stack pointer
-
   // memset .bss to zero, and copy .data section to RAM region
   extern long _sbss, _ebss, _sdata, _edata, _sidata;
   for (long *src = &_sbss; src < &_ebss; src++) *src = 0;
