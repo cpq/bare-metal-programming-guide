@@ -26,23 +26,33 @@ most complete, and could be used as a skeleton for the project of your own,
 dear reader. As such, I plan to provide, in addition to the Nucleo-F429ZI code,
 examples for the other boards too (RPI 2040, NXP, TI are in the short list).
 
+## Tools setup
+
 To proceed, the following tools are required:
 
 - ARM GCC, https://launchpad.net/gcc-arm-embedded - for compiling and linking
 - GNU make, http://www.gnu.org/software/make/ - for build automation
 - ST link, https://github.com/stlink-org/stlink - for flashing
 
-Tools setup instructions for Mac. Start a terminal, and execute:
+### Setup instructions for Mac
+
+Start a terminal, and execute:
+
 ```sh
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 $ brew install gcc-arm-embedded make stlink
 ```
-Tools setup instructions for Linux (Ubuntu). Start a terminal, and execute:
+
+### Setup instructions for Linux (Ubuntu)
+
+Start a terminal, and execute:
+
 ```sh
 $ sudo apt -y install gcc-arm-none-eabi make stlink-tools
 ```
 
-Tools setup instructions for Windows:
+### Setup instructions for Windows
+
 - Download and install [gcc-arm-none-eabi-10.3-2021.10-win32.exe](https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.exe?rev=29bb46cfa0434fbda93abb33c1d480e6&hash=3C58D05EA5D32EF127B9E4D13B3244D26188713C). Enable "Add path to environment variable" during the installation
 - Create `c:\tools` folder
 - Download [stlink-1.7.0-x86_64-w64-mingw32.zip](https://github.com/stlink-org/stlink/releases/download/v1.7.0/stlink-1.7.0-x86_64-w64-mingw32.zip) and unpack `bin/st-flash.exe` into `c:\tools`
@@ -58,7 +68,11 @@ Tools setup instructions for Windows:
   arm-none-eabi-gcc main.c  -W -Wall -Wextra -Werror ...
   </pre>
 
-Also, download two datasheets:
+
+### Required datasheets
+
+Download and open the following datasheets:
+
 - [STM32F429 MCU datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
 - [Nucleo-F429ZI board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
 
