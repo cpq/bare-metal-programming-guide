@@ -461,9 +461,11 @@ The following diagram visualises how `_reset()` initialises .data and .bss:
 
 ![](images/mem2.svg)
 
-The `firmware.bin` file is just a concatenation of the two sections: `.text`
-(code) and `.data` (data).  Those two sections were built according to the
-linker script: addresses in `.text` are in the flash region, and addresses in
+The `firmware.bin` file is just a concatenation of the three sections:
+`.vectors` (IRQ vector table), `.text` (code) and `.data` (data).  Those
+sections were built according to the linker script: `.vectors` lies at the very
+beginning of flash, then `.text` follows immediately after, and `.data` lies
+far above. Addresses in `.text` are in the flash region, and addresses in
 `.data` are in the RAM region.  If some function has address e.g. `0x8000100`,
 then it it located exactly at that address on flash. But if the code accesses
 some variable in the `.data` section by the address e.g. `0x20000200`, then
