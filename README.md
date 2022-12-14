@@ -23,8 +23,15 @@ system clock setup, and web server implementation with device dashboard.
 Each chapter has a complete example project associated with it. Since every
 chapter extends the previous one, the last chapter's example project is the
 most complete, and could be used as a skeleton for the project of your own,
-dear reader. As such, I plan to provide, in addition to the Nucleo-F429ZI code,
-examples for the other boards too (RPI 2040, NXP, TI are in the short list).
+dear reader. Therefore, in addition to the Nucleo-F429ZI code,
+examples for the other boards are provided. So this is the list of final
+ready-to-go baremetal projects:
+
+- [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/)
+- [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/)
+
+There is work in progress for other boards. File an issue to suggest the
+board you work with.
 
 ## Tools setup
 
