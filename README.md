@@ -4,15 +4,9 @@
 [![Build Status]( https://github.com/cpq/bare-metal-programming-guide/workflows/build/badge.svg)](https://github.com/cpq/bare-metal-programming-guide/actions)
 
 This guide is written for developers who wish to start programming
-microcontrollers using GCC compiler and bare metal approach. We are going to
-use a
-[Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
-development board with STM32F429 microcontroller ([buy on
-Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
-
-In this guide, I'll show how to program a microcontroller using just a compiler
-and a datasheet, nothing else. Later I'll explain what are the vendor's CMSIS
-headers, how and why they should be used. 
+microcontrollers using GCC compiler and a datasheet - nothing else! The
+fundamentals explained in this guide, will help you understand better how
+frameworks like Cube, Keil, Arduino - and others, work.
 
 The guide covers the following topics: memory and registers, interrupt vector
 table, startup code, linker script, build automation using `make`, GPIO
@@ -20,18 +14,19 @@ peripheral and LED blinky, SysTick timer, UART peripheral and debug output,
 `printf` redirect to UART (IO retargeting), debugging with Segger Ozone,
 system clock setup, and web server implementation with device dashboard.
 
-Each chapter has a complete example project associated with it. Since every
-chapter extends the previous one, the last chapter's example project is the
-most complete, and could be used as a skeleton for the project of your own,
-dear reader. Therefore, in addition to the Nucleo-F429ZI code,
-examples for the other boards are provided. So this is the list of final
-ready-to-go baremetal projects:
+Throughout the guide, we will be using a
+[Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
+development board  ([buy on
+Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
+All example projects source are provided for that board. The last (web server) project
+is the most complete, and provided for other boards too:
 
 - [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/)
 - [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/)
 
-There is work in progress for other boards. File an issue to suggest the
-board you work with.
+They can be used as a skeleton for the project of your own, dear reader.  There
+is work in progress for other boards. File an issue to suggest the board you
+work with.
 
 ## Tools setup
 
