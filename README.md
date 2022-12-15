@@ -164,6 +164,55 @@ mode. For example, this snippet sets pin A3 to output mode:
   * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bits 6-7 to 1
 ```
 
+Let me explain those bit operations. Our goal is to set bits 6-7, which are
+responsible for the pin 3 of GPIOA peripheral, to a specific value (1, in our
+case). This is done in two steps. First, we must clear the current value of
+bits 6-7, because it may hold some value already. Then we must set bits 6-7
+to the value we want.
+
+So, first, we must set bit range 6-7 to zero. How do we set
+a number of bits to zero? In four steps:
+
+- Get a number that has N contiguous bits set:
+   - 1 for 1 bit:  `0b1`,
+   - 3 for 2 bits: `0b11`,
+   - 7 for 3 bits: `0b111`,
+   - 15 for 4 bits: `0b1111`,
+   - and so on: generally, for N bits, the number is `2^N - 1`
+  So, for 2 bits it is number `3`, or `0b00000000000000000000000000000011`
+- Shift that number left. If we need to set bits X-Y, then shift on X positions
+  left. In our case, shift on a 6 positions left: `(3 << 6)`, or
+  `0b00000000000000000000000011000000`
+- Invert the number: turn zeros to ones, and ones to zeroes:
+  `~(3 << 6)`, or `0xb11111111111111111111111100111111`
+- Now, perform a "logical AND" operation of the register with our number. Bits
+  6-7, AND-ed with 0, will give zero - that's what we want! All other bits,
+  AND-ed with 1, will retain their current value: `REG &= ~(3 << 6)`. Retaining
+  values of all other bits is important: we don't want to change other settings
+  in other bit ranges!
+
+So, in general, if we want to clear bits X-Y (set them to zero), do:
+
+```c
+PERIPHERAL->REGISTER &= ~(NUMBER_WITH_N_BITS << X);
+```
+
+And, finally, we want to set a given bit range to the value we want. We
+shift that value X positions left, and OR with the current value of the whole
+register:
+
+```c
+PERIPHERAL->REGISTER |= VALUE << X;
+```
+
+Now, it should be clear to you, dear reader, the meaning of these two lines,
+which set bits 6-7 of the GPIOA MODER register to the value of 1 (output).
+
+```c
+  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bits 6-7
+  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bits 6-7 to 1
+```
+
 Some registers are not mapped to the MCU peripherals, but they are mapped to
 the ARM CPU configuration and control. For example, there is a "Reset at clock
 control" unit (RCC), described in section 6 of the datasheet. It describes
