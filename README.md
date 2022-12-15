@@ -18,14 +18,15 @@ Throughout the guide, we will be using a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
 development board  ([buy on
 Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
-All example projects source are provided for that board. The last (web server) project
-is the most complete, and provided for other boards too:
+All example projects source are provided for that board. The last (web server)
+project is the most complete, and can be used as a skeleton for the project of
+your own, dear reader.  Therefore, that last example project is provided for
+the other boards, too:
 
 - [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/)
 - [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/)
 
-They can be used as a skeleton for the project of your own, dear reader.  There
-is work in progress for other boards. File an issue to suggest the board you
+Support for other boards is in progress - file an issue to suggest the board you
 work with.
 
 ## Tools setup
