@@ -160,8 +160,8 @@ By setting individual bits, we can selectively set specific pins to a desired
 mode. For example, this snippet sets pin A3 to output mode:
 
 ```c
-  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bits 6-7
-  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bits 6-7 to 1
+  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bit range 6-7
+  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bit range 6-7 to 1
 ```
 
 Let me explain those bit operations. Our goal is to set bits 6-7, which are
@@ -209,8 +209,8 @@ Now, it should be clear to you, dear reader, the meaning of these two lines,
 which set bits 6-7 of the GPIOA MODER register to the value of 1 (output).
 
 ```c
-  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bits 6-7
-  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bits 6-7 to 1
+  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bit range 6-7
+  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bit range 6-7 to 1
 ```
 
 Some registers are not mapped to the MCU peripherals, but they are mapped to
@@ -225,8 +225,8 @@ register by direct accessing certain memory addresses. Let's look at the
 snippet that sets pin A3 to output mode:
 
 ```c
-  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bits 6-7
-  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bits 6-7 to 1
+  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bit range 6-7
+  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bit range 6-7 to 1
 ```
 
 That is pretty cryptic. Without extensive comments, such code would be quite
