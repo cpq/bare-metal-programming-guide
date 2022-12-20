@@ -576,6 +576,11 @@ uses a configuration file named `Makefile` where it reads instructions
 how to execute actions. This automation is great because it also documents the
 process of building firmware, used compilation flags, etc.
 
+There is a great Makefile tutorial at https://makefiletutorial.com - for those
+new to `make`, I suggest to take a look. Below, I list the most essential
+concepts required to understand our simple bare metal Makefile. Those who
+already familiar with `make`, can skip this section.
+
 The `Makefile` format is simple:
 
 ```make
