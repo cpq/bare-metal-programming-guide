@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 [![Build Status]( https://github.com/cpq/bare-metal-programming-guide/workflows/build/badge.svg)](https://github.com/cpq/bare-metal-programming-guide/actions)
 
+[English](README.md) | [中文](README_zh-CN.md)
+
 This guide is written for developers who wish to start programming
 microcontrollers using GCC compiler and a datasheet - nothing else! The
 fundamentals explained in this guide, will help you understand better how
@@ -155,6 +157,8 @@ from A0 to A15, to input mode:
 ```c
   * (volatile uint32_t *) (0x40020000 + 0) = 0;  // Set A0-A15 to input mode
 ```
+
+> Note the `volatile` specifier. Its meaning will be covered later.
 
 By setting individual bits, we can selectively set specific pins to a desired
 mode. For example, this snippet sets pin A3 to output mode:
@@ -576,6 +580,11 @@ uses a configuration file named `Makefile` where it reads instructions
 how to execute actions. This automation is great because it also documents the
 process of building firmware, used compilation flags, etc.
 
+There is a great Makefile tutorial at https://makefiletutorial.com - for those
+new to `make`, I suggest to take a look. Below, I list the most essential
+concepts required to understand our simple bare metal Makefile. Those who
+already familiar with `make`, can skip this section.
+
 The `Makefile` format is simple:
 
 ```make
@@ -856,13 +865,24 @@ every millisecond. We should have interrupt handler function defined - here
 it is, we simply increment a 32-bit millisecond counter:
 
 ```c
-static volatile uint32_t s_ticks;
+static volatile uint32_t s_ticks; // volatile is important!!
 void SysTick_Handler(void) {
   s_ticks++;
 }
 ```
 
-And we should add this handler to the vector table:
+> The `volatile` specifier is required here becase `s_ticks` is modified by the
+> interrupt handler. `volatile` prevents the compiler to optimise/cache
+> `s_ticks` value in a CPU register: instead, generated code always accesses
+> memory.  That is why `volatile` keywords is present in the peripheral struct
+> definitions, too.
+
+Note the `volatile` specifier for `s_ticks`. Any variable that is changed
+by the IRQ handler, must be marked as `volatile`, in order to prevent the
+compiler to optimize the operation by caching its value in a register.
+The `volatile` keyword makes generated code always load it from memory.
+
+Now we should add this handler to the vector table:
 
 ```c
 __attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
