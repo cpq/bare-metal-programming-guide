@@ -1,4 +1,4 @@
-# 裸金属编程指南
+# 裸机编程指南
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 [![Build Status]( https://github.com/cpq/bare-metal-programming-guide/workflows/build/badge.svg)](https://github.com/cpq/bare-metal-programming-guide/actions)
@@ -202,6 +202,7 @@ MCU有好多个GPIO外设（也常被叫做'banks'）：A、B、C...K，在数�
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
 #define PINNO(pin) (pin & 255)
 #define PINBANK(pin) (pin >> 8)
+```
 
 通过这种方法，我们可以指定任意GPIO引脚：
 
@@ -229,3 +230,14 @@ static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
 ```
 
 至此我们已经为GPIO外设创建了一个有用的初始化API，其它外设，比如串口，也可以用相似的方法来实现。这是一种很好的编程实践，可以让代码清晰可读。
+
+## MCU启动和向量表
+
+当STM32F429 MCU启动时，它会从flash存储区最前面的位置读取一个叫作“向量表”的东西。“向量表”的概念所有ARM MCU都通用，它是一个包含32位中断处理程序地址的数组。对于所有的ARM MCU，向量表前16个地址由ARM保留，其余的作为外设中断处理程序入口，由MCU厂商定义。越简单的MCU中断处理程序入口越少，越复杂的MCU中断处理程序入口则会更多。
+
+STM32F429的向量表在数据手册表62中描述，我们可以看到它在16个ARM保留的标准中断处理程序入口外还有91个外设中断处理程序入口。
+
+在向量表中，我们当前对前两个入口点比较感兴趣，它们在MCU启动过程中扮演了关键角色。这两个值是：初始堆栈指针和执行启动函数的地址（固件程序入口点）。
+
+所以现在我们知道，我们必须确保固件中第2个32位值包含启动函数的地址，当MCU启动时，它会从flash读取这个地址，然后跳转到我们的启动函数。
+
