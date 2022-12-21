@@ -861,13 +861,18 @@ every millisecond. We should have interrupt handler function defined - here
 it is, we simply increment a 32-bit millisecond counter:
 
 ```c
-static volatile uint32_t s_ticks;
+static volatile uint32_t s_ticks; // volatile is important!!
 void SysTick_Handler(void) {
   s_ticks++;
 }
 ```
 
-And we should add this handler to the vector table:
+Note the `volatile` specifier for `s_ticks`. Any variable that is changed
+by the IRQ handler, must be marked as `volatile`, in order to prevent the
+compiler to optimize the operation by caching its value in a register.
+The `volatile` keyword makes generated code always load it from memory.
+
+Now we should add this handler to the vector table:
 
 ```c
 __attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
