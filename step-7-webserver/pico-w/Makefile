@@ -7,7 +7,9 @@ SOURCES = main.c startup.c syscalls.c
 
 ifeq ($(OS),Windows_NT)
   RM = cmd /C del /Q /F
+  BIN2UF2 = bin2uf2.exe
 else
+  BIN2UF2 = ./bin2uf2
   RM = rm -f
 endif
 
@@ -19,11 +21,10 @@ firmware.elf: $(SOURCES) mcu.h
 firmware.bin: firmware.elf
 	arm-none-eabi-objcopy -O binary $< $@
 
-firmware.uf2: firmware.bin bin2uf2
-	./bin2uf2 $< $@
-#	bin2uf2 -i $< -o $@
+firmware.uf2: firmware.bin $(BIN2UF2)
+	$(BIN2UF2) $< $@
 
-bin2uf2: tools/bin2uf2.c
+$(BIN2UF2): tools/bin2uf2.c
 	$(CC) -W -Wall $< -o $@
 
 clean:
