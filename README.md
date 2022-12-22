@@ -156,7 +156,8 @@ from A0 to A15, to input mode:
   * (volatile uint32_t *) (0x40020000 + 0) = 0;  // Set A0-A15 to input mode
 ```
 
-By setting individual bits, we can selectively set specific pins to a desired
+Note the volatile specifier. The meaning of it will be covered later.  By
+setting individual bits, we can selectively set specific pins to a desired
 mode. For example, this snippet sets pin A3 to output mode:
 
 ```c
