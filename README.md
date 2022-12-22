@@ -156,8 +156,9 @@ from A0 to A15, to input mode:
   * (volatile uint32_t *) (0x40020000 + 0) = 0;  // Set A0-A15 to input mode
 ```
 
-Note the volatile specifier. The meaning of it will be covered later.  By
-setting individual bits, we can selectively set specific pins to a desired
+> Note the `volatile` specifier. Its meaning will be covered later.
+
+By setting individual bits, we can selectively set specific pins to a desired
 mode. For example, this snippet sets pin A3 to output mode:
 
 ```c
@@ -867,6 +868,12 @@ void SysTick_Handler(void) {
   s_ticks++;
 }
 ```
+
+> The `volatile` specifier is required here becase `s_ticks` is modified by the
+> interrupt handler. `volatile` prevents the compiler to optimise/cache
+> `s_ticks` value in a CPU register: instead, generated code always accesses
+> memory.  That is why you will find `volatile` keywords later in the
+> peripheral, too.
 
 Note the `volatile` specifier for `s_ticks`. Any variable that is changed
 by the IRQ handler, must be marked as `volatile`, in order to prevent the
