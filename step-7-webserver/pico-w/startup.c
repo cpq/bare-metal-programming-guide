@@ -5,25 +5,23 @@
 
 // Startup code
 __attribute__((naked, section(".boot"))) void _reset(void) {
-  // Initialise flash
+  // This code is executed by the boot ROM, and it must access flash, where
+  // this code is located, and "eXecute In Place" (XIP). Flash is external,
+  // accessed over QSPI, Synchronous Serial Interface (SSI).
   XIP_SSI->SSIENR = 0;
   XIP_SSI->BAUDR = 2;
-  XIP_SSI->CTRLR0 =
-      (XIP_SSI_CTRLR0_SPI_FRF_STD << XIP_SSI_CTRLR0_SPI_FRF_Pos) |
-      (XIP_SSI_CTRLR0_TMOD_EEPROM_READ << XIP_SSI_CTRLR0_TMOD_Pos) |
-      ((32 - 1) << XIP_SSI_CTRLR0_DFS_32_Pos);
-  XIP_SSI->CTRLR1 = (0 << XIP_SSI_CTRLR1_NDF_Pos);
-  XIP_SSI->SPI_CTRLR0 =
-      (0x03 << XIP_SSI_SPI_CTRLR0_XIP_CMD_Pos) |
-      ((24 / 4) << XIP_SSI_SPI_CTRLR0_ADDR_L_Pos) |
-      (XIP_SSI_SPI_CTRLR0_INST_L_8B << XIP_SSI_SPI_CTRLR0_INST_L_Pos) |
-      (XIP_SSI_SPI_CTRLR0_TRANS_TYPE_1C1A << XIP_SSI_SPI_CTRLR0_TRANS_TYPE_Pos);
-  XIP_SSI->SSIENR = XIP_SSI_SSIENR_SSI_EN_Msk;
+  XIP_SSI->CTRLR0 = (0U << 21) | (3U << 8) | ((32 - 1) << 16);  // Read
+  XIP_SSI->CTRLR1 = (0 << 0);
+  XIP_SSI->SPI_CTRLR0 = (3U << 24) | (6U << 2) | (2U << 8) | (0 << 0);
+  XIP_SSI->SSIENR = BIT(0);  // Enable
 
   // Initialise memory
   extern long _sbss, _ebss, _edata, _stext, _sflash;
   for (long *src = &_sflash, *dst = &_stext; dst < &_edata;) *dst++ = *src++;
   for (long *src = &_sbss; src < &_ebss;) *src++ = 0;
+
+  extern void (*vectors[])(void);
+  SCB->VTOR = (uint32_t) vectors;  // Point SCB to where our IRQ table is
 
   extern void main(void);
   main();             // Call main()

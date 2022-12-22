@@ -7,8 +7,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "rp2040.h"
-
 #define BIT(x) (1UL << (x))
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
 #define PINNO(pin) ((pin) &255)
@@ -18,12 +16,79 @@ static inline void spin(volatile uint32_t count) {
   while (count--) (void) 0;
 }
 
-struct iobank {
+struct scb {
+  volatile uint32_t CPUID, ICSR, VTOR, AIRCR, SCR, CCR;  // Incomplete
+};
+#define SCB ((struct scb *) 0xe000ed00)
+
+struct systick {
+  volatile uint32_t CTRL, LOAD, VAL, CALIB;
+};
+#define SYSTICK ((struct systick *) 0xe000e010)
+
+struct xip_ssi {
+  volatile uint32_t CTRLR0, CTRLR1, SSIENR, MWCR, SER, BAUDR, TXFTLR, RXFTLR,
+      TXFLR, RXFLR, SR, IMR, ISR, RISR, TXOICR, RXOICR, RXUICR, MSTICR, ICR,
+      DMACR, DMATDLR, DMARDLR, IDR, SSI_VERSION_ID, DR0, RESERVED[35],
+      RX_SAMPLE_DLY, SPI_CTRLR0, TXD_DRIVE_EDGE;
+};
+#define XIP_SSI ((struct xip_ssi *) 0x18000000UL)
+
+struct xosc {
+  volatile uint32_t CTRL, STATUS, DORMANT, STARTUP, RESERVED[3], COUNT;
+};
+#define XOSC ((struct xosc *) 0x40024000UL)
+#define XOSC_SET ((struct xosc *) 0x40026000UL)
+
+struct pll {
+  volatile uint32_t CS, PWR, FBDIV_INT, PRIM;
+};
+#define PLL_SYS ((struct pll *) 0x40028000UL)
+#define PLL_USB ((struct pll *) 0x4002c000UL)
+#define PLL_SYS_CLR ((struct pll *) 0x4002b000UL)
+#define PLL_USB_CLR ((struct pll *) 0x4002f000UL)
+
+struct clocks {
+  struct {
+    volatile uint32_t CTRL, DIV, SELECTED;
+  } GPOUT0, GPOUT1, GPOUT2, GPOUT3, REF, SYS, PERI, USB, ADC, RTC;
+  volatile uint32_t SYS_RESUS_CTRL, SYS_RESUS_STATUS, FC0_REF_KHZ, FC0_MIN_KHZ,
+      FC0_MAX_KHZ, FC0_DELAY, FC0_INTERVAL, FC0_SRC, FC0_STATUS, FC0_RESULT,
+      WAKE_EN0, WAKE_EN1, SLEEP_EN0, SLEEP_EN1, ENABLED0, ENABLED1, INTR, INTE,
+      INTF, INTS;
+};
+#define CLOCKS ((struct clocks *) 0x40008000UL)
+#define CLOCKS_SET ((struct clocks *) 0x4000a000UL)
+
+struct watchdog {
+  volatile uint32_t CTRL, LOAD, REASON, SCRATCH[8], TICK;
+};
+#define WATCHDOG ((struct watchdog *) 0x40058000UL)
+
+struct sio {
+  volatile uint32_t CPUID, GPIO_IN, GPIO_HI_IN, RESERVED, GPIO_OUT,
+      GPIO_OUT_SET, GPIO_OUT_CLR, GPIO_OUT_XOR, GPIO_OE, GPIO_OE_SET,
+      GPIO_OE_CLR, GPIO_OE_XOR, GPIO_HI_OUT, GPIO_HI_OUT_SET, GPIO_HI_OUT_CLR,
+      GPIO_HI_OUT_XOR, GPIO_HI_OE, GPIO_HI_OE_SET, GPIO_HI_OE_CLR,
+      GPIO_HI_OE_XOR, FIFO_ST, FIFO_WR, FIFO_RD, SPINLOCK_ST, DIV_UDIVIDEND,
+      DIV_UDIVISOR, DIV_SDIVIDEND, DIV_SDIVISOR, DIV_QUOTIENT, DIV_REMAINDER;
+};
+#define SIO ((struct sio *) 0xd0000000UL)
+
+struct resets {
+  volatile uint32_t RESET, WDSEL, DONE;
+};
+#define RESETS ((struct resets *) 0x4000c000UL)
+#define RESETS_XOR ((struct resets *) 0x4000d000UL)
+#define RESETS_SET ((struct resets *) 0x4000e000UL)
+#define RESETS_CLR ((struct resets *) (0x4000f000UL))
+
+struct io_bank {
   struct {
     volatile uint32_t STATUS, CTRL;
   } gpio[30];
 };
-#define IOBANK0 ((struct iobank *) IO_BANK0_BASE)
+#define IO_BANK0 ((struct io_bank *) 0X40014000UL)
 
 enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG };
 static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
@@ -33,7 +98,7 @@ static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
   } else if (mode == GPIO_MODE_OUTPUT) {
     SIO->GPIO_OE_SET = BIT(no);
   }
-  IOBANK0->gpio[no].CTRL = 5;
+  IO_BANK0->gpio[no].CTRL = 5;
 }
 
 static inline void gpio_write(uint16_t pin, bool val) {
@@ -44,84 +109,59 @@ static inline void gpio_write(uint16_t pin, bool val) {
   }
 }
 
-// This snippet of code is (c) Alex Taradov,
-// under the BSD-3-Clause
-#define F_REF 12000000
-#define F_TICK 1000
+// t: expiration time, prd: period, now: current time. Return true if expired
+static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
+  if (now + prd < *t) *t = 0;                    // Time wrapped? Reset timer
+  if (*t == 0) *t = now + prd;                   // Firt poll? Set expiration
+  if (*t > now) return false;                    // Not expired yet, return
+  *t = (now - *t) > prd ? now + prd : *t + prd;  // Next expiration time
+  return true;                                   // Expired, return true
+}
+
+// FREQUENCY = ((FREF / REFDIV) × FBDIV / (POSTDIV1 × POSTDIV2))
+//          REF    FBDIV   VCO      PDIV1   PDIV2   RESULT
+// SYS PLL: 12MHz * 133 = 1596MHz /   6   /   2  =  133MHz
+// USB PLL: 12MHz * 100 = 1200MHz /   5   /   5  =  48MHz
+enum { F_REF = 12000000, F_REFDIV = 1 };
+enum { F_SYS_FBDIV = 133, F_SYS_POSTDIV1 = 6, F_SYS_POSTDIV2 = 2 };
+enum { F_USB_FBDIV = 100, F_USB_POSTDIV1 = 5, F_USB_POSTDIV2 = 5 };
+#define F_SYS \
+  ((F_REF / F_REFDIV) * F_SYS_FBDIV / (F_SYS_POSTDIV1 * F_SYS_POSTDIV2))
+#define F_USB \
+  ((F_REF / F_REFDIV) * F_USB_FBDIV / (F_USB_POSTDIV1 * F_USB_POSTDIV2))
+
 static inline void clock_init(void) {
-  // Enable XOSC
-  XOSC->CTRL = (XOSC_CTRL_FREQ_RANGE_1_15MHZ << XOSC_CTRL_FREQ_RANGE_Pos);
-  XOSC->STARTUP = 47;  // ~1 ms @ 12 MHz
-  XOSC_SET->CTRL = (XOSC_CTRL_ENABLE_ENABLE << XOSC_CTRL_ENABLE_Pos);
-  while (0 == (XOSC->STATUS & XOSC_STATUS_STABLE_Msk))
-    ;
+  XOSC->CTRL = 2720;            // XOSC frequency range 1-15 MHz
+  XOSC->STARTUP = 47;           // About 1 ms, see 2.16.3
+  XOSC_SET->CTRL = 4011 << 12;  // Enable XOSC
+  while ((XOSC->STATUS & BIT(31)) == 0) (void) 0;  // Wait until enabled
 
-  // Setup SYS PLL for 12 MHz * 40 / 4 / 1 = 120 MHz
-  RESETS_CLR->RESET = RESETS_RESET_pll_sys_Msk;
-  while (0 == RESETS->RESET_DONE_b.pll_sys)
-    ;
+  RESETS_CLR->RESET = BIT(12);                     // Reset SYS PLL
+  while ((RESETS->DONE & BIT(12)) == 0) (void) 0;  // Wait
+  PLL_SYS->FBDIV_INT = F_SYS_FBDIV;
+  PLL_SYS->PRIM = (F_SYS_POSTDIV1 << 16) | (F_SYS_POSTDIV2 << 12);
+  PLL_SYS_CLR->PWR = BIT(0) | BIT(3) | BIT(5);    // Power up
+  while ((PLL_SYS->CS & BIT(31)) == 0) (void) 0;  // Wait
 
-  PLL_SYS->CS = (1 << PLL_SYS_CS_REFDIV_Pos);
-  PLL_SYS->FBDIV_INT = 40;
-  PLL_SYS->PRIM =
-      (4 << PLL_SYS_PRIM_POSTDIV1_Pos) | (1 << PLL_SYS_PRIM_POSTDIV2_Pos);
+  RESETS_CLR->RESET = BIT(13);                     // Reset USB PLL
+  while ((RESETS->DONE & BIT(13)) == 0) (void) 0;  // Wait
+  PLL_USB->FBDIV_INT = F_USB_FBDIV;
+  PLL_USB->PRIM = (F_USB_POSTDIV1 << 16) | (F_USB_POSTDIV2 << 12);
+  PLL_USB_CLR->PWR = BIT(0) | BIT(3) | BIT(5);    // Power up
+  while ((PLL_USB->CS & BIT(31)) == 0) (void) 0;  // Wait
 
-  PLL_SYS_CLR->PWR = PLL_SYS_PWR_VCOPD_Msk | PLL_SYS_PWR_PD_Msk;
-  while (0 == PLL_SYS->CS_b.LOCK)
-    ;
+  CLOCKS->REF.CTRL = (2 << 0);             // REF source is PLL
+  CLOCKS->SYS.CTRL = (0 << 5) | (1 << 0);  // SYS source is PLL
+  CLOCKS->PERI.CTRL = BIT(11) | (0 << 5);  // PERI clock enable, source SYS
+  CLOCKS->USB.CTRL = BIT(11) | (0 << 5);   // USB clock enable, source SYS
+  CLOCKS->ADC.CTRL = BIT(11) | (0 << 5);   // ADC clock enable, source SYS
+  CLOCKS->RTC.DIV = (48 << 8);             // RTC divider: 12 / 48 = 0.25Mhz
+  CLOCKS->RTC.CTRL = BIT(11) | (3 << 5);   // RTC clock enable, source XOSC
 
-  PLL_SYS_CLR->PWR = PLL_SYS_PWR_POSTDIVPD_Msk;
+  RESETS_CLR->RESET = BIT(5) | BIT(8);  // Enable GPIO: BANK0, PADS_BANK0
+  while ((RESETS->DONE & (BIT(5) | BIT(8))) == 0) (void) 0;  // Wait
 
-  // Setup USB PLL for 12 MHz * 36 / 3 / 3 = 48 MHz
-  RESETS_CLR->RESET = RESETS_RESET_pll_usb_Msk;
-  while (0 == RESETS->RESET_DONE_b.pll_usb)
-    ;
-
-  PLL_USB->CS = (1 << PLL_SYS_CS_REFDIV_Pos);
-  PLL_USB->FBDIV_INT = 36;
-  PLL_USB->PRIM =
-      (3 << PLL_SYS_PRIM_POSTDIV1_Pos) | (3 << PLL_SYS_PRIM_POSTDIV2_Pos);
-
-  PLL_USB_CLR->PWR = PLL_SYS_PWR_VCOPD_Msk | PLL_SYS_PWR_PD_Msk;
-  while (0 == PLL_USB->CS_b.LOCK)
-    ;
-
-  PLL_USB_CLR->PWR = PLL_SYS_PWR_POSTDIVPD_Msk;
-
-  // Switch clocks to their final socurces
-  CLOCKS->CLK_REF_CTRL =
-      (CLOCKS_CLK_REF_CTRL_SRC_xosc_clksrc << CLOCKS_CLK_REF_CTRL_SRC_Pos);
-
-  CLOCKS->CLK_SYS_CTRL = (CLOCKS_CLK_SYS_CTRL_AUXSRC_clksrc_pll_sys
-                          << CLOCKS_CLK_SYS_CTRL_AUXSRC_Pos);
-  CLOCKS_SET->CLK_SYS_CTRL = (CLOCKS_CLK_SYS_CTRL_SRC_clksrc_clk_sys_aux
-                              << CLOCKS_CLK_SYS_CTRL_SRC_Pos);
-
-  CLOCKS->CLK_PERI_CTRL =
-      CLOCKS_CLK_PERI_CTRL_ENABLE_Msk |
-      (CLOCKS_CLK_PERI_CTRL_AUXSRC_clk_sys << CLOCKS_CLK_PERI_CTRL_AUXSRC_Pos);
-
-  CLOCKS->CLK_USB_CTRL = CLOCKS_CLK_USB_CTRL_ENABLE_Msk |
-                         (CLOCKS_CLK_USB_CTRL_AUXSRC_clksrc_pll_usb
-                          << CLOCKS_CLK_USB_CTRL_AUXSRC_Pos);
-
-  CLOCKS->CLK_ADC_CTRL = CLOCKS_CLK_ADC_CTRL_ENABLE_Msk |
-                         (CLOCKS_CLK_ADC_CTRL_AUXSRC_clksrc_pll_usb
-                          << CLOCKS_CLK_ADC_CTRL_AUXSRC_Pos);
-
-  CLOCKS->CLK_RTC_DIV =
-      (256 << CLOCKS_CLK_RTC_DIV_INT_Pos);  // 12MHz / 256 = 46875 Hz
-  CLOCKS->CLK_RTC_CTRL =
-      CLOCKS_CLK_RTC_CTRL_ENABLE_Msk | (CLOCKS_CLK_RTC_CTRL_AUXSRC_xosc_clksrc
-                                        << CLOCKS_CLK_ADC_CTRL_AUXSRC_Pos);
-
-  // Configure 1 ms tick for watchdog and timer
-  WATCHDOG->TICK =
-      ((F_REF / F_TICK) << WATCHDOG_TICK_CYCLES_Pos) | WATCHDOG_TICK_ENABLE_Msk;
-
-  // Enable GPIOs
-  RESETS_CLR->RESET = RESETS_RESET_io_bank0_Msk | RESETS_RESET_pads_bank0_Msk;
-  while (0 == RESETS->RESET_DONE_b.io_bank0 ||
-         0 == RESETS->RESET_DONE_b.pads_bank0)
-    ;
+  SYSTICK->LOAD = F_SYS / 1000 - 1;
+  SYSTICK->VAL = 0;
+  SYSTICK->CTRL = BIT(0) | BIT(1) | BIT(2);  // Enable SysTick
 }
