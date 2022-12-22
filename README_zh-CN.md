@@ -190,7 +190,7 @@ static inline void gpio_set_mode(struct gpio *gpio, uint8_t pin, uint8_t mode) {
 gpio_set_mode(GPIOA, 3 /* pin */, GPIO_MODE_OUTPUT);  // Set A3 to output
 ```
 
-MCU有好多个GPIO外设（也常被叫做'banks'）：A、B、C...K，在数据手册2.3节可以看到，它们映射的存储空间相隔1KB，GPIOA起始地址为0x40020000，GPIOB起始地址为0x40020400，以此类推：
+MCU有好多个GPIO外设（也常被叫作'banks'）：A、B、C...K，在数据手册2.3节可以看到，它们映射的存储空间相隔1KB，GPIOA起始地址为0x40020000，GPIOB起始地址为0x40020400，以此类推：
 
 ```c
 #define GPIO(bank) ((struct gpio *) (0x40020000 + 0x400 * (bank)))
@@ -455,3 +455,111 @@ $ st-flash --reset write firmware.bin 0x8000000
 ```
 
 这样就把固件烧写到板子上了。
+
+## Makefile：构建自动化
+
+我们可以用 `make` 命令行工具替代手动敲入“编译”、“链接”、“烧写”这些命令，自动完成整个过程。`make` 工具使用一个名为 `Makefile` 的配置文件，从中读取执行动作的指令。这种自动化方式非常棒，因为这样可以把构建固件的过程、使用了哪些编译标记等也文档化。
+
+在 https://makefiletutorial.com 上有一个非常好的给初学者的Makefile教程，强烈建议看一下。下面我将列出一些非常必要的概念以理解我们所使用的Makefile。对于已经很熟悉 `make` 的朋友，可以跳过这一部分。
+
+其实 `Makefile` 的格式并不复杂：
+
+```make
+action1:
+	command ...     # Comments can go after hash symbol
+	command ....    # IMPORTANT: command must be preceded with the TAB character
+
+action2:
+	command ...     # Don't forget about TAB. Spaces won't work!
+```
+
+现在我们可以跟动作名（也被称作目标）一起调用 `make` 来执行相应的动作：
+
+```sh
+$ make action1
+```
+
+当然，也可以在命令中定义和使用变量，动作也可以是需要创建的文件名：
+
+```make
+firmware.elf:
+	COMPILATION COMMAND .....
+```
+
+任何动作都可以有一个依赖列表。例如，`firmware.elf` 依赖源文件 `main.c`，当 `main.c` 改变时，`make build` 就会重新构建 `firmware.elf`:
+
+```
+build: firmware.elf
+
+firmware.elf: main.c
+	COMPILATION COMMAND
+```
+
+我们已经准备好为固件编写 `Makefile`，定义一个 `build` 动作/目标：
+
+```make
+CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
+            -Wformat-truncation -fno-common -Wconversion \
+            -g3 -Os -ffunction-sections -fdata-sections -I. \
+            -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS)
+LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
+SOURCES = main.c 
+
+build: firmware.elf
+
+firmware.elf: $(SOURCES)
+	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -o $@
+```
+
+在这里我们定义了一些编译标记。`?=` 表示这是默认值，我们可以在命令行中覆盖它们，像这样：
+
+```sh
+$ make build CFLAGS="-O2 ...."
+```
+
+上面的 `Makefile` 文件中定义了 `CFLAGS`、`LDFLAGS`、`SOURCES` 变量，然后我们告诉 `make` ，当要 `build` 时创建 `firmware.elf` 文件，它依赖 `main.c` 文件，使用 `arm-none-eabi-gcc` 编译器和给定的编译标记生成它。`$@` 特殊变量会被展开成动作/目标名，在这个例子中是 `firmware.elf`。
+
+现在调用 `make` 试一下：
+
+``` sh
+$ make build
+arm-none-eabi-gcc main.c  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -fno-common -Wconversion -g3 -Os -ffunction-sections -fdata-sections -I. -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16  -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=firmware.elf.map -o firmware.elf
+```
+
+如果我们再次运行：
+
+```sh
+$ make build
+make: Nothing to be done for `build'.
+```
+
+`make` 会检查 `firmware.elf` 和依赖项 `main.c` 的修改时间，如果是它们是最新的，则什么都不做。如果我们修改下 `main.c`，则会重新构建：
+
+```sh
+$ touch main.c # Simulate changes in main.c
+$ make build
+```
+
+现在，还剩下“烧写”这个动作/目标：
+
+```make
+firmware.bin: firmware.elf
+	arm-none-eabi-objcopy -O binary $< $@
+
+flash: firmware.bin
+	st-flash --reset write $(TARGET).bin 0x8000000
+```
+
+OK，现在从终端中执行命令 `make flash` 就会创建 `firmware.bin` 文件，然后通过 `st-link` 烧入板子。当 `main.c` 改变时，这个命令也会重新构建，因为 `firmware.bin` 依赖 `firmware.elf`，`firmware.elf` 又依赖 `main.c`。所以我们的开发循环就是这样的两步：
+
+```sh
+# Develop code in main.c
+$ make flash
+```
+
+还有一个良好实践就是在 `Makefile` 中添加 `clean` 动作，以删除构建生成的文件：
+
+```
+clean:
+	rm -rf firmware.*
+```
