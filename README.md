@@ -872,8 +872,8 @@ void SysTick_Handler(void) {
 > The `volatile` specifier is required here becase `s_ticks` is modified by the
 > interrupt handler. `volatile` prevents the compiler to optimise/cache
 > `s_ticks` value in a CPU register: instead, generated code always accesses
-> memory.  That is why you will find `volatile` keywords later in the
-> peripheral, too.
+> memory.  That is why `volatile` keywords is present in the peripheral struct
+> definitions, too.
 
 Note the `volatile` specifier for `s_ticks`. Any variable that is changed
 by the IRQ handler, must be marked as `volatile`, in order to prevent the
