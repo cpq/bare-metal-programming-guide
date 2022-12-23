@@ -92,7 +92,7 @@ $ sudo apt -y install gcc-arm-none-eabi make stlink-tools
 - Verify that the build process works:
   ```sh
   cd step-4-printf
-  make firmare.bin
+  make firmware.bin
   ```
 
 ## Introduction
