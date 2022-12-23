@@ -564,7 +564,7 @@ clean:
 	rm -rf firmware.*
 ```
 
-完整项目的源代码可以在 [step-0-minimal](step-0-minimal) 文件夹找到。
+完整工程代码可以在 [step-0-minimal](step-0-minimal) 文件夹找到。
 
 ## 闪烁LED
 
@@ -656,7 +656,7 @@ static inline void spin(volatile uint32_t count) {
 
 执行 `make flash` 来看蓝色LED闪烁吧！
 
-完整项目源码可以在 [step-1-blinky](step-1-blinky) 文件夹找到。
+完整工程源码可以在 [step-1-blinky](step-1-blinky) 文件夹找到。
 
 ## 用SysTick中断实现闪烁
 
@@ -700,7 +700,7 @@ void SysTick_Handler(void) {
 }
 ```
 
-注意要用 `s_ticks` 的 `volatile` 说明符，在中断处理函数中的任何变量都应该标记为 `volatile`，这样可以避免编译器通过在寄存器中缓存变量值的优化操作。`volatile` 关键字可以是生成的代码总是从存储空间载入变量值。
+注意 `s_ticks` 要用 `volatile` 说明符，在中断处理函数中的任何变量都应该标记为 `volatile`，这样可以避免编译器通过在寄存器中缓存变量值的优化操作。`volatile` 关键字可以是生成的代码总是从存储空间载入变量值。
 
 现在把SysTick中断处理函数加到向量表中：
 
@@ -738,4 +738,574 @@ bool timer_expired(uint32_t *t, uint64_t prd, uint64_t now) {
 
 通过使用 `SysTick` 和 `timer_expired()` 工具函数，使主循环成为非阻塞的。这意味着在主循环中我们还可以执行许多动作，例如，创建不同周期的定时器，它们都能及时被触发。
 
-完整项目源码可以在 [step-2-systick](step-2-systick) 文件夹找到。
+完整工程源码可以在 [step-2-systick](step-2-systick) 文件夹找到。
+
+## 添加串口调试输出
+
+现在是时候给固件添加一些人类可读的诊断信息了。MCU外设中有一个串行通信接口，通常被称作串口。看一下芯片数据手册2.3节，STM32F429有多个串口控制器，适当配置后就可以通过特定引脚与外部交换数据。最小化的串口配置需要2个引脚，一个接收，另一个发送。
+
+在Nucleo开发板数据手册6.9节，可以看到MCU的串口3的发送引脚是PD8，接收引脚是PD9，并且已经被连到了板载的ST-LINK调试器上，这意味着我们配置好串口3就可以通过PD8发送数据，然后通过ST-LINK在工作站上看到MCU发送的数据。
+
+现在给串口创建API，就像之前GPIO那样。芯片数据手册30.6节概括了串口寄存器，可以这样定义串口结构体：
+
+```c
+struct uart {
+  volatile uint32_t SR, DR, BRR, CR1, CR2, CR3, GTPR;
+};
+#define UART1 ((struct uart *) 0x40011000)
+#define UART2 ((struct uart *) 0x40004400)
+#define UART3 ((struct uart *) 0x40004800)
+```
+
+要配置串口，需要这些步骤：
+
+- 使能串口时钟，通过设置 `RCC->APB2ENR` 寄存器的相应位
+- 设置接收和发送引脚为替代功能，替代功能列表在芯片数据手册表12
+- 设置波特率（通信速率），通过 `BRR` 寄存器
+- 使能串口外设，通过 `CR1` 寄存器接收和发送数据
+
+我们已经知道如何把GPIO引脚设为特定的模式，如果1个引脚被用作替代功能，我们也必须指定替代功能编号，可以通过GPIO外设的替代功能寄存器 `AFR` 进行控制。仔细阅读芯片数据手册中对 `AFR` 寄存器的描述，可以发现替代功能有4位编号，所以要控制全部16个引脚需要2个32位寄存器。设置引脚替代功能的API可以这样实现：
+
+```c
+static inline void gpio_set_af(uint16_t pin, uint8_t af_num) {
+  struct gpio *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  gpio->AFR[n >> 3] &= ~(15UL << ((n & 7) * 4));
+  gpio->AFR[n >> 3] |= ((uint32_t) af_num) << ((n & 7) * 4);
+}
+```
+
+为了从GPIO API中完全隐藏寄存器特定的代码，我们把GPIO时钟初始化的代码移动到 `gpio_set_mode()` 函数中：
+
+```c
+static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
+  struct gpio *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  RCC->AHB1ENR |= BIT(PINBANK(pin));       // Enable GPIO clock
+  ...
+```
+
+现在可以创建一个串口初始化的API函数：
+
+```c
+#define FREQ 16000000  // CPU frequency, 16 Mhz
+static inline void uart_init(struct uart *uart, unsigned long baud) {
+  // https://www.st.com/resource/en/datasheet/stm32f429zi.pdf
+  uint8_t af = 0;           // Alternate function
+  uint16_t rx = 0, tx = 0;  // pins
+
+  if (uart == UART1) RCC->APB2ENR |= BIT(4);
+  if (uart == UART2) RCC->APB1ENR |= BIT(17);
+  if (uart == UART3) RCC->APB1ENR |= BIT(18);
+
+  if (uart == UART1) af = 4, tx = PIN('A', 9), rx = PIN('A', 10);
+  if (uart == UART2) af = 4, tx = PIN('A', 2), rx = PIN('A', 3);
+  if (uart == UART3) af = 7, tx = PIN('D', 8), rx = PIN('D', 9);
+
+  gpio_set_mode(tx, GPIO_MODE_AF);
+  gpio_set_af(tx, af);
+  gpio_set_mode(rx, GPIO_MODE_AF);
+  gpio_set_af(rx, af);
+  uart->CR1 = 0;                           // Disable this UART
+  uart->BRR = FREQ / baud;                 // FREQ is a CPU frequency 
+  uart->CR1 |= BIT(13) | BIT(2) | BIT(3);  // Set UE, RE, TE
+}
+```
+
+最后，再来实现串口读写函数。芯片数据手册30.6.1节告诉我们状态寄存器 `SR` 表示数据是否准备好：
+
+```c
+static inline int uart_read_ready(struct uart *uart) {
+  return uart->SR & BIT(5);  // If RXNE bit is set, data is ready
+}
+```
+
+数据可以从数据寄存器 `DR` 中获取：
+
+```c
+static inline uint8_t uart_read_byte(struct uart *uart) {
+  return (uint8_t) (uart->DR & 255);
+}
+```
+
+发送单个字节的数据也是通过 `DR` 寄存器完成。设置好要发送的数据后，我们需要等待发送完成，通过检查 `SR` 寄存器第7位来实现：
+
+```c
+static inline void uart_write_byte(struct uart *uart, uint8_t byte) {
+  uart->DR = byte;
+  while ((uart->SR & BIT(7)) == 0) spin(1);
+}
+```
+
+写数据到缓冲区：
+
+```c
+static inline void uart_write_buf(struct uart *uart, char *buf, size_t len) {
+  while (len-- > 0) uart_write_byte(uart, *(uint8_t *) buf++);
+}
+```
+
+在 `main()` 函数中初始化串口：
+
+```c
+  ...
+  uart_init(UART3, 115200);              // Initialise UART
+```
+
+然后每次闪烁LED时输出一条消息 "hi\r\n"：
+
+```c
+    if (timer_expired(&timer, period, s_ticks)) {
+      ...
+      uart_write_buf(UART3, "hi\r\n", 4);  // Write message
+    }
+```
+
+重新编译，然后烧写到开发板上，用一个终端程序连接ST-LINK的端口。在Mac上，我用 `cu`，在Linux上也可以用它。在Windows上使用 `putty` 工具是一个好主意。打开终端，执行命令后可以看到：
+
+```sh
+$ cu -l /dev/cu.YOUR_SERIAL_PORT -s 115200
+hi
+hi
+```
+
+完整工程代码可以在 [step-3-uart](step-3-uart) 文件夹找到。
+
+## 重定向`printf()`到串口
+
+在这一节，我们将 `uart_write_buf()` 调用替换为 `printf()`，它使我们能够进行格式化输出，这样可以更好的输出诊断信息，实现了“打印样式的调试”。
+
+我们使用的GNU ARM工具链除了包含GCC编译器和一些工具外，还包含了一个被称为[newlib](https://sourceware.org/newlib)的C库，由红帽为嵌入式系统开发。
+
+如果我们的固件调用了一个标准C库函数，比如 `strcmp()`，newlib就会被GCC链接器加到我们的固件中。
+
+newlib实现了一些标准C函数，特别是文件输入输出操作，并且被实现的很随潮流：这些函数最终调用一组被称为 "syscalls" 的底层输入输出函数。
+
+例如：
+
+- `fopen()` 最终调用 `_open()`
+- `fread()` 最终调用 `_read()`
+- `fwrite()`, `fprintf()`, `printf()` 最终调用 `_write()`
+- `malloc` 最终调用 `_sbrk()`，等等
+
+因此，通过修改 `_write()` 系统调用，我们可以重定向 `printf()` 到任何我们希望的地方，这个机制被称为 "IO retargeting"。
+
+注意，STM32 Cube也使用ARM GCC工具链，这就是为什么Cube工程都包含 `syscalls.c` 文件。其它工具链，比如TI的CCS、Keil的CC，可能使用不同的C库，重定向机制会有一点区别。我们用newlib，所以修改 `_write()` 可以打印到串口3。
+
+在那之前，我们先重新组织下源码结构：
+
+- 把所有API定义放到 `mcu.h` 文件中
+- 把启动代码放到 `startup.c` 文件中
+- 为newlib的系统调用创建一个空文件 `syscalls.c`
+- 修改Makefile，把 `syscalls.c` 和 `startup.c` 加到build中
+
+将所有 API 定义移动到 `mcu.h` 后，`main.c` 文件变得相当紧凑。注意我们还没提到底层寄存器，高级API函数很容易理解：
+
+```c
+#include "mcu.h"
+
+static volatile uint32_t s_ticks;
+void SysTick_Handler(void) {
+  s_ticks++;
+}
+
+int main(void) {
+  uint16_t led = PIN('B', 7);            // Blue LED
+  systick_init(16000000 / 1000);         // Tick every 1 ms
+  gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
+  uart_init(UART3, 115200);              // Initialise UART
+  uint32_t timer = 0, period = 250;      // Declare timer and 250ms period
+  for (;;) {
+    if (timer_expired(&timer, period, s_ticks)) {
+      static bool on;                      // This block is executed
+      gpio_write(led, on);                 // Every `period` milliseconds
+      on = !on;                            // Toggle LED state
+      uart_write_buf(UART3, "hi\r\n", 4);  // Write message
+    }
+    // Here we could perform other activities!
+  }
+  return 0;
+}
+```
+
+现在我们把 `printf()` 重定向到串口3，在空的 `syscalls.c` 文件中拷入一下内容：
+
+```c
+#include "mcu.h"
+
+int _write(int fd, char *ptr, int len) {
+  (void) fd, (void) ptr, (void) len;
+  if (fd == 1) uart_write_buf(UART3, ptr, (size_t) len);
+  return -1;
+}
+```
+
+这段代码：如果我们写入的文件描述符是 1（这是一个标准输出描述符），则将缓冲区写入串口3，否则忽视。这就是重定向的本质！
+
+重新编译，会得到一些链接器错误：
+
+```sh
+../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-sbrkr.o): in function `_sbrk_r':
+sbrkr.c:(.text._sbrk_r+0xc): undefined reference to `_sbrk'
+closer.c:(.text._close_r+0xc): undefined reference to `_close'
+lseekr.c:(.text._lseek_r+0x10): undefined reference to `_lseek'
+readr.c:(.text._read_r+0x10): undefined reference to `_read'
+fstatr.c:(.text._fstat_r+0xe): undefined reference to `_fstat'
+isattyr.c:(.text._isatty_r+0xc): undefined reference to `_isatty'
+```
+
+这是因为我们使用了newlib的标准输入输出函数，那么就需要把newlib中其它的系统调用也实现。加入一些简单的什么都不做的桩函数：
+
+```c
+int _fstat(int fd, struct stat *st) {
+  (void) fd, (void) st;
+  return -1;
+}
+
+void *_sbrk(int incr) {
+  (void) incr;
+  return NULL;
+}
+
+int _close(int fd) {
+  (void) fd;
+  return -1;
+}
+
+int _isatty(int fd) {
+  (void) fd;
+  return 1;
+}
+
+int _read(int fd, char *ptr, int len) {
+  (void) fd, (void) ptr, (void) len;
+  return -1;
+}
+
+int _lseek(int fd, int ptr, int dir) {
+  (void) fd, (void) ptr, (void) dir;
+  return 0;
+}
+```
+
+再重新编译，应该就不会报错了。
+
+最后一步，将 `main()` 中 `uart_write_buf()` 替换为 `printf()`，并打印一些有用的信息，比如LED状态和当前s_ticks的值：
+
+```c
+printf("LED: %d, tick: %lu\r\n", on, s_ticks);  // Write message
+```
+
+再重新编译，串口输出应该像这样：
+
+```sh
+LED: 1, tick: 250
+LED: 0, tick: 500
+LED: 1, tick: 750
+LED: 0, tick: 1000
+```
+
+可喜可贺！我们学习了IO重定向是如何工作的，并且可以用打印输出来调试固件了。
+
+完整工程源码可以在 [step-4-printf](step-4-printf) 文件夹找到。
+
+## 用Segger Ozone进行调试
+
+如果我们的固件卡在某个地方并且 printf 调试不起作用怎么办？甚至连启动代码都不起作用怎么办？我们需要一个调试器。那有很多选项，但我建议使用Segger的Ozone调试器。为什么？因为它是独立的，不依赖任何IDE。我们可以把 `firmware.elf` 直接提供给Ozone，它会自动拾取源文件。
+
+可以从Segger网站[下载 Ozone](https://www.segger.com/products/development-tools/ozone-j-link-debugger/)。在用它调试我们的Nucleo开发板之前，我们需要把板载的ST-LINK固件改成jlink的固件，这样Ozone才能识别。遵循Segger网站的[说明](https://www.segger.com/products/debug-probes/j-link/models/other-j-links/st-link-on-board/)完成固件修改。
+
+现在，运行Ozone，在向导中选择设备：
+
+<img src="images/ozone1.png" width="50%" />
+
+选择我们要用的调试器硬件：
+
+<img src="images/ozone2.png" width="50%" />
+
+然后选择 `firmware.elf` 固件文件：
+
+<img src="images/ozone3.png" width="50%" />
+
+接下来的步骤保持默认，点击“完成”，调试器已经载入（可以看到`mcu.h`源码被拾取）：
+
+<img src="images/ozone3.png" width="50%" />
+
+点击左上角的绿色按钮，下载、运行固件，然后会停在这里：
+
+![](images/ozone5.png)
+
+现在我们可以单步运行代码，设置断点，以及其它调试工作。有一个地方可以注意，那就是Ozone方便的外设视图：
+
+![](images/ozone6.png)
+
+我们可以用它直接检查或设置外设的状态，例如，点亮板子上的绿色LED（PB0）：
+
+1. 先使能GPIOB时钟，找到  Peripherals -> RCC -> AHB1ENR，然后把 GPIOBEN 位设为1：
+  <img src="images/ozone7.png" width="75%" />
+
+2. 找到 Peripherals -> GPIO -> GPIOB -> MODER，设置 MODER0 为1（输出）：
+  <img src="images/ozone8.png" width="75%" />
+
+3. 找到 Peripherals -> GPIO -> GPIOB -> ODR，设置 ODR0 为1（高电平）：
+  <img src="images/ozone9.png" width="75%" />
+
+这样绿色LED就被点亮了。愉快地调试吧！
+
+## 供应商CMSIS头文件
+
+在前面的部分，我们仅使用数据手册、编辑器和GCC编译器开发了固件程序，使用数据手册创建了外设结构定义。
+
+现在我们已经知道MCU是怎么工作的，是时候介绍一下CMSIS头文件了。它是什么？它是由MCU厂商创建和提供的带有全部定义的头文件。它包含MCU相关的全部，所以很庞大。
+
+CMSIS代表通用微控制器软件接口标准（Common Microcontroller Software Interface Standard），因此它是MCU制造商指定外设API的共同基础。 因为CMSIS是一种ARM标准，并且CMSIS头文件由MCU厂商提供，所以是权威的来源。因此，使用供应商头文件是首选方法，而不是手动编写定义。
+
+在这一节，我们将使用供应商CMSIS头文件替换 `mcu.h` 中的API函数，并保持固件其它部分不变。
+
+STM32 F4系列的CMSIS头文件在这个[仓库](https://github.com/STMicroelectronics/cmsis_device_f4)，从那里将以下文件拷到我们的固件文件夹[step-5-cmsis](step-5-cmsis)：
+
+- [stm32f429xx.h](https://raw.githubusercontent.com/STMicroelectronics/cmsis_device_f4/master/Include/stm32f429xx.h)
+- [system_stm32f4xx.h](https://raw.githubusercontent.com/STMicroelectronics/cmsis_device_f4/master/Include/system_stm32f4xx.h)
+
+Those two files depend on a standard ARM CMSIS includes, download them too:
+- [core_cm4.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/core_cm4.h)
+- [cmsis_gcc.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/cmsis_gcc.h)
+- [cmsis_version.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/cmsis_version.h)
+- [cmsis_compiler.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/cmsis_compiler.h)
+- [mpu_armv7.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/mpu_armv7.h)
+
+然后移除 `mcu.h` 中所有外设API和定义，只留下标准C包含、供应商CMSIS包含，引脚定义等：
+
+```c
+#pragma once
+
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/stat.h>
+
+#include "stm32f429xx.h"
+
+#define FREQ 16000000  // CPU frequency, 16 Mhz
+#define BIT(x) (1UL << (x))
+#define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
+#define PINNO(pin) (pin & 255)
+#define PINBANK(pin) (pin >> 8)
+
+static inline void spin(volatile uint32_t count) {
+  while (count--) asm("nop");
+}
+
+static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
+  ...
+}
+```
+
+如果我们执行 `make clean build` 重新编译固件，GCC会报错：缺少 `systick_init()`, `GPIO_MODE_OUTPUT`, `uart_init()`,
+和 `UART3`。我们使用STM32 CMSIS文件重新添加它们。
+
+从 `systick_init()` 开始， `core_cm4.h` 头文件中定义了 `SysTick_Type` 结构体，与我们的 `struct systick` 和 `SysTick` 外设相关宏定义作用相同。还有，`stm32f429xx.h` 头文件中有一个 `RCC_TypeDef` 结构体与我们的 `RCC` 宏定义一样，所以我们的 `systick_init()` 函数几乎不用修改，只需要用 `SYSTICK` 替换 `SysTick`：
+
+```c
+static inline void systick_init(uint32_t ticks) {
+  if ((ticks - 1) > 0xffffff) return;  // Systick timer is 24 bit
+  SysTick->LOAD = ticks - 1;
+  SysTick->VAL = 0;
+  SysTick->CTRL = BIT(0) | BIT(1) | BIT(2);  // Enable systick
+  RCC->APB2ENR |= BIT(14);                   // Enable SYSCFG
+}
+```
+
+接下来是 `gpio_set_mode()` 函数。`stm32f429xx.h` 头文件中有一个 `GPIO_TypeDef` 结构体，与我们的 `struct gpio` 相同，使用它改写：
+
+```c
+#define GPIO(bank) ((GPIO_TypeDef *) (GPIOA_BASE + 0x400 * (bank)))
+enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG };
+
+static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
+  GPIO_TypeDef *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  RCC->AHB1ENR |= BIT(PINBANK(pin));       // Enable GPIO clock
+  gpio->MODER &= ~(3U << (n * 2));         // Clear existing setting
+  gpio->MODER |= (mode & 3) << (n * 2);    // Set new mode
+}
+```
+
+`gpio_set_af()` 和 `gpio_write()` 也是一样简单替换就行。
+
+然后是串口，CMSIS中有 `USART_TypeDef` 和 `USART1`、`USART2`、`USART3` 的定义，使用它们：
+
+```c
+#define UART1 USART1
+#define UART2 USART2
+#define UART3 USART3
+```
+
+在 `uart_init()` 以及其它串口函数中将 `struct uart` 替换为 `USART_TypeDef`，其余部分保持不变。
+
+做完这些，重新编译和烧写固件。LED又闪烁起来，串口也有输出了。恭喜！
+
+我们已经使用供应商CMSIS头文件重写了固件代码，现在重新组织下代码，把所有标准文件放到 `include` 目录下，然后更新Makefile文件让GCC编译器知道：
+
+```make
+...
+  -g3 -Os -ffunction-sections -fdata-sections -I. -Iinclude \
+```
+
+现在得到了一个可以在未来的工程中重用的工程模板。
+
+完整工程源码可以在 [step-5-cmsis](step-5-cmsis) 文件夹找到。
+
+## 配置时钟
+
+启动后，Nucleo-F429ZI CPU以16MHz运行，最大频率为180MHz。请注意，系统时钟频率并不是我们需要关心的唯一因素。外设连接到不同的总线，APB1 和 APB2 时钟不同。 它们的时钟速度由频率预分频器配置值，在 RCC 中设置。主 CPU 时钟源也可以不同 - 我们可以使用外部晶体振荡器 （HSE） 或内部振荡器（HSI）。在我们的例子中，我们将使用 HSI。
+
+当CPU从闪存执行指令时，闪存读取速度（大约25MHz）在CPU时钟变高时成为瓶颈。有几个技巧会有所帮助，指令预取就是其中之一。此外，我们可以给闪存控制器提供一些线索，告诉它系统时钟有多快：该值称为闪存延迟。对于 180MHz 系统时钟，`FLASH_LATENCY`值为 5。闪存控制器中的位 8 和 9 控制启用指令和数据缓存：
+
+```c
+  FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, caches
+```
+
+时钟源（HSI 或 HSE）通过一个称为锁相环（PLL）的硬件，将源频率乘以特定值。然后，一组分频器用于设置系统时钟和APB1、APB2时钟。为了获得180MHz的最大系统时钟，可能需要多个值的PLL分频器和APB预分频器。第 6.3.3 节数据表告诉我们APB1时钟的最大值：<= 45MHz，和 APB2 时钟：<= 90MHz。这缩小了可能的列表组合。在这里，我们手动选择值。请注意，像CubeMX这样的工具可以自动化该过程，并使其变得简单和可视化。
+
+```c
+enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
+enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 180, PLL_P = 2 };  // Run at 180 Mhz
+#define PLL_FREQ (PLL_HSI * PLL_N / PLL_M / PLL_P)
+#define FREQ (PLL_FREQ * 1000000)
+```
+
+现在，我们已经准备好使用简单的算法来设置CPU和外设总线的时钟。可能看起来像这样：
+
+- 可选，使能FPU
+- 设置flash延迟
+- 确定时钟源，PLL、APB1和APB2分频
+- 配置RCC
+
+```c
+static inline void clock_init(void) {                 // Set clock frequency
+  SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
+  FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, caches
+  RCC->PLLCFGR &= ~((BIT(17) - 1));                   // Clear PLL multipliers
+  RCC->PLLCFGR |= (((PLL_P - 2) / 2) & 3) << 16;      // Set PLL_P
+  RCC->PLLCFGR |= PLL_M | (PLL_N << 6);               // Set PLL_M and PLL_N
+  RCC->CR |= BIT(24);                                 // Enable PLL
+  while ((RCC->CR & BIT(25)) == 0) spin(1);           // Wait until done
+  RCC->CFGR = (APB1_PRE << 10) | (APB2_PRE << 13);    // Set prescalers
+  RCC->CFGR |= 2;                                     // Set clock source to PLL
+  while ((RCC->CFGR & 12) == 0) spin(1);              // Wait until done
+}
+```
+
+剩下的就是从主函数调用 `clock_init`，然后重新编译和烧写，这样我们的板子就以它的最大速度180MHz运行了！
+
+完整工程源码可以在 [step-6-clock](step-6-clock) 文件夹找到。
+
+## 带设备仪表盘的网络服务器
+
+Nucleo-F429ZI 带有板载以太网。以太网硬件需要两个组件：PHY（向铜缆、光缆等介质发送和接收电信号）和 MAC（驱动 PHY 控制器）。
+在我们的Nucleo开发板上，MAC控制器是MCU内置的，PHY是外部的（具体来说，是Microchip的LAN8720a）。
+
+MAC和PHY可以用多个接口通信，我们将使用RMII。为此，一些引脚必须配置为使用其替代功能 （AF）。要实现 Web 服务器，我们需要 3 个软件组件：
+- 网络驱动程序，用于向 MAC 控制器发送/接收以太网帧
+- 一个网络堆栈，用于解析帧并理解 TCP/IP
+- 理解HTTP的网络库
+
+我们将使用[猫鼬网络库]（https://github.com/cesanta/mongoose），它在单个文件中实现所有这些。这是一个双重许可的库（GPLv2/商业），旨在使网络嵌入式开发快速简便。
+
+先拷贝 [mongoose.c](https://raw.githubusercontent.com/cesanta/mongoose/master/mongoose.c) 和 [mongoose.h](https://raw.githubusercontent.com/cesanta/mongoose/master/mongoose.h) 到我们的工程中，现在我们手上有网络驱动、网络协议栈和HTTP库了，Mongoose还提供了很多示例，其中之一是[设备仪表盘示例](https://github.com/cesanta/mongoose/tree/master/examples/device-dashboard)。这个示例实现了很多事情，像登录、通过WebSocket实时传输数据、嵌入式文件系统、MQTT通信等等，我们就使用这个例子，再拷贝2个文件：
+
+- [net.c](https://raw.githubusercontent.com/cesanta/mongoose/master/examples/device-dashboard/net.c)，实现了仪表盘功能
+- [packed_fs.c](https://raw.githubusercontent.com/cesanta/mongoose/master/examples/device-dashboard/packed_fs.c)，包含了HTML/CSS/JS GUI文件
+
+我们需要告诉 Mongoose 开启哪些功能，可以通过设置预处理常数等编译器标记实现，也可以在 `mongoose_custom.h` 文件中设置。我们用第二种方法，创建 `mongoose_custom.h` 文件并写入以下内容：
+
+```c
+#pragma once
+#define MG_ARCH MG_ARCH_NEWLIB
+#define MG_ENABLE_MIP 1
+#define MG_ENABLE_PACKED_FS 1
+#define MG_IO_SIZE 512
+#define MG_ENABLE_CUSTOM_MILLIS 1
+```
+
+现在向 `main.c` 添加一些网络代码，`#include "mongoose.c"` 初始化以太网RMII引脚，并在RCC中使能以太网：
+
+```c
+  uint16_t pins[] = {PIN('A', 1),  PIN('A', 2),  PIN('A', 7),
+                     PIN('B', 13), PIN('C', 1),  PIN('C', 4),
+                     PIN('C', 5),  PIN('G', 11), PIN('G', 13)};
+  for (size_t i = 0; i < sizeof(pins) / sizeof(pins[0]); i++) {
+    gpio_init(pins[i], GPIO_MODE_AF, GPIO_OTYPE_PUSH_PULL, GPIO_SPEED_INSANE,
+              GPIO_PULL_NONE, 11);
+  }
+  nvic_enable_irq(61);                          // Setup Ethernet IRQ handler
+  RCC->APB2ENR |= BIT(14);                      // Enable SYSCFG
+  SYSCFG->PMC |= BIT(23);                       // Use RMII. Goes first!
+  RCC->AHB1ENR |= BIT(25) | BIT(26) | BIT(27);  // Enable Ethernet clocks
+  RCC->AHB1RSTR |= BIT(25);                     // ETHMAC force reset
+  RCC->AHB1RSTR &= ~BIT(25);                    // ETHMAC release reset
+```
+
+Mongoose的驱动程序使用以太网中断，因此我们需要更新 `startup.c` 并将 `ETH_IRQHandler` 添加到向量表中。让我们以不需要任何修改就能添加中断处理函数的方式重新组织 `startup.c` 中的向量表定义，方法是使用“弱符号”概念。
+
+函数可以标记为“弱”，它的工作方式与普通函数类似。当源代码定义具有相同名称的函数时，差异就来了。通常，两个同名的函数会构建失败。但是，如果一个函数被标记为弱函数，则可以构建成功并且链接器会选择非弱函数。这提供了设置样板中的函数为“默认函数”的能力，然后可以在代码中的其他位置简单地创建一个同名函数来覆盖它。
+
+我们接下来用这种方法填充向量表，创建一个 `DefaultIRQHandler()` 并标记为weak，然后给每一个中断处理函数声明一个处理函数名并使它成为 `DefaultIRQHandler()` 的别名：
+
+```c
+void __attribute__((weak)) DefaultIRQHandler(void) {
+  for (;;) (void) 0;
+}
+#define WEAK_ALIAS __attribute__((weak, alias("DefaultIRQHandler")))
+
+WEAK_ALIAS void NMI_Handler(void);
+WEAK_ALIAS void HardFault_Handler(void);
+WEAK_ALIAS void MemManage_Handler(void);
+...
+__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+    0, _reset, NMI_Handler, HardFault_Handler, MemManage_Handler,
+    ...
+```
+
+现在，我们可以在代码中定义任何中断处理函数，它会替代默认的那个。这就是我们的例子中所发生的：Mongoose的STM32驱动中定义了一个 `ETH_IRQHandler()`，它会替代默认的中断处理函数。
+
+下一步是初始化Mongoose库：创建时间管理器、配置网络驱动、启动监听HTTP连接：
+
+```c
+  struct mg_mgr mgr;        // Initialise Mongoose event manager
+  mg_mgr_init(&mgr);        // and attach it to the MIP interface
+  mg_log_set(MG_LL_DEBUG);  // Set log level
+
+  struct mip_driver_stm32 driver_data = {.mdc_cr = 4};  // See driver_stm32.h
+  struct mip_if mif = {
+      .mac = {2, 0, 1, 2, 3, 5},
+      .use_dhcp = true,
+      .driver = &mip_driver_stm32,
+      .driver_data = &driver_data,
+  };
+  mip_init(&mgr, &mif);
+  extern void device_dashboard_fn(struct mg_connection *, int, void *, void *);
+  mg_http_listen(&mgr, "http://0.0.0.0", device_dashboard_fn, &mgr);
+  MG_INFO(("Init done, starting main loop"));
+```
+
+剩下的就是把 `mg_mgr_poll()` 调用加到主循环。
+
+现在把 `mongoose.c`、`net.c` 和 `packed_fs.c` 文件加到Makefile，重新构建，烧写到板子上。连接一个串口控制台到调试输出，可以观察到板子通过DHCP获取了IP地址：
+
+```
+847 3 mongoose.c:6784:arp_cache_add     ARP cache: added 0xc0a80001 @ 90:5c:44:55:19:8b
+84e 2 mongoose.c:6817:onstatechange     READY, IP: 192.168.0.24
+854 2 mongoose.c:6818:onstatechange            GW: 192.168.0.1
+859 2 mongoose.c:6819:onstatechange            Lease: 86363 sec
+LED: 1, tick: 2262
+LED: 0, tick: 2512
+```
+
+打开一个浏览器，输入上面的IP地址，就可以看到一个仪表盘。在[full description](https://github.com/cesanta/mongoose/tree/master/examples/device-dashboard)获取更多细节。
+
+![Device dashboard](https://raw.githubusercontent.com/cesanta/mongoose/master/examples/device-dashboard/screenshots/dashboard.png)
+
+完整工程源码可以 [step-7-webserver](step-7-webserver) 文件夹找到。
