@@ -33,8 +33,7 @@ Nucleo-F429ZI.
 | [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/) |  [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | complete |
 | [RP2040 Pico-W](step-7-webserver/pico-w/) | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://datasheets.raspberrypi.com/picow/pico-w-datasheet.pdf) | in progress |
 
-Support for other boards is in progress - file an issue to suggest the board you
-work with.
+Feel free to file an issue to support the board you work with.
 
 ## Tools setup
 
