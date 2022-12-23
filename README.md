@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 [![Build Status]( https://github.com/cpq/bare-metal-programming-guide/workflows/build/badge.svg)](https://github.com/cpq/bare-metal-programming-guide/actions)
 
-[English](README.md) | [中文](README_zh-CN.md)
+Translations: English | [中文](README_zh-CN.md)
 
 This guide is written for developers who wish to start programming
 microcontrollers using GCC compiler and a datasheet - nothing else! The
