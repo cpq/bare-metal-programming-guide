@@ -54,6 +54,7 @@ $ brew install gcc-arm-embedded make stlink
 Start a terminal, and execute:
 
 ```sh
+$ sudo apt -y update
 $ sudo apt -y install gcc-arm-none-eabi make stlink-tools
 ```
 
@@ -74,6 +75,22 @@ $ sudo apt -y install gcc-arm-none-eabi make stlink-tools
   arm-none-eabi-gcc main.c  -W -Wall -Wextra -Werror ...
   </pre>
 
+### Setup instruction for in-browser development (using GitHub Codespaces):
+
+- Click on the "Code" button, select "Codespaces" tab, click on plus icon
+  <img src="images/codespace.png" width="50%" />
+- This repository will be opened in the in-browser editor, with an opened terminal:
+  <img src="images/codespace-terminal.png" width="75%" />
+- Execute Linux/Ubuntu setup instructions in the terminal:
+  ```sh
+  sudo apt -y update
+  sudo apt -y install gcc-arm-none-eabi make stlink-tools
+  ```
+- Verify that the build process works:
+  ```sh
+  cd step-4-printf
+  make firmare.bin
+  ```
 
 ### Required datasheets
 
