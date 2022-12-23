@@ -24,10 +24,14 @@ Every chapter in this guide has an associated project, and they gradually
 progress in functionality and completeness.  The last (web server) project is
 the most complete, and can be used as a skeleton for the project of your own,
 dear reader.  Therefore, that last example project is provided for the other
-boards, too:
+boards too. To follow this tutorial, download MCU and dev board datasheets for
+Nucleo-F429ZI.
 
-- [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/)
-- [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/)
+| Skeleton project | MCU datasheet | Board datasheet | Status |
+| --------- | ---------------- | ------------- | ------------ |
+| [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/) | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https//www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | complete |
+| [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/) |  [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | complete |
+| [RP2040 Pico-W](step-7-webserver/pico-w/) | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://datasheets.raspberrypi.com/picow/pico-w-datasheet.pdf) | in progress |
 
 Support for other boards is in progress - file an issue to suggest the board you
 work with.
@@ -91,13 +95,6 @@ $ sudo apt -y install gcc-arm-none-eabi make stlink-tools
   cd step-4-printf
   make firmare.bin
   ```
-
-### Required datasheets
-
-Download and open the following datasheets:
-
-- [STM32F429 MCU datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
-- [Nucleo-F429ZI board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
 
 ## Introduction
 
