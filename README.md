@@ -20,8 +20,8 @@ Throughout the guide, we will be using a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
 development board  ([buy on
 Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
-Every chapter in this guide has an associated project, and they gradually
-progress in functionality and completeness.  The last (web server) project is
+Every chapter in this guide comes with a complete source code which gradually
+progress in functionality and completeness.  The last (web server) chapter is
 the most complete, and can be used as a skeleton for the project of your own,
 dear reader.  Therefore, that last example project is provided for the other
 boards too. To follow this tutorial, download MCU and dev board datasheets for
