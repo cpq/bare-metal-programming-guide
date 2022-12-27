@@ -910,7 +910,7 @@ and compare generated assembly code:
                                  |  ldr     r1, [r2, #0]   <---- Update s_ticks
    cmp     r3, r0                |  cmp     r1, r3
    bcc.n   200000d2 <delay+0x6>  |  bcc.n   200000d2 <delay+0x6>
-   bx      lr                                                  bx      lr
+   bx      lr                    |  bx      lr
 ```
 
 Long story short: if there is no `volalile`, the `delay()` function will loop
