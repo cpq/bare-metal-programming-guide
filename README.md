@@ -918,8 +918,8 @@ forever and never return. Because it caches (optimises) the value of `s_ticks`
 in a register and never updates it. A compiler does that because it doesn't
 know that `s_ticks` can be updated elsewhere - by the interrupt handler!  The
 generated code with `volatile`, on the other hand, loads `s_ticks` value on
-each iteration.  So, the rule of thumb: those values in memory that get updated
-by interrupt handlers, or by the hardware, declare as `volatile`.
+each iteration.  So, the rule of thumb: **those values in memory that get updated
+by interrupt handlers, or by the hardware, declare as `volatile`**.
 
 Now we should add `SysTick_Handler()` interrupt handler to the vector table:
 
