@@ -901,16 +901,16 @@ Now let's compile this code with, and without `volatile` specifier for `s_ticks`
 and compare generated assembly code:
 
 ```
-// NO VOLATILE:                  |  // WITH VOLATILE:
-// uint32_t s_ticks;             |  // volatile uint32_t s_ticks;
+// NO VOLATILE:                           |  // WITH VOLATILE:
+// uint32_t s_ticks;                      |  // volatile uint32_t s_ticks;
 
-   ldr     r3, [pc, #8]          |  ldr     r2, [pc, #12]
-   ldr     r3, [r3, #0]          |  ldr     r3, [r2, #0]
-   adds    r0, r3, r0            |  adds    r3, r3, r0
-                                 |  ldr     r1, [r2, #0]   <---- Update s_ticks
-   cmp     r3, r0                |  cmp     r1, r3
-   bcc.n   200000d2 <delay+0x6>  |  bcc.n   200000d2 <delay+0x6>
-   bx      lr                    |  bx      lr
+   ldr     r3, [pc, #8] <-- cache s_ticks |  ldr     r2, [pc, #12]
+   ldr     r3, [r3, #0] <-- in r3         |  ldr     r3, [r2, #0]
+   adds    r0, r3, r0   <-- calc until    |  adds    r3, r3, r0     <-- r3 = until
+                                          |  ldr     r1, [r2, #0]   <-- reload s_ticks
+   cmp     r3, r0       <-- compare       |  cmp     r1, r3         <-- compare
+   bcc.n   200000d2 <delay+0x6>           |  bcc.n   200000d2 <delay+0x6>
+   bx      lr                             |  bx      lr
 ```
 
 Long story short: if there is no `volalile`, the `delay()` function will loop
