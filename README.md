@@ -171,10 +171,9 @@ from A0 to A15, to input mode:
   * (volatile uint32_t *) (0x40020000 + 0) = 0;  // Set A0-A15 to input mode
 ```
 
-> Note the `volatile` specifier. Its meaning will be covered later.
-
-By setting individual bits, we can selectively set specific pins to a desired
-mode. For example, this snippet sets pin A3 to output mode:
+Note the `volatile` specifier. Its meaning will be covered later.  By setting
+individual bits, we can selectively set specific pins to a desired mode. For
+example, this snippet sets pin A3 to output mode:
 
 ```c
   * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bit range 6-7
@@ -884,18 +883,44 @@ void SysTick_Handler(void) {
 }
 ```
 
-> The `volatile` specifier is required here becase `s_ticks` is modified by the
-> interrupt handler. `volatile` prevents the compiler to optimise/cache
-> `s_ticks` value in a CPU register: instead, generated code always accesses
-> memory.  That is why `volatile` keywords is present in the peripheral struct
-> definitions, too.
+The `volatile` specifier is required here becase `s_ticks` is modified by the
+interrupt handler. `volatile` prevents the compiler to optimise/cache `s_ticks`
+value in a CPU register: instead, generated code always accesses memory.  That
+is why `volatile` keywords is present in the peripheral struct definitions,
+too. Since this is important to understand, let's demonstrate that on a simple
+function: Arduino's `delay()`. Let is use our `s_ticks` variable:
 
-Note the `volatile` specifier for `s_ticks`. Any variable that is changed
-by the IRQ handler, must be marked as `volatile`, in order to prevent the
-compiler to optimize the operation by caching its value in a register.
-The `volatile` keyword makes generated code always load it from memory.
+```c
+void delay(unsigned ms) {            // This function waits "ms" milliseconds
+ uint32_t until = s_ticks + ms;      // Time in a future when we need to stop
+ while (s_ticks < until) (void) 0;   // Loop until then
+}
+```
 
-Now we should add this handler to the vector table:
+Now let's compile this code with, and without `volatile` specifier for `s_ticks`
+and compare generated assembly code:
+
+```
+// NO VOLATILE:                  |  // WITH VOLATILE:
+// uint32_t s_ticks;             |  // volatile uint32_t s_ticks;
+
+   ldr     r3, [pc, #8]          |  ldr     r2, [pc, #12]
+   ldr     r3, [r3, #0]          |  ldr     r3, [r2, #0]
+   adds    r0, r3, r0            |  adds    r3, r3, r0
+                                 |  ldr     r1, [r2, #0]   <---- Update s_ticks
+   cmp     r3, r0                |  cmp     r1, r3
+   bcc.n   200000d2 <delay+0x6>  |  bcc.n   200000d2 <delay+0x6>
+   bx      lr                                                  bx      lr
+```
+
+Long story short: if there is no `volalile`, the `delay()` function will
+loop forever and never return. Because it caches (optimises) the value of
+`s_ticks` in a register and never updates it. The generated code with
+`volatile`, on the other hand, loads `s_ticks` value on each iteration.
+So, the rule of thumb: those values in memory that get updated by interrupt
+handlers, or by the hardware, declare as `volatile`.
+
+Now we should add `SysTick_Handler()` interrupt handler to the vector table:
 
 ```c
 __attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
