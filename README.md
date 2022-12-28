@@ -401,7 +401,6 @@ format, which contains several sections. Let's see them:
 ```sh
 $ arm-none-eabi-objdump -h main.o
 ...
-Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
   0 .text         00000002  00000000  00000000  00000034  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
@@ -411,10 +410,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   3 .vectors      000001ac  00000000  00000000  00000038  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, DATA
-  4 .comment      0000004a  00000000  00000000  000001e4  2**0
-                  CONTENTS, READONLY
-  5 .ARM.attributes 0000002e  00000000  00000000  0000022e  2**0
-                  CONTENTS, READONLY
+...
 ```
 
 Note that VMA/LMA addresses for sections are set to 0 - meaning, `main.o`
@@ -553,7 +549,6 @@ Let's examine sections in firmware.elf:
 ```sh
 $ arm-none-eabi-objdump -h firmware.elf
 ...
-Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
   0 .vectors      000001ac  08000000  08000000  00010000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
@@ -898,28 +893,27 @@ void delay(unsigned ms) {            // This function waits "ms" milliseconds
 ```
 
 Now let's compile this code with, and without `volatile` specifier for `s_ticks`
-and compare generated assembly code:
+and compare generated machine code:
 
 ```
-// NO VOLATILE:                          |  // WITH VOLATILE:
-// uint32_t s_ticks;                     |  // volatile uint32_t s_ticks;
-
-  ldr     r3, [pc, #8] <-- cache s_ticks |  ldr     r2, [pc, #12]
-  ldr     r3, [r3, #0] <-- in r3         |  ldr     r3, [r2, #0]   <-- r3 = s_ticks
-  adds    r0, r3, r0   <-- r0 = r3 + ms  |  adds    r3, r3, r0     <-- r3 = r3 + ms
-                                         |  ldr     r1, [r2, #0]   <-- reload! r1 = s_ticks
-  cmp     r3, r0       <-- compare       |  cmp     r1, r3         <-- compare
+// NO VOLATILE: uint32_t s_ticks;        |  // VOLATILE: volatile uint32_t s_ticks;
+                                         |
+  ldr     r3, [pc, #8]  // cache s_ticks |  ldr     r2, [pc, #12]
+  ldr     r3, [r3, #0]  // in r3         |  ldr     r3, [r2, #0]   // r3 = s_ticks
+  adds    r0, r3, r0    // r0 = r3 + ms  |  adds    r3, r3, r0     // r3 = r3 + ms
+                                         |  ldr     r1, [r2, #0]   // RELOAD: r1 = s_ticks
+  cmp     r3, r0        // compare       |  cmp     r1, r3         // compare
   bcc.n   200000d2 <delay+0x6>           |  bcc.n   200000d2 <delay+0x6>
   bx      lr                             |  bx      lr
 ```
 
-Long story short: if there is no `volalile`, the `delay()` function will loop
-forever and never return. Because it caches (optimises) the value of `s_ticks`
-in a register and never updates it. A compiler does that because it doesn't
-know that `s_ticks` can be updated elsewhere - by the interrupt handler!  The
+If there is no `volalile`, the `delay()` function will loop forever and never
+return. That is because it caches (optimises) the value of `s_ticks` in a
+register and never updates it. A compiler does that because it doesn't know
+that `s_ticks` can be updated elsewhere - by the interrupt handler!  The
 generated code with `volatile`, on the other hand, loads `s_ticks` value on
-each iteration.  So, the rule of thumb: **those values in memory that get updated
-by interrupt handlers, or by the hardware, declare as `volatile`**.
+each iteration.  So, the rule of thumb: **those values in memory that get
+updated by interrupt handlers, or by the hardware, declare as `volatile`**.
 
 Now we should add `SysTick_Handler()` interrupt handler to the vector table:
 
