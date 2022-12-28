@@ -328,7 +328,7 @@ self-explanatory and human readable.
 
 ## MCU boot and vector table
 
-When STM32F429 MCU boots, it reads a so-called "vector table" from the
+When an ARM MCU boots, it reads a so-called "vector table" from the
 beginning of flash memory. A vector table is a concept common to all ARM MCUs.
 That is a array of 32-bit addresses of interrupt handlers. First 16 entries
 are reserved by ARM and are common to all ARM MCUs. The rest of interrupt
@@ -339,10 +339,11 @@ and more complex MCUs have many.
 Vector table for STM32F429 is documented in Table 62. From there we can learn
 that there are 91 peripheral handlers, in addition to the standard 16.
 
-At this point, we are interested in the first two entries of the vector table,
-because they play a key role in the MCU boot process. Those two first values
-are: initial stack pointer, and an address of the boot function to execute
-(a firmware entry point).
+Every entry in the vector table is an address of a function that MCU executes
+when a hardware interrupt (IRQ) triggers. The exception are first two entries,
+which play a key role in the MCU boot process.  Those two first values are: an
+initial stack pointer, and an address of the boot function to execute (a
+firmware entry point).
 
 So now we know, that we must make sure that our firmware should be composed in
 a way that the 2nd 32-bit value in the flash should contain an address of
@@ -435,7 +436,7 @@ address space, and which symbols to create.
 
 ### Linker script
 
-Create a minimal linker script `link.ld`, and copy-paste contents from
+Create a file `link.ld`, and copy-paste contents from
 [step-0-minimal/link.ld](step-0-minimal/link.ld). Below is the explanation:
 
 ```
