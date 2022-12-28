@@ -896,15 +896,15 @@ Now let's compile this code with, and without `volatile` specifier for `s_ticks`
 and compare generated machine code:
 
 ```
-// NO VOLATILE: uint32_t s_ticks;        |  // VOLATILE: volatile uint32_t s_ticks;
-                                         |
-  ldr     r3, [pc, #8]  // cache s_ticks |  ldr     r2, [pc, #12]
-  ldr     r3, [r3, #0]  // in r3         |  ldr     r3, [r2, #0]   // r3 = s_ticks
-  adds    r0, r3, r0    // r0 = r3 + ms  |  adds    r3, r3, r0     // r3 = r3 + ms
-                                         |  ldr     r1, [r2, #0]   // RELOAD: r1 = s_ticks
-  cmp     r3, r0        // ALWAYS FALSE! |  cmp     r1, r3         // compare
-  bcc.n   200000d2 <delay+0x6>           |  bcc.n   200000d2 <delay+0x6>
-  bx      lr                             |  bx      lr
+// NO VOLATILE: uint32_t s_ticks;       |  // VOLATILE: volatile uint32_t s_ticks;
+                                        |
+ ldr     r3, [pc, #8]  // cache s_ticks |  ldr     r2, [pc, #12]
+ ldr     r3, [r3, #0]  // in r3         |  ldr     r3, [r2, #0]   // r3 = s_ticks
+ adds    r0, r3, r0    // r0 = r3 + ms  |  adds    r3, r3, r0     // r3 = r3 + ms
+                                        |  ldr     r1, [r2, #0]   // RELOAD: r1 = s_ticks
+ cmp     r3, r0        // ALWAYS FALSE  |  cmp     r1, r3         // compare
+ bcc.n   200000d2 <delay+0x6>           |  bcc.n   200000d2 <delay+0x6>
+ bx      lr                             |  bx      lr
 ```
 
 If there is no `volalile`, the `delay()` function will loop forever and never
