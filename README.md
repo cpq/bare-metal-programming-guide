@@ -817,10 +817,10 @@ see that SysTick has four registers:
 - VAL - a current counter value, decremented on each clock cycle
 - CALIB - calibration register
 
-Every time VAL drops to zero, a SysTick interrupt is generated. The SysTick
-interrupt index in the vector table is 15, so we need to set it. Upon boot,
-our board Nucleo-F429ZI runs at 16Mhz. We can configure the SysTick counter
-to trigger interrupt each millisecond.
+Every time VAL drops to zero, a SysTick interrupt is generated.
+The SysTick interrupt index in the vector table is 15, so we need to set it.
+Upon boot, our board Nucleo-F429ZI runs at 16Mhz. We can configure the SysTick
+counter to trigger interrupt each millisecond.
 
 First, let's define a SysTick peripheral. We know 4 registers, and from the
 datasheet we can learn that the SysTick address is 0xe000e010. So:
@@ -858,6 +858,15 @@ void SysTick_Handler(void) {
   s_ticks++;
 }
 ```
+
+With 16MHz clock, we init SysTick counter to trigger an interrupt every
+16000 cycles: the `SYSTICK->VAL` initial value is 15999, then it decrements
+on each cycle by 1, and when it reaches 0, an interrupt is generated. The
+firmware code execution gets interrupted: a `SysTick_Handler()` function is
+called to increment `s_tick` variable. Here how it looks like on a time scale:
+
+![](images/systick.svg)
+
 
 The `volatile` specifier is required here becase `s_ticks` is modified by the
 interrupt handler. `volatile` prevents the compiler to optimise/cache `s_ticks`

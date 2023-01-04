@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 500 175" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <rect x="-0.428" y="151.474" width="500.501" height="25.29" style="fill: rgb(255, 255, 255);">
+    <title>white</title>
+  </rect>
+  <rect x="-0.628" y="-0.3" width="501.094" height="23.975" style="fill: rgb(255, 255, 255);">
+    <title>white</title>
+  </rect>
+  <rect x="-0.675" y="23.396" width="500.853" height="26.478" style="fill: rgb(254, 246, 204);">
+    <title>Main rect</title>
+  </rect>
+  <rect x="-0.645" y="49.132" width="500.672" height="24.694" style="fill: rgb(224, 255, 250);">
+    <title>systick rect</title>
+  </rect>
+  <rect x="-0.645" y="73.271" width="500.823" height="27.585" style="fill: rgb(255, 224, 224);">
+    <title>main rect</title>
+  </rect>
+  <rect x="-0.928" y="100.575" width="500.823" height="28.019" style="fill: rgb(213, 254, 208);">
+    <title>handler rect</title>
+  </rect>
+  <rect x="-0.957" y="127.052" width="501.416" height="24.788" style="fill: rgb(212, 215, 255);">
+    <title>main rect</title>
+  </rect>
+  <g transform="matrix(1, 0, 0, 1, -23.484138, -2.893622)">
+    <title>interrupt</title>
+    <line style="stroke-width: 0.7px; stroke-dasharray: 4px; fill: rgb(163, 163, 163); stroke: rgb(125, 125, 125);" x1="286.606" y1="48.904" x2="286.606" y2="158.355"/>
+    <line style="stroke-width: 0.7px; stroke-dasharray: 4px; fill: rgb(163, 163, 163); stroke: rgb(125, 125, 125);" x1="432.32" y1="48.904" x2="432.32" y2="159.048"/>
+    <text style="font-family: Arial, sans-serif; font-size: 8.9px; white-space: pre;" transform="matrix(1.130793, 0, 0, 1.130793, -39.262714, -32.366329)"><tspan x="271.131" y="175.621">SysTick</tspan><tspan x="271.1310119628906" dy="1em">​</tspan><tspan>interrupt</tspan></text>
+    <text style="font-family: Arial, sans-serif; font-size: 8.9px; white-space: pre;" transform="matrix(1.130793, 0, 0, 1.130793, 106.495117, -32.366329)"><tspan x="271.131" y="175.621">SysTick<tspan x="271.1310119628906" dy="1em">​</tspan></tspan><tspan>interrupt</tspan></text>
+  </g>
+  <g transform="matrix(1, 0, 0, 1, 0, 4.192891)">
+    <title>clock</title>
+    <text style="font-family: Arial, sans-serif; font-size: 12px; white-space: pre;" x="87.523" y="35.683">clock</text>
+    <g style="" transform="matrix(1.059426, 0, 0, 1, -29.808987, -12.898497)">
+      <title>current</title>
+      <line style="stroke: rgb(0, 0, 0);" x1="153.416" y1="37.069" x2="168.416" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="153.672" y1="37.069" x2="168.672" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="183.416" y1="37.069" x2="198.416" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="230.817" y1="37.069" x2="245.817" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="261.385" y1="37.069" x2="276.385" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="290.585" y1="37.069" x2="305.585" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="320.309" y1="37.069" x2="335.309" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="369.152" y1="37.069" x2="384.152" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="399.152" y1="37.069" x2="414.152" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="429.152" y1="37.069" x2="444.152" y2="37.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="168.416" y1="51.45" x2="183.416" y2="51.45"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="168.927" y1="36.389" x2="183.927" y2="36.389" transform="matrix(0, 1, -1, 0, 205.061002, -132.283002)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="183.671" y1="36.389" x2="198.671" y2="36.389" transform="matrix(0, 1, -1, 0, 219.805005, -147.027005)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="198.671" y1="36.814" x2="213.671" y2="36.814" transform="matrix(0, 1, -1, 0, 235.230004, -161.602006)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="246.057" y1="36.814" x2="260.216" y2="36.814" transform="matrix(0, 1.059426, -0.943907, 0, 280.56531, -223.610172)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="261.625" y1="36.195" x2="275.784" y2="36.195" transform="matrix(0, 1.059426, -0.943907, 0, 295.549025, -240.722308)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="276.625" y1="36.195" x2="290.784" y2="36.195" transform="matrix(0, 1.059426, -0.943907, 0, 310.549025, -256.613697)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="290.825" y1="36.195" x2="304.984" y2="36.195" transform="matrix(0, 1.059426, -0.943907, 0, 324.749038, -271.657558)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="305.825" y1="36.814" x2="319.984" y2="36.814" transform="matrix(0, 1.059426, -0.943907, 0, 340.333316, -286.929948)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="320.825" y1="36.195" x2="334.984" y2="36.195" transform="matrix(0, 1.059426, -0.943907, 0, 354.749038, -303.440337)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="335.549" y1="36.195" x2="349.708" y2="36.195" transform="matrix(0, 1.059426, -0.943907, 0, 369.473037, -319.039323)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="384.393" y1="36.195" x2="398.551" y2="36.195" transform="matrix(0, 1.059426, -0.943907, 0, 418.317048, -370.785936)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="399.393" y1="36.195" x2="413.552" y2="36.195" transform="matrix(0, 1.059426, -0.943907, 0, 433.317031, -386.677308)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="414.393" y1="36.814" x2="428.552" y2="36.814" transform="matrix(0, 1.059426, -0.943907, 0, 448.901309, -401.949697)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="429.393" y1="36.814" x2="443.552" y2="36.814" transform="matrix(0, 1.059426, -0.943907, 0, 463.901309, -417.841087)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="444.393" y1="36.814" x2="458.552" y2="36.814" transform="matrix(0, 1.059426, -0.943907, 0, 478.901309, -433.732476)" bx:origin="-0.017 0"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="198.416" y1="51.45" x2="213.416" y2="51.45"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="246.385" y1="52.069" x2="261.385" y2="52.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="275.585" y1="51.45" x2="290.585" y2="51.45"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="305.585" y1="51.45" x2="320.585" y2="51.45"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="384.152" y1="51.45" x2="399.152" y2="51.45"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="414.152" y1="51.45" x2="429.152" y2="51.45"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="444.152" y1="52.069" x2="459.152" y2="52.069"/>
+      <line style="stroke: rgb(0, 0, 0);" x1="335.205" y1="51.45" x2="350.205" y2="51.45"/>
+    </g>
+    <g>
+      <title>dots</title>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="148.79" cy="38.403" rx="0.266" ry="0.265"/>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="180.116" cy="38.565" rx="0.266" ry="0.265"/>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="230.684" cy="39.215" rx="0.266" ry="0.265"/>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="262.75" cy="38.241" rx="0.266" ry="0.265"/>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="293.805" cy="38.403" rx="0.266" ry="0.265"/>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="325.167" cy="38.241" rx="0.266" ry="0.265"/>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="377.016" cy="38.403" rx="0.266" ry="0.265"/>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="409.153" cy="38.565" rx="0.266" ry="0.265"/>
+      <ellipse style="stroke: rgb(0, 0, 0);" cx="440.786" cy="39.052" rx="0.266" ry="0.265"/>
+    </g>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="205.926" y="40.807">...</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="353.332" y="39.285">...</text>
+  </g>
+  <g transform="matrix(1, 0, 0, 1, 0, 4.192891)">
+    <title>main</title>
+    <text style="fill: none; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; stroke: rgb(0, 0, 0); stroke-width: 0.5px; white-space: pre;" x="353.793" y="86.76">...</text>
+    <text style="fill: none; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; stroke: rgb(0, 0, 0); stroke-width: 0.5px; white-space: pre;" x="205.654" y="87.199">...</text>
+    <text style="font-family: Arial, sans-serif; font-size: 12px; white-space: pre;" x="80.915" y="85.967">main()</text>
+    <g transform="matrix(1, 0, 0, 1, -14.423648, -21.467649)">
+      <path style="stroke: rgb(0, 0, 0); fill: none;" d="M 270.11 105.605 C 281.139 105.605 276.935 116.752 274.243 122.136 C 271.742 127.137 276.273 131.952 279.926 131.952"/>
+      <polyline style="fill: none; stroke: rgb(0, 0, 0);" points="275.835 133.945 279.991 132.353 278.368 127.577"/>
+    </g>
+    <g transform="matrix(1, 0, 0, 1, 131.425995, -20.987143)">
+      <path style="stroke: rgb(0, 0, 0); fill: none;" d="M 270.11 105.605 C 281.139 105.605 276.935 116.752 274.243 122.136 C 271.742 127.137 276.273 131.952 279.926 131.952"/>
+      <polyline style="fill: none; stroke: rgb(0, 0, 0);" points="275.835 133.945 279.991 132.353 278.368 127.577"/>
+    </g>
+    <polyline style="fill: none; stroke: rgb(0, 0, 0);" points="316.25 82.53 320.406 84.122 318.783 88.898"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="135.571" y1="92.138" x2="146.347" y2="75.876"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="146.347" y1="92.138" x2="157.123" y2="75.876"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="157.123" y1="92.138" x2="167.899" y2="75.876"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="167.899" y1="92.43" x2="178.675" y2="76.168"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="178.675" y1="92.43" x2="189.451" y2="76.168"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="189.451" y1="92.43" x2="200.227" y2="76.168"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="217.693" y1="80.9" x2="221.779" y2="75.773"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="221.779" y1="91.743" x2="232.555" y2="75.481"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="232.555" y1="92.035" x2="243.331" y2="75.773"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="243.331" y1="92.035" x2="252.354" y2="78.865"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="325.299" y1="92.035" x2="336.075" y2="75.773"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="336.22" y1="91.743" x2="346.996" y2="75.481"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="346.996" y1="91.743" x2="349.18" y2="88.946"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="368.624" y1="91.813" x2="379.324" y2="75.481"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="390.1" y1="92.035" x2="399.123" y2="78.865"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="379.324" y1="91.955" x2="390.1" y2="75.693"/>
+    <polyline style="fill: none; stroke: rgb(0, 0, 0);" points="349.336 75.325 322.975 75.325 322.975 92.136 349.712 91.893"/>
+    <polyline style="fill: none; stroke: rgb(0, 0, 0);" points="399.115 91.86 365.331 91.462 365.331 75.049 399.092 75.292" transform="matrix(-1, 0, 0, -1, 764.445984, 166.909004)"/>
+    <polyline style="fill: none; stroke: rgb(0, 0, 0);" points="252.262 92.47 217.016 92.072 217.016 75.659 252.483 75.902" transform="matrix(-1, 0, 0, -1, 469.499008, 168.128998)"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="203.076" y1="75.688" x2="132.903" y2="75.931"/>
+    <line style="fill: none; stroke: rgb(0, 0, 0);" x1="202.102" y1="92.013" x2="133.391" y2="92.013"/>
+  </g>
+  <g transform="matrix(1, 0, 0, 1, 0, 4.192891)">
+    <title>Time</title>
+    <polyline style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-dasharray: 5px;" points="126.838 10.129 126.838 148.689 126.838 143.399"/>
+    <polyline style="stroke: rgb(0, 0, 0); fill: none;" points="455.16 4.603 463.344 9.887 455.16 14.482"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="126.621" y1="9.94" x2="200.227" y2="10.686"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="219.933" y1="10.686" x2="346.598" y2="9.94"/>
+    <line style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" x1="368.15" y1="9.94" x2="462.402" y2="9.94"/>
+    <text style="fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="353.385" y="11.406">...</text>
+    <text style="font-family: Arial, sans-serif; font-size: 12px; white-space: pre;" x="92.76" y="13.65">time</text>
+    <text style="fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="206.283" y="11.407">...</text>
+  </g>
+  <g transform="matrix(1, 0, 0, 1, 0, 4.192891)">
+    <title>SYSTICK-&gt;VAL</title>
+    <text style="font-family: Arial, sans-serif; font-size: 12px; white-space: pre;" x="27.537" y="61.292"> SYSTICK-&gt;VAL</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; paint-order: fill; white-space: pre;"><tspan x="130.859" y="60.289">15999  15998     </tspan><tspan style="font-weight: 700;">...</tspan><tspan>     1         </tspan><tspan style="font-size: 6px;"> </tspan><tspan>0    15999   15998    </tspan><tspan style="font-size: 5px;"> </tspan><tspan style="font-weight: 700;">...</tspan><tspan>     1     </tspan><tspan style="font-size: 7px;">  </tspan><tspan>  </tspan><tspan style="font-size: 4px;"> </tspan><tspan>0     15999</tspan></text>
+  </g>
+  <g transform="matrix(1, 0, 0, 1, 0, 4.192891)">
+    <title>s_tick</title>
+    <text style="font-family: Arial, sans-serif; font-size: 12px; white-space: pre;" x="83.375" y="138.354">s_tick</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="149.095" y="140.343">0                                               1                                                   2</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="205.926" y="136.853">...</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="354.149" y="135.739">...</text>
+  </g>
+  <g transform="matrix(1, 0, 0, 1, 0, 4.192891)">
+    <title>SysTick_Handler</title>
+    <rect x="268.936" y="101.056" width="39.778" height="17.565" style="stroke: rgb(0, 0, 0); fill: none;"/>
+    <rect x="414.835" y="100.706" width="39.778" height="17.565" style="stroke: rgb(0, 0, 0); fill: none;"/>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="354.149" y="111.128">...</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; white-space: pre;" x="419.062" y="112.922">stick++</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; white-space: pre;" x="273.116" y="113.272">stick++</text>
+    <polyline style="fill: none; stroke: rgb(0, 0, 0);" points="461.783 82.53 465.939 84.122 464.316 88.898"/>
+    <text style="font-family: Arial, sans-serif; font-size: 12px; white-space: pre;" x="17.808" y="112.401">SysTick_Handler()</text>
+    <g transform="matrix(1, 0, 0, 1, -13.170377, -23.325369)">
+      <path style="stroke: rgb(0, 0, 0); fill: none;" d="M 323.657 134.322 C 334.686 134.322 330.482 123.175 327.79 117.791 C 325.289 112.79 329.82 107.975 333.473 107.975"/>
+    </g>
+    <g transform="matrix(1, 0, 0, 1, 132.449326, -23.277365)">
+      <path style="stroke: rgb(0, 0, 0); fill: none;" d="M 323.657 134.322 C 334.686 134.322 330.482 123.175 327.79 117.791 C 325.289 112.79 329.82 107.975 333.473 107.975"/>
+    </g>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="205.926" y="112.242">...</text>
+  </g>
+</svg>
