@@ -203,7 +203,7 @@ we don't want to change settings in other bit ranges. So in general, if we want
 to clear N bits at position X:
 
 ```c
-PERIPHERAL->REGISTER &= ~((2^N - 1) << X);
+REGISTER &= ~((2^N - 1) << X);
 ```
 
 And, finally, we want to set a given bit range to the value we want. We
@@ -211,7 +211,7 @@ shift that value X positions left, and OR with the current value of the whole
 register:
 
 ```c
-PERIPHERAL->REGISTER |= VALUE << X;
+REGISTER |= VALUE << X;
 ```
 
 ## Human-readable peripherals programming
