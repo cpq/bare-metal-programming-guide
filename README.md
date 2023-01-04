@@ -186,31 +186,24 @@ case). This is done in two steps. First, we must clear the current value of
 bits 6-7, because it may hold some value already. Then we must set bits 6-7
 to the value we want.
 
-So, first, we must set bit range 6-7 to zero. How do we set
-a number of bits to zero? In four steps:
+So, first, we must set bit range 6-7 (two bits at position 6) to zero. How do
+we set a number of bits to zero? In four steps:
 
-- Get a number that has N contiguous bits set:
-   - 1 for 1 bit:  `0b1`,
-   - 3 for 2 bits: `0b11`,
-   - 7 for 3 bits: `0b111`,
-   - 15 for 4 bits: `0b1111`,
-   - and so on: generally, for N bits, the number is `2^N - 1`
-  So, for 2 bits it is number `3`, or `0b00000000000000000000000000000011`
-- Shift that number left. If we need to set bits X-Y, then shift on X positions
-  left. In our case, shift on a 6 positions left: `(3 << 6)`, or
-  `0b00000000000000000000000011000000`
-- Invert the number: turn zeros to ones, and ones to zeroes:
-  `~(3 << 6)`, or `0xb11111111111111111111111100111111`
-- Now, perform a "logical AND" operation of the register with our number. Bits
-  6-7, AND-ed with 0, will give zero - that's what we want! All other bits,
-  AND-ed with 1, will retain their current value: `REG &= ~(3 << 6)`. Retaining
-  values of all other bits is important: we don't want to change other settings
-  in other bit ranges!
+| Action | Expression | Bits (first 12 of 32) |
+| - | - | - |
+| Get a number with N contiguous bits set: `2^N-1`, N=2 | `3`  | `000000000011` |
+| Shift that number X positions left | `(3<<6)` | `000011000000` |
+| Invert the number: turn zeros to ones, and ones to zeroes | `~(3<<6)` | `111100111111` |
+| Logical AND with existing value | `VAL &= ~(3<<6)` | `xxxx00xxxxxx` |
 
-So, in general, if we want to clear bits X-Y (set them to zero), do:
+Note that the last operation, logical AND, turns N bits at position X to zero
+(because they are ANDed with 0), but retains the value of all other bits
+(because they are ANDed with 1).  Retaining existing value is important, cause
+we don't want to change settings in other bit ranges. So in general, if we want
+to clear N bits at position X:
 
 ```c
-PERIPHERAL->REGISTER &= ~(NUMBER_WITH_N_BITS << X);
+PERIPHERAL->REGISTER &= ~((2^N - 1) << X);
 ```
 
 And, finally, we want to set a given bit range to the value we want. We
