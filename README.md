@@ -208,7 +208,7 @@ REGISTER &= ~((2^N - 1) << X);
 
 And, finally, we want to set a given bit range to the value we want. We
 shift that value X positions left, and OR with the current value of the whole
-register:
+register (in order to retain other bits' values):
 
 ```c
 REGISTER |= VALUE << X;
