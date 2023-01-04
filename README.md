@@ -214,19 +214,6 @@ register:
 PERIPHERAL->REGISTER |= VALUE << X;
 ```
 
-Now, it should be clear to you, dear reader, the meaning of these two lines,
-which set bits 6-7 of the GPIOA MODER register to the value of 1 (output).
-
-```c
-  * (volatile uint32_t *) (0x40020000 + 0) &= ~(3 << 6);  // CLear bit range 6-7
-  * (volatile uint32_t *) (0x40020000 + 0) |= 1 << 6;     // Set bit range 6-7 to 1
-```
-
-Some registers are not mapped to the MCU peripherals, but they are mapped to
-the ARM CPU configuration and control. For example, there is a "Reset at clock
-control" unit (RCC), described in section 6 of the datasheet. It describes
-registers that allow to set systems clock and other things.
-
 ## Human-readable peripherals programming
 
 In the previous section we have learned that we can read and write peripheral
