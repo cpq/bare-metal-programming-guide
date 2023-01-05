@@ -1653,3 +1653,47 @@ for more details.
 
 A complete project source code you can find in
 [step-7-webserver](step-7-webserver) directory.
+
+## Automatic software and hardware tests
+
+It is a good practice for a software project to have a continuous
+integration (CI) test. On every change pushed to the
+repository, CI automatically rebuilds and tests all components.
+
+Github makes it easy to do. We can create a `.github/workflows/test.yml` file
+which is a CI configuration file. In that file, we can install ARM GCC
+and run `make` in every example directory to build respective firmwares.
+
+Long story short! This tells Github to run on every repo push:
+https://github.com/cpq/bare-metal-programming-guide/blob/b0820b5c62b74a9b4456854feb376cda8cde4ecd/.github/workflows/test.yml#L1-L2
+
+This installs ARM GCC compiler:
+https://github.com/cpq/bare-metal-programming-guide/blob/b0820b5c62b74a9b4456854feb376cda8cde4ecd/.github/workflows/test.yml#L9
+
+This builds a firmware in every example directory:
+https://github.com/cpq/bare-metal-programming-guide/blob/b0820b5c62b74a9b4456854feb376cda8cde4ecd/.github/workflows/test.yml#L10-L18
+
+That's it!  Extremely simple and extremely powerful. Now if we push a change to
+the repo which breaks a build, Github will notify us. On success, Github will
+keep quiet.  See an [example successful
+run](https://github.com/cpq/bare-metal-programming-guide/actions/runs/3840030588).
+
+Would it be great to also test built firmware binaries on a real hardware, to
+test not only the build process, but that the built firmware is correct and
+functional? Easy. See my other guide [COMING SOON] for detailed instructions.
+
+## About the author
+
+I am Sergey Lyubka, an engineer and entrepreneur. I am a director and
+co-founder at Cesanta - a technology company based in Dublin, Ireland.  I hold
+MSc in RadioPhysics and Electronics from Kyiv State University, Ukraine.
+
+My passion is bare metal embedded programming and embedded network
+programming.  My company develops an open source, embedded [HTTP/MQTT/Websocket
+network library](https://github.com/cesanta/mongoose).
+
+I am open to give talks on embedded network programming - so [please
+contact](https://mongoose.ws/contact/) if you'd like me to talk for your
+company's development team, or at your university.
+
+Thank you!
