@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 [![Build Status]( https://github.com/cpq/bare-metal-programming-guide/workflows/build/badge.svg)](https://github.com/cpq/bare-metal-programming-guide/actions)
 
-Translations: English | [中文](README_zh-CN.md)
+English | [中文](README_zh-CN.md)
 
 This guide is written for developers who wish to start programming
 microcontrollers using GCC compiler and a datasheet - nothing else! The
@@ -14,7 +14,8 @@ The guide covers the following topics: memory and registers, interrupt vector
 table, startup code, linker script, build automation using `make`, GPIO
 peripheral and LED blinky, SysTick timer, UART peripheral and debug output,
 `printf` redirect to UART (IO retargeting), debugging with Segger Ozone,
-system clock setup, and web server implementation with device dashboard.
+system clock setup, web server implementation with device dashboard, and
+automatic tests.
 
 Throughout the guide, we will be using a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
@@ -1684,13 +1685,13 @@ functional? Easy. See my other guide [COMING SOON] for detailed instructions.
 
 ## About the author
 
-I am Sergey Lyubka, an engineer and entrepreneur. I am a director and
-co-founder at Cesanta - a technology company based in Dublin, Ireland.  I hold
-MSc in RadioPhysics and Electronics from Kyiv State University, Ukraine.
+I am Sergey Lyubka, an engineer and entrepreneur. I hold MSc in RadioPhysics
+and Electronics from Kyiv State University, Ukraine. I am a director and
+co-founder at Cesanta - a technology company based in Dublin, Ireland.
 
 My passion is bare metal embedded programming and embedded network
 programming.  My company develops an open source, embedded [HTTP/MQTT/Websocket
-network library](https://github.com/cesanta/mongoose).
+network library](https://mongoose.ws).
 
 I am open to give talks on embedded network programming - so [please
 contact](https://mongoose.ws/contact/) if you'd like me to talk for your
