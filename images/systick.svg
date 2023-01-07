@@ -144,11 +144,11 @@
   </g>
   <g transform="matrix(1, 0, 0, 1, 0, 4.192891)">
     <title>SysTick_Handler</title>
-    <rect x="268.936" y="101.056" width="39.778" height="17.565" style="stroke: rgb(0, 0, 0); fill: none;"/>
-    <rect x="414.835" y="100.706" width="39.778" height="17.565" style="stroke: rgb(0, 0, 0); fill: none;"/>
+    <rect x="268.936" y="101.056" width="41" height="17.565" style="stroke: rgb(0, 0, 0); fill: none;"/>
+    <rect x="414.835" y="100.706" width="41" height="17.565" style="stroke: rgb(0, 0, 0); fill: none;"/>
     <text style="font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; white-space: pre;" x="354.149" y="111.128">...</text>
-    <text style="font-family: Arial, sans-serif; font-size: 10px; white-space: pre;" x="419.062" y="112.922">stick++</text>
-    <text style="font-family: Arial, sans-serif; font-size: 10px; white-space: pre;" x="273.116" y="113.272">stick++</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; white-space: pre;" x="417" y="112.922">s_tick++</text>
+    <text style="font-family: Arial, sans-serif; font-size: 10px; white-space: pre;" x="271" y="113.272">s_tick++</text>
     <polyline style="fill: none; stroke: rgb(0, 0, 0);" points="461.783 82.53 465.939 84.122 464.316 88.898"/>
     <text style="font-family: Arial, sans-serif; font-size: 12px; white-space: pre;" x="17.808" y="112.401">SysTick_Handler()</text>
     <g transform="matrix(1, 0, 0, 1, -13.170377, -23.325369)">
