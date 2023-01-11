@@ -15,7 +15,8 @@ table, startup code, linker script, build automation using `make`, GPIO
 peripheral and LED blinky, SysTick timer, UART peripheral and debug output,
 `printf` redirect to UART (IO retargeting), debugging with Segger Ozone,
 system clock setup, web server implementation with device dashboard, and
-automatic tests.
+automatic tests (including
+[automatic tests on a real hardware](https://github.com/cpq/continuous-hardware-test)).
 
 Throughout the guide, we will be using a
 [Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
@@ -32,7 +33,7 @@ Nucleo-F429ZI.
 | --------- | ---------------- | ------------- | ------------ |
 | [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/) | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https//www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | complete |
 | [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/) |  [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | complete |
-| [RP2040 Pico-W](step-7-webserver/pico-w/) | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://datasheets.raspberrypi.com/picow/pico-w-datasheet.pdf) | in progress |
+| [RP2040 Pico-W5500](step-7-webserver/pico-w/) | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://datasheets.raspberrypi.com/picow/pico-datasheet.pdf) | complete |
 
 Feel free to file an issue to support the board you work with.
 
@@ -1681,7 +1682,8 @@ run](https://github.com/cpq/bare-metal-programming-guide/actions/runs/3840030588
 
 Would it be great to also test built firmware binaries on a real hardware, to
 test not only the build process, but that the built firmware is correct and
-functional? Easy. See my other guide [COMING SOON] for detailed instructions.
+functional? Easy. See my https://github.com/cpq/continuous-hardware-test
+for detailed instructions.
 
 ## About the author
 
