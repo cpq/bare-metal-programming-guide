@@ -33,7 +33,7 @@ Nucleo-F429ZI.
 | --------- | ---------------- | ------------- | ------------ |
 | [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/) | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https//www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | complete |
 | [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/) |  [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | complete |
-| [RP2040 Pico-W5500](step-7-webserver/pico-w/) | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://datasheets.raspberrypi.com/picow/pico-datasheet.pdf) | complete |
+| [RP2040 Pico-W5500](step-7-webserver/pico-w5500/) | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf) | complete |
 
 Feel free to file an issue to support the board you work with.
 
