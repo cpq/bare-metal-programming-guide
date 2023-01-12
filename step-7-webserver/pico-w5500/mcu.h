@@ -40,9 +40,7 @@ static inline void nvic_set_prio(uint8_t irq, uint8_t prio) {
   NVIC->IP[irq >> 2] = ((uint32_t) (NVIC->IP[irq >> 2] & ~(255U << shift)) |
                         (((prio << 6U) & (uint32_t) 255UL) << shift));
 }
-static inline void nvic_enable_irq(uint8_t irq) {
-  NVIC->ISER[0] = BIT(irq);
-}
+static inline void nvic_enable_irq(uint8_t irq) { NVIC->ISER[0] = BIT(irq); }
 
 struct scb {
   volatile uint32_t CPUID, ICSR, VTOR, AIRCR, SCR, CCR;  // Incomplete
@@ -139,9 +137,7 @@ static inline void gpio_write(uint16_t pin, bool val) {
   }
 }
 
-static inline bool gpio_read(uint16_t pin) {
-  return SIO->GPIO_IN & BIT(pin);
-}
+static inline bool gpio_read(uint16_t pin) { return SIO->GPIO_IN & BIT(pin); }
 
 // t: expiration time, prd: period, now: current time. Return true if expired
 static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
@@ -217,19 +213,22 @@ static inline void uart_write_byte(struct uart *uart, uint8_t byte) {
   while (uart->FR & BIT(5)) (void) 0;  // Wait while TX FIFO is full
   uart->DR = byte;
 }
+
 static inline void uart_write_buf(struct uart *uart, char *buf, size_t len) {
   while (len-- > 0) uart_write_byte(uart, *(uint8_t *) buf++);
 }
+
 static inline int uart_read_ready(struct uart *uart) {
   return uart->FR & BIT(4);
 }
+
 static inline uint8_t uart_read_byte(struct uart *uart) {
   return (uint8_t) (uart->DR & 255);
 }
 
 // Bit-bang SPI implementation
 struct spi {
-  int miso, mosi, clk, cs;  // Pins
+  int miso, mosi, clk, cs;  // SPI Pins
   int spin;                 // Number of NOP spins for bitbanging
 };
 
