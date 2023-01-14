@@ -36,7 +36,7 @@ test: update
 	grep 'Ethernet: up' /tmp/output.txt
 
 update: build
-	curl --fail -su :$(VCON_API_KEY) $(DEVICE_URL)/ota?uf2=1 --data-binary @firmware.uf2
+	curl --fail -su :$(VCON_API_KEY) $(DEVICE_URL)/ota --data-binary @firmware.bin
 
 clean:
 	$(RM) firmware.* bin2uf2

@@ -12,6 +12,8 @@ SECTIONS {
 
   .boot : ALIGN(4) {
     KEEP(*(.boot))
+    . = 256 - 4;
+    LONG(0xcccccccc) /* RP2040 expects CRC in the last 4 bytes of this block */
   } > boot
 
   .text : ALIGN(4) {
