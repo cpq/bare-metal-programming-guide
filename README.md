@@ -1780,12 +1780,12 @@ One of the example projects builds firmware for the RP2040-W5500 board, so
 let's flash it using a `curl` command and a saved API key. The best way is
 to add a Makefile target for testing, and let Github Actions (our software CI)
 call it:
-[.github/workflows/test.yml](https://github.com/cpq/bare-metal-programming-guide/blob/8d419f5e7718a8dcacad2ddc2f899eb75f64271e/.github/workflows/test.yml#L18)
+https://github.com/cpq/bare-metal-programming-guide/blob/8d419f5e7718a8dcacad2ddc2f899eb75f64271e/.github/workflows/test.yml#L18
 
 Note that we pass a `VCON_API_KEY` environment variable to `make`. Also note
 that we're invoking `test` Makefile target, which should build and test our
 firmware. Here is the `test` Makefile target:
-[step-7-webserver/pico-w5500/Makefile](https://github.com/cpq/bare-metal-programming-guide/blob/4fd72e67c380e3166a25c27b47afb41d431f84b9/step-7-webserver/pico-w5500/Makefile#L32-L37)
+https://github.com/cpq/bare-metal-programming-guide/blob/4fd72e67c380e3166a25c27b47afb41d431f84b9/step-7-webserver/pico-w5500/Makefile#L32-L37
 
 Explanation:
 - line 34: The `test` target depends on `build`, so we always build firmware
