@@ -1656,7 +1656,7 @@ for more details.
 A complete project source code you can find in
 [step-7-webserver](step-7-webserver) directory.
 
-## Automatic software and hardware tests
+## Automated firmware builds (software CI)
 
 It is a good practice for a software project to have a continuous
 integration (CI) test. On every change pushed to the
@@ -1680,10 +1680,149 @@ the repo which breaks a build, Github will notify us. On success, Github will
 keep quiet.  See an [example successful
 run](https://github.com/cpq/bare-metal-programming-guide/actions/runs/3840030588).
 
+
+## Automated firmware tests (hardware CI)
+
 Would it be great to also test built firmware binaries on a real hardware, to
 test not only the build process, but that the built firmware is correct and
-functional? Easy. See my https://github.com/cpq/continuous-hardware-test
-for detailed instructions.
+functional?
+
+It is not trivial to build such system ad hoc. For example,
+one can setup a dedicated test workstation, attach a tested device
+(e.g. Nucleo-F429ZI board) to it, and write a piece of software for remote
+firmware upload and test using a built-in debugger. Possible, but fragile,
+consumes a lot of efforts and needs a lot of attention.
+
+The alternative is to use one of the commercial hardware test systems (or EBFs,
+Embedded Board Farms), though such commercial solutions are quite expensive. 
+
+But there is an easy way.
+
+### Solution: ESP32 + vcon.io
+
+And there is a simple and inexpensive way to do it using the https://vcon.io
+service, which implements remote firmware update and UART monitor:
+
+1. Take any ESP32 or ESP32C3 device (e.g. any inexpensive development board)
+2. Flash a pre-built firmware on it, turning ESP32 into a remotely-controlled programmer
+3. Wire ESP32 to your target device: SWD pins for flashing, UART pins for capturing output
+4. Configure ESP32 to register on https://dash.vcon.io management dashboard
+
+When done, your target device will have an authenticated, secure RESTful
+API for reflashing and capturing device output. It can be called from anywhere,
+for example from the software CI:
+
+![](images/ota.svg)
+
+The [vcon.io](https://vcon.io) service is run by Cesanta - the company I work
+for. It is a paid service with a freebie quota: if you have just a few devices
+to manage, it is completely free.
+
+### Configuring and wiring ESP32
+
+Take any ESP32 or ESP32C3 device - a devboard, a module, or your custom device.
+Our recommendation is ESP32C3 XIAO devboard
+([buy on Digikey](https://www.digikey.ie/en/products/detail/seeed-technology-co-ltd/113991054/16652880))
+because of its low price (about 5 EUR) and small form factor.
+
+We're going to assume that the target device is a Raspberry Pi
+[W5500-EVB-Pico](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico)
+board with a built-in Ethernet interface. If your device is different,
+adjust the "Wiring" step according to your device's pinout.
+
+- Follow [Flashing ESP32](https://vcon.io/docs/#flashing-esp32) to flash your ESP32
+- Follow [Network Setup](https://vcon.io/docs/#network-setup) to register ESP32 on https://dash.vcon.io
+- Follow [Wiring](https://vcon.io/docs/#quick-start-guide) to wire ESP32 to your device
+
+This is how a configured device breadboard setup may look like:
+![](images/breadboard.webp)
+
+This is how a configured device dashboard looks like:
+![](images/screenshot.webp)
+
+Now, you can reflash your device with a single command:
+
+```sh
+curl -su :$API_KEY 'https://dash.vcon.io/api/v3/devices/$ID/ota' --data-binary @firmware.bin
+```
+
+Where `API_KEY` is the dash.vcon.io authentication key, `ID` is the registered
+device number, and `firmware.bin` is the name of the newly built firmware.  You
+can get the `API_KEY` by clicking on the "api key" link on a dashboard.  The
+device ID is listed in the table.
+
+We can also capture device output with a single command: 
+
+```sh
+curl -su :$API_KEY 'https://dash.vcon.io/api/v3/devices/$ID/tx?t=5'
+```
+
+There, `t=5` means wait 5 seconds while capturing UART output.
+
+Now, we can use those two commands in any software CI platform to test a new
+firmware on a real device, and test device's UART output against some expected
+keywords. 
+
+### Integrating with Github Actions
+
+Okay, our software CI builds a firmware image for us. It would be nice to
+test that firmware image on a real hardware. And now we can!
+We should add few extra commands that use `curl` utility to send a built
+firmware to the test board, and then capture its debug output.
+
+A `curl` command requires a secret API key, which we do not want to expose to
+the public. The right way to go is to:
+1. Go to the project settings / Secrets / Actions
+2. Click on "New repository secret" button
+3. Give it a name, `VCON_API_KEY`, paste the value into a "Secret" box, click "Add secret"
+
+One of the example projects builds firmware for the RP2040-W5500 board, so
+let's flash it using a `curl` command and a saved API key. The best way is
+to add a Makefile target for testing, and let Github Actions (our software CI)
+call it:
+[.github/workflows/test.yml](https://github.com/cpq/bare-metal-programming-guide/blob/8d419f5e7718a8dcacad2ddc2f899eb75f64271e/.github/workflows/test.yml#L18)
+
+Note that we pass a `VCON_API_KEY` environment variable to `make`. Also note
+that we're invoking `test` Makefile target, which should build and test our
+firmware. Here is the `test` Makefile target:
+[step-7-webserver/pico-w5500/Makefile](https://github.com/cpq/bare-metal-programming-guide/blob/4fd72e67c380e3166a25c27b47afb41d431f84b9/step-7-webserver/pico-w5500/Makefile#L32-L37)
+
+Explanation:
+- line 34: The `test` target depends on `build`, so we always build firmware
+  before testing
+- line 35: We flash firmware remotely. The `--fail` flag to `curl` utility
+  makes it fail if the response from the server is not successful (not HTTP 200
+  OK)
+- line 36: Capture UART log for 5 seconds and save it to `/tmp/output.txt`
+- line 37: Search for the string `Ethernet: up` in the output, and fail if it
+  is not found
+
+This is the example output of the `make test` command described above:
+
+```sh
+$ make test
+curl --fail ...
+{"success":true,"written":59904}
+curl --fail ...
+3f3 2 main.c:65:main                    Ethernet: down
+7d7 1 mongoose.c:6760:onstatechange     Link up
+7e5 3 mongoose.c:6843:tx_dhcp_discover  DHCP discover sent
+7e8 2 main.c:65:main                    Ethernet: up
+81d 3 mongoose.c:6726:arp_cache_add     ARP cache: added 192.168.0.1 @ 90:5c:44:55:19:8b
+822 2 mongoose.c:6752:onstatechange     READY, IP: 192.168.0.24
+827 2 mongoose.c:6753:onstatechange            GW: 192.168.0.1
+82d 2 mongoose.c:6755:onstatechange            Lease: 86336 sec
+bc3 2 main.c:65:main                    Ethernet: up
+fab 2 main.c:65:main                    Ethernet: up
+```
+
+Done! Now, our automatic tests ensure that the firmware can be built, that is
+it bootable, that it initialises the network stack correctly.  This mechanism
+can be easily extended: just add more complex actions in your firmware binary,
+print the result to the UART, and check for the expected output in the test.
+
+Happy testing!
+
 
 ## About the author
 
