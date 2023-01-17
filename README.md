@@ -1785,17 +1785,20 @@ https://github.com/cpq/bare-metal-programming-guide/blob/8d419f5e7718a8dcacad2dd
 Note that we pass a `VCON_API_KEY` environment variable to `make`. Also note
 that we're invoking `test` Makefile target, which should build and test our
 firmware. Here is the `test` Makefile target:
-https://github.com/cpq/bare-metal-programming-guide/blob/4fd72e67c380e3166a25c27b47afb41d431f84b9/step-7-webserver/pico-w5500/Makefile#L32-L37
+https://github.com/cpq/bare-metal-programming-guide/blob/d9bced31b1ccde8eca4d6dc38440e104dba053ce/step-7-webserver/pico-w5500/Makefile#L32-L39
 
 Explanation:
-- line 34: The `test` target depends on `build`, so we always build firmware
+- line 34: The `test` target depends on the `upload` target, so `upload`
+  is executed first (see line 38)
+- line 35: Capture UART log for 5 seconds and save it to `/tmp/output.txt`
+- line 36: Search for the string `Ethernet: up` in the output, and fail if it
+  is not found. The `Ethernet: up` is printed by the firmware when it
+  acquired an IP address via DHCP - e.g. when it initialises network
+- line 38: The `upload` target depends on `build`, so we always build firmware
   before testing
-- line 35: We flash firmware remotely. The `--fail` flag to `curl` utility
+- line 39: We flash firmware remotely. The `--fail` flag to `curl` utility
   makes it fail if the response from the server is not successful (not HTTP 200
   OK)
-- line 36: Capture UART log for 5 seconds and save it to `/tmp/output.txt`
-- line 37: Search for the string `Ethernet: up` in the output, and fail if it
-  is not found
 
 This is the example output of the `make test` command described above:
 
