@@ -1792,8 +1792,7 @@ Explanation:
   is executed first (see line 38)
 - line 35: Capture UART log for 5 seconds and save it to `/tmp/output.txt`
 - line 36: Search for the string `Ethernet: up` in the output, and fail if it
-  is not found. The `Ethernet: up` is printed by the firmware when it
-  acquired an IP address via DHCP - e.g. when it initialises network
+  is not found
 - line 38: The `upload` target depends on `build`, so we always build firmware
   before testing
 - line 39: We flash firmware remotely. The `--fail` flag to `curl` utility
