@@ -1658,8 +1658,8 @@ A complete project source code you can find in
 
 ## Automated firmware builds (software CI)
 
-It is a good practice for a software project to have a continuous
-integration (CI) test. On every change pushed to the
+It is a good practice for a software project to have continuous
+integration (CI). On every change pushed to the
 repository, CI automatically rebuilds and tests all components.
 
 Github makes it easy to do. We can create a `.github/workflows/test.yml` file
@@ -1687,7 +1687,7 @@ Would it be great to also test built firmware binaries on a real hardware, to
 test not only the build process, but that the built firmware is correct and
 functional?
 
-It is not trivial to build such system ad hoc. For example,
+It is not trivial to build such a system ad hoc. For example,
 one can setup a dedicated test workstation, attach a tested device
 (e.g. Nucleo-F429ZI board) to it, and write a piece of software for remote
 firmware upload and test using a built-in debugger. Possible, but fragile,
@@ -1700,8 +1700,8 @@ But there is an easy way.
 
 ### Solution: ESP32 + vcon.io
 
-And there is a simple and inexpensive way to do it using the https://vcon.io
-service, which implements remote firmware update and UART monitor:
+Using https://vcon.io service, which implements remote firmware update and
+UART monitor, we can:
 
 1. Take any ESP32 or ESP32C3 device (e.g. any inexpensive development board)
 2. Flash a pre-built firmware on it, turning ESP32 into a remotely-controlled programmer
@@ -1714,9 +1714,9 @@ for example from the software CI:
 
 ![](images/ota.svg)
 
-The [vcon.io](https://vcon.io) service is run by Cesanta - the company I work
-for. It is a paid service with a freebie quota: if you have just a few devices
-to manage, it is completely free.
+Note: the [vcon.io](https://vcon.io) service is run by Cesanta - the company I
+work for. It is a paid service with a freebie quota: if you have just a few
+devices to manage, it is completely free.
 
 ### Configuring and wiring ESP32
 
