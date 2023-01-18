@@ -1828,11 +1828,11 @@ Happy testing!
 
 ## About the author
 
-I am Sergey Lyubka, an engineer and entrepreneur. I hold MSc in RadioPhysics
-and Electronics from Kyiv State University, Ukraine. I am a director and
-co-founder at Cesanta - a technology company based in Dublin, Ireland.  My
-passion is bare metal embedded programming and embedded network programming.
-My company develops embedded solutions:
+I am Sergey Lyubka, an engineer and entrepreneur. I hold a MSc in Physics from
+Kyiv State University, Ukraine. I am a director and co-founder at Cesanta - a
+technology company based in Dublin, Ireland.  My passion is bare metal embedded
+programming and embedded network programming.  My company develops embedded
+solutions:
 - https://mongoose.ws - an open source HTTP/MQTT/Websocket network library
 - https://vcon.io - a remote firmware update / serial monitor framework
 
