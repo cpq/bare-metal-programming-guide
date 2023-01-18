@@ -31,7 +31,7 @@ Nucleo-F429ZI.
 
 | Skeleton project | MCU datasheet | Board datasheet | Status |
 | --------- | ---------------- | ------------- | ------------ |
-| [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/) | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https//www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | complete |
+| [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/) | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | complete |
 | [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/) |  [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | complete |
 | [RP2040 Pico-W5500](step-7-webserver/pico-w5500/) | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | complete |
 
@@ -764,7 +764,7 @@ int main(void) {
   uint16_t led = PIN('B', 7);            // Blue LED
   RCC->AHB1ENR |= BIT(PINBANK(led));     // Enable GPIO clock for LED
   gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
-  for (;;) asm volatile("nop");          // Infinite loop
+  for (;;) (void) 0;                     // Infinite loop
   return 0;
 }
 ```
@@ -779,7 +779,7 @@ register (i.e. set pin low). Let's define an API function for that:
 ```c
 static inline void gpio_write(uint16_t pin, bool val) {
   struct gpio *gpio = GPIO(PINBANK(pin));
-  gpio->BSRR |= (1U << PINNO(pin)) << (val ? 0 : 16);
+  gpio->BSRR = (1U << PINNO(pin)) << (val ? 0 : 16);
 }
 ```
 
@@ -789,7 +789,7 @@ a NOP instruction a given number of times:
 
 ```c
 static inline void spin(volatile uint32_t count) {
-  while (count--) asm("nop");
+  while (count--) (void) 0;
 }
 ```
 
@@ -932,7 +932,7 @@ Now we are ready to update our main loop and use a precise timer for LED blink.
 For example, let's use 250 milliseconds blinking interval:
 
 ```c
-  uint32_t timer, period = 250;          // Declare timer and 250ms period
+  uint32_t timer, period = 500;          // Declare timer and 500ms period
   for (;;) {
     if (timer_expired(&timer, period, s_ticks)) {
       static bool on;       // This block is executed
@@ -1019,16 +1019,16 @@ Now we're ready to create a UART initialization API function:
 #define FREQ 16000000  // CPU frequency, 16 Mhz
 static inline void uart_init(struct uart *uart, unsigned long baud) {
   // https://www.st.com/resource/en/datasheet/stm32f429zi.pdf
-  uint8_t af = 0;           // Alternate function
+  uint8_t af = 7;           // Alternate function
   uint16_t rx = 0, tx = 0;  // pins
 
   if (uart == UART1) RCC->APB2ENR |= BIT(4);
   if (uart == UART2) RCC->APB1ENR |= BIT(17);
   if (uart == UART3) RCC->APB1ENR |= BIT(18);
 
-  if (uart == UART1) af = 4, tx = PIN('A', 9), rx = PIN('A', 10);
-  if (uart == UART2) af = 4, tx = PIN('A', 2), rx = PIN('A', 3);
-  if (uart == UART3) af = 7, tx = PIN('D', 8), rx = PIN('D', 9);
+  if (uart == UART1) tx = PIN('A', 9), rx = PIN('A', 10);
+  if (uart == UART2) tx = PIN('A', 2), rx = PIN('A', 3);
+  if (uart == UART3) tx = PIN('D', 8), rx = PIN('D', 9);
 
   gpio_set_mode(tx, GPIO_MODE_AF);
   gpio_set_af(tx, af);
@@ -1156,7 +1156,7 @@ int main(void) {
   systick_init(16000000 / 1000);         // Tick every 1 ms
   gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
   uart_init(UART3, 115200);              // Initialise UART
-  uint32_t timer = 0, period = 250;      // Declare timer and 250ms period
+  uint32_t timer = 0, period = 500;      // Declare timer and 500ms period
   for (;;) {
     if (timer_expired(&timer, period, s_ticks)) {
       static bool on;                      // This block is executed
@@ -1364,7 +1364,7 @@ standard C inludes, vendor CMSIS include, defines to PIN, BIT, FREQ, and
 #define PINBANK(pin) (pin >> 8)
 
 static inline void spin(volatile uint32_t count) {
-  while (count--) asm("nop");
+  while (count--) (void) 0;
 }
 
 static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {

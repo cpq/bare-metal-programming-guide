@@ -20,7 +20,7 @@ int main(void) {
   gpio_init(led, GPIO_MODE_OUTPUT, GPIO_OTYPE_PUSH_PULL, GPIO_SPEED_HIGH,
             GPIO_PULL_NONE, 0);          // Set LED1 to output mode
   uart_init(UART0, 115200);              // Initialise UART
-  uint32_t timer = 0, period = 250;      // Declare timer and 250ms period
+  uint32_t timer = 0, period = 500;      // Declare timer and 500ms period
 
   // Initialise Ethernet, enable LED pins
   // See datasheet: https://www.ti.com/lit/pdf/spms433

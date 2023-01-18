@@ -11,7 +11,7 @@ else
   RM = rm -f
 endif
 
-build: firmware.elf
+build: firmware.bin
 
 firmware.elf: $(SOURCES)
 	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -o $@

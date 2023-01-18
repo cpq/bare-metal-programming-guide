@@ -48,7 +48,7 @@ static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
 
 static inline void gpio_write(uint16_t pin, bool val) {
   struct gpio *gpio = GPIO(PINBANK(pin));
-  gpio->BSRR |= (1U << PINNO(pin)) << (val ? 0 : 16);
+  gpio->BSRR = (1U << PINNO(pin)) << (val ? 0 : 16);
 }
 
 static inline void spin(volatile uint32_t count) {
@@ -56,9 +56,7 @@ static inline void spin(volatile uint32_t count) {
 }
 
 static volatile uint32_t s_ticks;
-void SysTick_Handler(void) {
-  s_ticks++;
-}
+void SysTick_Handler(void) { s_ticks++; }
 
 // t: expiration time, prd: period, now: current time. Return true if expired
 bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
@@ -74,7 +72,7 @@ int main(void) {
   RCC->AHB1ENR |= BIT(PINBANK(led));     // Enable GPIO clock for LED
   systick_init(16000000 / 1000);         // Tick every 1 ms
   gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
-  uint32_t timer, period = 250;          // Declare timer and 250ms period
+  uint32_t timer = 0, period = 500;      // Declare timer and 500ms period
   for (;;) {
     if (timer_expired(&timer, period, s_ticks)) {
       static bool on;       // This block is executed
