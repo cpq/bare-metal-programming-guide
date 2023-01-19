@@ -18,22 +18,18 @@ system clock setup, web server implementation with device dashboard, and
 automatic tests (including
 [automatic tests on a real hardware](https://github.com/cpq/continuous-hardware-test)).
 
-Throughout the guide, we will be using a
-[Nucleo-F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html)
-development board  ([buy on
-Mouser](https://eu.mouser.com/ProductDetail/STMicroelectronics/NUCLEO-F429ZI?qs=mKNKSX85ZJcE6FU0UkiXTA%3D%3D)).
 Every chapter in this guide comes with a complete source code which gradually
 progress in functionality and completeness.  The last (web server) chapter is
 the most complete, and can be used as a skeleton for the project of your own,
 dear reader.  Therefore, that last example project is provided for the other
-boards too. To follow this tutorial, download MCU and dev board datasheets for
-Nucleo-F429ZI.
+boards too. This tutorial uses the Nucleo-F429ZI development board, so go ahead
+and download the "mcu datasheet" and the "board datasheet" for it.
 
-| Skeleton project | MCU datasheet | Board datasheet | Status |
-| --------- | ---------------- | ------------- | ------------ |
-| [STM32 Nucleo-F429ZI](step-7-webserver/nucleo-f429zi/) | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | complete |
-| [TI EK-TM4C1294XL](step-7-webserver/ek-tm4c1294xl/) |  [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | complete |
-| [RP2040 Pico-W5500](step-7-webserver/pico-w5500/) | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | complete |
+| Board | MCU datasheet | Board datasheet | Status | Skeleton project |
+| ----- | ------------- | --------------- | ------ | ---------------- |
+| STM32 Nucleo-F429ZI | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | complete |  [link](step-7-webserver/nucleo-f429zi/) |
+| TI EK-TM4C1294XL | [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | complete | [link](step-7-webserver/ek-tm4c1294xl) | 
+| RP2040 Pico-W5500 | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | complete | [link](step-7-webserver/pico-w5500/) |
 
 Feel free to file an issue to support the board you work with.
 
