@@ -1031,7 +1031,7 @@ static inline void uart_init(struct uart *uart, unsigned long baud) {
   gpio_set_mode(rx, GPIO_MODE_AF);
   gpio_set_af(rx, af);
   uart->CR1 = 0;                           // Disable this UART
-  uart->BRR = FREQ / baud;                 // FREQ is a CPU frequency 
+  uart->BRR = FREQ / baud;                 // FREQ is a UART bus frequency
   uart->CR1 |= BIT(13) | BIT(2) | BIT(3);  // Set UE, RE, TE
 }
 ```
