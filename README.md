@@ -15,15 +15,14 @@ table, startup code, linker script, build automation using `make`, GPIO
 peripheral and LED blinky, SysTick timer, UART peripheral and debug output,
 `printf` redirect to UART (IO retargeting), debugging with Segger Ozone,
 system clock setup, web server implementation with device dashboard, and
-automatic tests (including
-[automatic tests on a real hardware](https://github.com/cpq/continuous-hardware-test)).
+automatic tests.
 
 Every chapter in this guide comes with a complete source code which gradually
 progress in functionality and completeness.  The last (web server) chapter is
 the most complete, and can be used as a skeleton for the project of your own,
 dear reader.  Therefore, that last example project is provided for the other
-boards too. This tutorial uses the Nucleo-F429ZI development board, so go ahead
-and download the "mcu datasheet" and the "board datasheet" for it.
+boards too. In this tutorial we'll use the Nucleo-F429ZI development board, so
+go ahead and download the "mcu datasheet" and the "board datasheet" for it.
 
 | Board | MCU datasheet | Board datasheet | Status | Skeleton project |
 | ----- | ------------- | --------------- | ------ | ---------------- |
