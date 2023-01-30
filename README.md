@@ -1691,7 +1691,9 @@ When done, your target device will have an authenticated, secure RESTful
 API for reflashing and capturing device output. It can be called from anywhere,
 for example from the software CI:
 
-![](images/ota.svg)
+<div style="background: #777; padding: 1em; border-radius: 0.8em;">
+  <img src="https://vcon.io/images/hero.svg" />
+</div>
 
 Note: the [vcon.io](https://vcon.io) service is run by Cesanta - the company I
 work for. It is a paid service with a freebie quota: if you have just a few
@@ -1700,7 +1702,7 @@ devices to manage, it is completely free.
 ### Configuring and wiring ESP32
 
 Take any ESP32 or ESP32C3 device - a devboard, a module, or your custom device.
-Our recommendation is ESP32C3 XIAO devboard
+My recommendation is ESP32C3 XIAO devboard
 ([buy on Digikey](https://www.digikey.ie/en/products/detail/seeed-technology-co-ltd/113991054/16652880))
 because of its low price (about 5 EUR) and small form factor.
 
@@ -1709,9 +1711,9 @@ We're going to assume that the target device is a Raspberry Pi
 board with a built-in Ethernet interface. If your device is different,
 adjust the "Wiring" step according to your device's pinout.
 
-- Follow [Flashing ESP32](https://vcon.io/docs/#flashing-esp32) to flash your ESP32
-- Follow [Network Setup](https://vcon.io/docs/#network-setup) to register ESP32 on https://dash.vcon.io
-- Follow [Wiring](https://vcon.io/docs/#quick-start-guide) to wire ESP32 to your device
+- Follow [Flashing ESP32](https://vcon.io/docs/#module-flashing) to flash your ESP32
+- Follow [Network Setup](https://vcon.io/docs/#module-registration) to register ESP32 on https://dash.vcon.io
+- Follow [Wiring](https://vcon.io/docs/#module-to-device-wiring) to wire ESP32 to your device
 
 This is how a configured device breadboard setup may look like:
 ![](images/breadboard.webp)
@@ -1722,7 +1724,7 @@ This is how a configured device dashboard looks like:
 Now, you can reflash your device with a single command:
 
 ```sh
-curl -su :$API_KEY 'https://dash.vcon.io/api/v3/devices/$ID/ota' --data-binary @firmware.bin
+curl -su :API_KEY https://dash.vcon.io/api/v3/devices/ID/ota --data-binary @firmware.bin
 ```
 
 Where `API_KEY` is the dash.vcon.io authentication key, `ID` is the registered
@@ -1733,7 +1735,7 @@ device ID is listed in the table.
 We can also capture device output with a single command: 
 
 ```sh
-curl -su :$API_KEY 'https://dash.vcon.io/api/v3/devices/$ID/tx?t=5'
+curl -su :API_KEY https://dash.vcon.io/api/v3/devices/ID/tx?t=5
 ```
 
 There, `t=5` means wait 5 seconds while capturing UART output.
