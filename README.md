@@ -1691,9 +1691,7 @@ When done, your target device will have an authenticated, secure RESTful
 API for reflashing and capturing device output. It can be called from anywhere,
 for example from the software CI:
 
-<div style="background: #777; padding: 1em; border-radius: 0.8em;">
-  <img src="https://vcon.io/images/hero.svg" />
-</div>
+![VCON module operation](images/hero.svg)
 
 Note: the [vcon.io](https://vcon.io) service is run by Cesanta - the company I
 work for. It is a paid service with a freebie quota: if you have just a few
