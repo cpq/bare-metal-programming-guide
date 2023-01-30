@@ -6,16 +6,16 @@
 English | [中文](README_zh-CN.md)
 
 This guide is written for developers who wish to start programming
-microcontrollers using GCC compiler and a datasheet - nothing else! The
-fundamentals explained in this guide, will help you understand better how
-frameworks like Cube, Keil, Arduino - and others, work.
+microcontrollers using a GCC compiler and a datasheet, without using any
+framework! This guide explains the fundamentals - and it helps to
+understand how embedded frameworks (Cube, Keil, Arduino, etc) work.
 
 The guide covers the following topics: memory and registers, interrupt vector
 table, startup code, linker script, build automation using `make`, GPIO
 peripheral and LED blinky, SysTick timer, UART peripheral and debug output,
-`printf` redirect to UART (IO retargeting), debugging with Segger Ozone,
-system clock setup, web server implementation with device dashboard, and
-automatic tests.
+`printf` redirect to UART (IO retargeting), debugging with Segger Ozone, system
+clock setup, using CMSIS headers, web server implementation with device
+dashboard, and automatic tests.
 
 Every chapter in this guide comes with a complete source code which gradually
 progress in functionality and completeness.  The last (web server) chapter is
