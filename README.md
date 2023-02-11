@@ -39,6 +39,7 @@ To proceed, the following tools are required:
 - ARM GCC, https://launchpad.net/gcc-arm-embedded - for compiling and linking
 - GNU make, http://www.gnu.org/software/make/ - for build automation
 - ST link, https://github.com/stlink-org/stlink - for flashing
+- Git, https://git-scm.com/ - for downloading source code and version control
 
 ### Setup instructions for Mac
 
@@ -46,7 +47,7 @@ Start a terminal, and execute:
 
 ```sh
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-$ brew install gcc-arm-embedded make stlink
+$ brew install gcc-arm-embedded make stlink git
 ```
 
 ### Setup instructions for Linux (Ubuntu)
@@ -55,7 +56,7 @@ Start a terminal, and execute:
 
 ```sh
 $ sudo apt -y update
-$ sudo apt -y install gcc-arm-none-eabi make stlink-tools
+$ sudo apt -y install gcc-arm-none-eabi make stlink-tools git
 ```
 
 ### Setup instructions for Windows
@@ -65,16 +66,19 @@ $ sudo apt -y install gcc-arm-none-eabi make stlink-tools
 - Download [stlink-1.7.0-x86_64-w64-mingw32.zip](https://github.com/stlink-org/stlink/releases/download/v1.7.0/stlink-1.7.0-x86_64-w64-mingw32.zip) and unpack `bin/st-flash.exe` into `c:\tools`
 - Download [make-4.4-without-guile-w32-bin.zip](https://sourceforge.net/projects/ezwinports/files/make-4.4-without-guile-w32-bin.zip/download) and unpack `bin/make.exe` into `c:\tools`
 - Add `c:\tools` to the `Path` environment variable
-- Verify installation:
-  - Download and unzip [this repository](https://github.com/cpq/bare-metal-programming-guide/archive/refs/heads/main.zip) into `c:\`
-  - Start command prompt, and execute the following:
-  <pre style="color: silver;">
-  C:\Users\YOURNAME> <b style="color: black;">cd \</b>
-  C:\> <b style="color: black;">cd bare-metal-programming-guide-main\step-0-minimal</b>
-  C:\bare-metal-programming-guide-main\step-0-minimal> <b style="color: black;">make</b>
-  arm-none-eabi-gcc main.c  -W -Wall -Wextra -Werror ...
-  </pre>
+- Enable "Developer Mode" in Windows 10/11, for symbolic link support.
+- Install Git from https://git-scm.com/download/win. Check "Enable symlink" during installation
 
+### Verify installed tools
+
+Now, when all required tools are installed, start terminal/command prompt, and
+enter the following commands to download this repository and build an example:
+
+```sh
+git clone https://github.com/cpq/bare-metal-programming-guide
+cd bare-metal-programming-guide/step-0-minimal
+make
+```
 
 ## Introduction
 
