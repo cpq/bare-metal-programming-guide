@@ -780,9 +780,9 @@ Finally, we're ready to modify our main loop to implement LED blinking:
 
 ```c
   for (;;) {
-    gpio_write(pin, true);
+    gpio_write(led, true);
     spin(999999);
-    gpio_write(pin, false);
+    gpio_write(led, false);
     spin(999999);
   }
 ```
