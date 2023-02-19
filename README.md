@@ -656,7 +656,7 @@ firmware.bin: firmware.elf
 	$(DOCKER) $(CROSS)-objcopy -O binary $< $@
 
 flash: firmware.bin
-	st-flash --reset write $(TARGET).bin 0x8000000
+	st-flash --reset write $< 0x8000000
 ```
 
 That's it! Now, `make flash` terminal command creates a `firmware.bin` file,
