@@ -656,7 +656,7 @@ firmware.bin: firmware.elf
 	$(DOCKER) $(CROSS)-objcopy -O binary $< $@
 
 flash: firmware.bin
-	st-flash --reset write $(TARGET).bin 0x8000000
+	st-flash --reset write $< 0x8000000
 ```
 
 That's it! Now, `make flash` terminal command creates a `firmware.bin` file,
@@ -780,9 +780,9 @@ Finally, we're ready to modify our main loop to implement LED blinking:
 
 ```c
   for (;;) {
-    gpio_write(pin, true);
+    gpio_write(led, true);
     spin(999999);
-    gpio_write(pin, false);
+    gpio_write(led, false);
     spin(999999);
   }
 ```
