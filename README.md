@@ -179,11 +179,11 @@ we set a number of bits to zero? In four steps:
 | Get a number with N contiguous bits set: `2^N-1`, N=2 | `3`  | `000000000011` |
 | Shift that number X positions left | `(3<<6)` | `000011000000` |
 | Invert the number: turn zeros to ones, and ones to zeroes | `~(3<<6)` | `111100111111` |
-| Logical AND with existing value | `VAL &= ~(3<<6)` | `xxxx00xxxxxx` |
+| Bitwise AND with existing value | `VAL &= ~(3<<6)` | `xxxx00xxxxxx` |
 
-Note that the last operation, logical AND, turns N bits at position X to zero
+Note that the last operation, bitwise AND, turns N bits at position X to zero
 (because they are ANDed with 0), but retains the value of all other bits
-(because they are ANDed with 1).  Retaining existing value is important, cause
+(because they are ANDed with 1). Retaining existing value is important, cause
 we don't want to change settings in other bit ranges. So in general, if we want
 to clear N bits at position X:
 
@@ -295,7 +295,7 @@ self-explanatory and human readable.
 
 When an ARM MCU boots, it reads a so-called "vector table" from the
 beginning of flash memory. A vector table is a concept common to all ARM MCUs.
-That is a array of 32-bit addresses of interrupt handlers. First 16 entries
+That is an array of 32-bit addresses of interrupt handlers. First 16 entries
 are reserved by ARM and are common to all ARM MCUs. The rest of interrupt
 handlers are specific to the given MCU - these are interrupt handlers for
 peripherals. Simpler MCUs with few peripherals have few interrupt handlers,
@@ -342,7 +342,7 @@ For function `_reset()`, we have used GCC-specific attributes `naked` and
 be created by the compiler, and that function does not return.
 
 The `void (*tab[16 + 91])(void)` expression means: define an array of 16 + 91
-pointers to functions, that return nothing (void) and take to arguments. Each
+pointers to functions, that return nothing (void) and take no arguments. Each
 such function is an IRQ handler (Interrupt ReQuest handler). An array of those
 handlers is called a vector table.
 
@@ -653,7 +653,7 @@ Now, what is left - is the `flash` target:
 
 ```make
 firmware.bin: firmware.elf
-	$(DOCKER) $(CROSS)-objcopy -O binary $< $@
+	arm-none-eabi-objcopy -O binary $< $@
 
 flash: firmware.bin
 	st-flash --reset write $< 0x8000000
@@ -894,7 +894,7 @@ Now we should add `SysTick_Handler()` interrupt handler to the vector table:
 
 ```c
 __attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
-    0, _reset, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SysTick_Handler};
+    _estack, _reset, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SysTick_Handler};
 ```
 
 Now we have a precise millisecond clock! Let's create a helper function
@@ -970,11 +970,11 @@ To configure UART, we need to:
 - Enable the peripheral, receive and transmit via the CR1 register
 
 We already know how to set a GPIO pin into a specific mode. If a pin is in the
-AF mode, we also need to specify the "function number", i.e. which exactly
+AF mode, we also need to specify the "function number", i.e. which exact
 peripheral takes control. This can be done via the "alternate function register",
 `AFR`, of the GPIO peripheral. Reading the AFR register description in the
 datasheet, we can see that the AF number occupies 4 bits, thus the whole setup
-for 16 pins occupies 2 registers. If a p
+for 16 pins occupies 2 registers.
 
 ```c
 static inline void gpio_set_af(uint16_t pin, uint8_t af_num) {
@@ -1076,7 +1076,7 @@ On my Mac workstation, I use `cu`. It also can be used on Linux. On Windows,
 using `putty` utility can be a good idea. Run a terminal and see the messages:
 
 ```sh
-$ cu -l /dev/cu.YOUR_SERIAL_PORT -s 115200
+$ cu -l /dev/YOUR_SERIAL_PORT -s 115200
 hi
 hi
 ```
@@ -1099,7 +1099,7 @@ then a newlib code will be added to our firmware by the GCC linker.
 
 Some of the standard C functions that newlib implements, specifically, file
 input/output (IO) operations, implemented by the newlib is a special fashion: those
-functions eventually call a set of low-level IO functions called "sycalls".
+functions eventually call a set of low-level IO functions called "syscalls".
 
 For example:
 - `fopen()` eventually calls `_open()`
@@ -1306,7 +1306,7 @@ CMSIS stands for Common Microcontroller Software Interface Standard, thus it is
 a common ground for the MCU manufacturers to specify peripheral API.  Since
 CMSIS is an ARM standard, and since CMSIS headers are supplied by the MCU
 vendor, they are the source of authority. Therefore, using vendor
-headers is is a preferred way, rather than writing definitions manually.
+headers is a preferred way, rather than writing definitions manually.
 
 In this section, we will replace our API functions in the `mcu.h` by the
 CMSIS vendor header, and leave the rest of the firmware intact.
