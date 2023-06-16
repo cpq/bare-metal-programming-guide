@@ -56,7 +56,9 @@ static inline void spin(volatile uint32_t count) {
 }
 
 static volatile uint32_t s_ticks;
-void SysTick_Handler(void) { s_ticks++; }
+void SysTick_Handler(void) {
+  s_ticks++;
+}
 
 // t: expiration time, prd: period, now: current time. Return true if expired
 bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
@@ -99,5 +101,5 @@ __attribute__((naked, noreturn)) void _reset(void) {
 extern void _estack(void);  // Defined in link.ld
 
 // 16 standard and 91 STM32-specific handlers
-__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+__attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = {
     _estack, _reset, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SysTick_Handler};

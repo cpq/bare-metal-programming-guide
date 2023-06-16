@@ -18,5 +18,5 @@ extern void SysTick_Handler(void);  // Defined in main.c
 extern void _estack(void);          // Defined in link.ld
 
 // 16 standard and 91 STM32-specific handlers
-__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+__attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = {
     _estack, _reset, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SysTick_Handler};

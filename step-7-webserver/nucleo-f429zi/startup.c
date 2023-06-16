@@ -123,7 +123,7 @@ WEAK_ALIAS void DMA2D_IRQHandler(void);
 extern void _estack(void);  // Defined in link.ld
 
 // IRQ table
-__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+__attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = {
     // Cortex interrupts
     _estack, _reset, NMI_Handler, HardFault_Handler, MemManage_Handler,
     BusFault_Handler, UsageFault_Handler, 0, 0, 0, 0, SVC_Handler,

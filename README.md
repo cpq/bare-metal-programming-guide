@@ -7,8 +7,8 @@ English | [中文](README_zh-CN.md)
 
 This guide is written for developers who wish to start programming
 microcontrollers using a GCC compiler and a datasheet, without using any
-framework! This guide explains the fundamentals - and it helps to
-understand how embedded frameworks (Cube, Keil, Arduino, etc) work.
+framework. This guide explains the fundamentals, and helps to understand how
+embedded frameworks like Cube, Keil, Arduino, and others, work.
 
 The guide covers the following topics: memory and registers, interrupt vector
 table, startup code, linker script, build automation using `make`, GPIO
@@ -332,7 +332,7 @@ __attribute__((naked, noreturn)) void _reset(void) {
 extern void _estack(void);  // Defined in link.ld
 
 // 16 standard and 91 STM32-specific handlers
-__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+__attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = {
   _estack, _reset
 };
 ```
@@ -341,10 +341,10 @@ For function `_reset()`, we have used GCC-specific attributes `naked` and
 `noreturn` - they mean, standard function's prologue and epilogue should not
 be created by the compiler, and that function does not return.
 
-The `void (*tab[16 + 91])(void)` expression means: define an array of 16 + 91
-pointers to functions, that return nothing (void) and take to arguments. Each
-such function is an IRQ handler (Interrupt ReQuest handler). An array of those
-handlers is called a vector table.
+The `void (*const tab[16 + 91])(void)` expression means: define an array of 16
++ 91 pointers to functions, that return nothing (void) and take to arguments.
+Each such function is an IRQ handler (Interrupt ReQuest handler). An array of
+those handlers is called a vector table.
 
 The vector table `tab` we put in a separate section called `.vectors` - that we
 need later to tell the linker to put that section right at the beginning of the
@@ -893,7 +893,7 @@ updated by interrupt handlers, or by the hardware, declare as `volatile`**.
 Now we should add `SysTick_Handler()` interrupt handler to the vector table:
 
 ```c
-__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+__attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = {
     0, _reset, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SysTick_Handler};
 ```
 
@@ -1583,7 +1583,7 @@ WEAK_ALIAS void NMI_Handler(void);
 WEAK_ALIAS void HardFault_Handler(void);
 WEAK_ALIAS void MemManage_Handler(void);
 ...
-__attribute__((section(".vectors"))) void (*tab[16 + 91])(void) = {
+__attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = {
     0, _reset, NMI_Handler, HardFault_Handler, MemManage_Handler,
     ...
 ```

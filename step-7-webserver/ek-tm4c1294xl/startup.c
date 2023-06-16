@@ -130,7 +130,7 @@ WEAK_ALIAS void I2C9_Handler(void);
 extern void _estack();
 
 // IRQ table
-__attribute__((section(".vectors"))) void (*tab[16 + 114])(void) = {
+__attribute__((section(".vectors"))) void (*const tab[16 + 114])(void) = {
     // Cortex interrupts
     _estack, _reset, NMI_Handler, HardFault_Handler, MemManage_Handler,
     BusFault_Handler, UsageFault_Handler, 0, 0, 0, 0, SVC_Handler,
