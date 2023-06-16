@@ -8,12 +8,17 @@ void SysTick_Handler(void) {
   s_ticks++;
 }
 
+uint32_t SystemCoreClock = FREQ;
+void SystemInit(void) {
+  RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG
+  SysTick_Config(SystemCoreClock / 1000);  // Tick every 1 ms
+}
+
 int main(void) {
-  uint16_t led = PIN('B', 7);            // Blue LED
-  systick_init(FREQ / 1000);             // Tick every 1 ms
-  gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
-  uart_init(UART3, 115200);              // Initialise UART
-  uint32_t timer = 0, period = 500;      // Declare timer and 500ms period
+  uint16_t led = PIN('B', 7);                 // Blue LED
+  gpio_set_mode(led, GPIO_MODE_OUTPUT);       // Set blue LED to output mode
+  uart_init(UART_DEBUG, 115200);              // Initialise UART
+  volatile uint32_t timer = 0, period = 500;  // Declare timers
   for (;;) {
     if (timer_expired(&timer, period, s_ticks)) {
       static bool on;       // This block is executed

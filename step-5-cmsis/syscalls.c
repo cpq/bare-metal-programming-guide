@@ -56,7 +56,7 @@ int _getpid(void) {
 
 int _write(int fd, char *ptr, int len) {
   (void) fd, (void) ptr, (void) len;
-  if (fd == 1) uart_write_buf(UART3, ptr, (size_t) len);
+  if (fd == 1) uart_write_buf(UART_DEBUG, ptr, (size_t) len);
   return -1;
 }
 
@@ -83,4 +83,7 @@ int _stat(const char *path, struct stat *st) {
 int mkdir(const char *path, mode_t mode) {
   (void) path, (void) mode;
   return -1;
+}
+
+void _init(void) {
 }

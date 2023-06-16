@@ -21,14 +21,6 @@ static inline void spin(volatile uint32_t count) {
   while (count--) asm("nop");
 }
 
-static inline void systick_init(uint32_t ticks) {
-  if ((ticks - 1) > 0xffffff) return;  // Systick timer is 24 bit
-  SysTick->LOAD = ticks - 1;
-  SysTick->VAL = 0;
-  SysTick->CTRL = BIT(0) | BIT(1) | BIT(2);  // Enable systick
-  RCC->APB2ENR |= BIT(14);                   // Enable SYSCFG
-}
-
 #define GPIO(bank) ((GPIO_TypeDef *) (GPIOA_BASE + 0x400U * (bank)))
 enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG };
 
@@ -55,6 +47,10 @@ static inline void gpio_write(uint16_t pin, bool val) {
 #define UART1 USART1
 #define UART2 USART2
 #define UART3 USART3
+
+#ifndef UART_DEBUG
+#define UART_DEBUG USART3
+#endif
 
 static inline void uart_init(USART_TypeDef *uart, unsigned long baud) {
   // https://www.st.com/resource/en/datasheet/stm32f429zi.pdf
@@ -95,7 +91,8 @@ static inline uint8_t uart_read_byte(USART_TypeDef *uart) {
   return (uint8_t) (uart->DR & 255);
 }
 
-static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
+static inline bool timer_expired(volatile uint32_t *t, uint32_t prd,
+                                 uint32_t now) {
   if (now + prd < *t) *t = 0;                    // Time wrapped? Reset timer
   if (*t == 0) *t = now + prd;                   // Firt poll? Set expiration
   if (*t > now) return false;                    // Not expired yet, return
