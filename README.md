@@ -1323,6 +1323,7 @@ There are two sets of CMSIS headers:
   https://github.com/STMicroelectronics/cmsis_device_f4
 
 We can pull those headers by a simple Makefile snippet:
+https://github.com/cpq/bare-metal-programming-guide/blob/785aa2ead0432fc67327781c82b9c41149fba158/step-5-cmsis/Makefile#L27-L31
 
 The ST CMSIS package also provides startup files for all their MCUs. We
 can use those instead of hand-writing the startup.c. The ST-provided startup
@@ -1331,33 +1332,7 @@ file calls `SystemInit()` function, so we define it in the `main.c`.
 Now, let's replace our API functions in the `mcu.h` using CMSIS definitions,
 and leave the rest of the firmware intact.  From the `mcu.h`, remove all
 peripheral API and definitions, and leave only standard C inludes, vendor CMSIS
-include, defines to PIN, BIT, FREQ, and `timer_expired()` helper function:
-
-```c
-#pragma once
-
-#include <inttypes.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/stat.h>
-
-#include "stm32f429xx.h"
-
-#define FREQ 16000000  // CPU frequency, 16 Mhz
-#define BIT(x) (1UL << (x))
-#define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
-#define PINNO(pin) (pin & 255)
-#define PINBANK(pin) (pin >> 8)
-
-static inline void spin(volatile uint32_t count) {
-  while (count--) (void) 0;
-}
-
-static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
-  ...
-}
-```
+include, defines to PIN, BIT, FREQ, and `timer_expired()` helper function.
 
 If we try to rebuild the firmware - `make clean build`, then GCC will fail
 complaining about missing `systick_init()`, `GPIO_MODE_OUTPUT`, `uart_init()`,
@@ -1368,7 +1343,7 @@ Let's start from `systick_init()`. ARM core CMSIS headers provide a
 
 Next goes `gpio_set_mode()` function. The  `stm32f429xx.h` header has
 `GPIO_TypeDef` structure, identical to our `struct gpio`. Let's use it:
-https://github.com/cpq/bare-metal-programming-guide/blob/2a61ea23e44c4531b66f6508238cfc43ca7c2634/step-5-cmsis/mcu.h#L32-L41
+https://github.com/cpq/bare-metal-programming-guide/blob/785aa2ead0432fc67327781c82b9c41149fba158/step-5-cmsis/mcu.h#L24-L33
 
 The `gpio_set_af()` and `gpio_write()` functions is also trivial -
 simply replace `struct gpio` with `GPIO_TypeDef`, and that's all.
@@ -1390,7 +1365,10 @@ shows the output. Congratulations, we have adopted our firmware code to
 use vendor CMSIS header files. Now let's reorganise the repository a bit
 by moving all standard files into `include` directory and updating Makefile
 to let GCC know about it:
-https://github.com/cpq/bare-metal-programming-guide/blob/2a61ea23e44c4531b66f6508238cfc43ca7c2634/step-5-cmsis/Makefile#L3
+https://github.com/cpq/bare-metal-programming-guide/blob/785aa2ead0432fc67327781c82b9c41149fba158/step-5-cmsis/Makefile#L4
+
+Also, let's include CMSIS header pulling as a dependency for the binary:
+https://github.com/cpq/bare-metal-programming-guide/blob/785aa2ead0432fc67327781c82b9c41149fba158/step-5-cmsis/Makefile#L18
 
 We have left with a project template that can be reused for the future
 projects.  A complete project source code you can find in
