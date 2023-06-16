@@ -1182,8 +1182,10 @@ fstatr.c:(.text._fstat_r+0xe): undefined reference to `_fstat'
 isattyr.c:(.text._isatty_r+0xc): undefined reference to `_isatty'
 ```
 
-Since we've used a newlib stdio function, we need to supply newlib with the rest
-of syscalls. Let's add just a simple stubs that do nothing:
+Since we've used a newlib stdio function, we need to supply newlib with the
+rest of syscalls. We add a simple stubs that do nothing, with exception  of
+`_sbrk()`. It needs to be implemented, since `printf()` calls `malloc()` which
+calls `_sbrk()`:
 
 ```c
 int _fstat(int fd, struct stat *st) {
@@ -1192,8 +1194,13 @@ int _fstat(int fd, struct stat *st) {
 }
 
 void *_sbrk(int incr) {
-  (void) incr;
-  return NULL;
+  extern char _end;
+  static unsigned char *heap = NULL;
+  unsigned char *prev_heap;
+  if (heap == NULL) heap = (unsigned char *) &_end;
+  prev_heap = heap;
+  heap += incr;
+  return prev_heap;
 }
 
 int _close(int fd) {
