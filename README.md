@@ -1406,12 +1406,7 @@ and the APB2 clock: <= 90MHz. That narrows down the list of possible
 combinations. Here we chose the values manually. Note that tools like
 CubeMX can automate the process and make it easy and visual.
 
-```c
-enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
-enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 180, PLL_P = 2 };  // Run at 180 Mhz
-#define PLL_FREQ (PLL_HSI * PLL_N / PLL_M / PLL_P)
-#define SYS_FREQUENCY (PLL_FREQ * 1000000)
-```
+https://github.com/cpq/bare-metal-programming-guide/blob/9a3f9bc7b07d6a2a114581979e5b6715754c87c1/step-6-clock/hal.h#L20-L28
 
 Now we're ready for a simple algorithm to set up the clock for CPU and peripheral buses
 may look like this:
