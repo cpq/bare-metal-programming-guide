@@ -1423,6 +1423,15 @@ may look like this:
 - Move clock inititialization into a separate file `sysinit.c`, function
   `SystemInit()` which is automatically called by the startup code
 
+https://github.com/cpq/bare-metal-programming-guide/blob/9a3f9bc7b07d6a2a114581979e5b6715754c87c1/step-6-clock/sysinit.c#L10-L26
+
+We need to also change `hal.h` - specifically, the UART intialization code.
+Different UART controllers are running on different buses: UART1 runs on a
+fast APB2, and the rest of UARTs run on a slower APB1. When running on a
+default 16Mhz clock, that did not make a difference. But when running on
+higher speeds, APB1 and APB2 may have different clocks, thus we need to
+adjust the baud rate calculation for the UART:
+https://github.com/cpq/bare-metal-programming-guide/blob/9a3f9bc7b07d6a2a114581979e5b6715754c87c1/step-6-clock/hal.h#L90-L107
 
 Rebuild and reflash, and our board runs at its maximum speed, 180MHz!
 A complete project source code you can find in [step-6-clock](step-6-clock)
