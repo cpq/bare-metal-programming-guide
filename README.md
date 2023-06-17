@@ -12,8 +12,7 @@ embedded frameworks like Cube, Keil, Arduino, and others, work.
 
 Every chapter in this guide comes with a complete source code which gradually
 progress in functionality and completeness. In the end, I provide bare metal
-template projects for different architectures, summarised in the table below.
-The list of projects is as follows:
+template projects for different architectures:
 
 - **blinky** - classic, blink an LED and print a debug message periodically:
 - **cli** - UART command line interface. Implements commands to set LED status and hexdump RAM
@@ -23,9 +22,6 @@ The list of projects is as follows:
   count in a file, increment on each boot, and print on debug log
 - **webui** - web server with device dashboard
 
-In this tutorial we'll use the Nucleo-F429ZI development board, so
-go ahead and download the "mcu datasheet" and the "board datasheet" for it.
-
 | Board | MCU datasheet | Board datasheet | Template project |
 | ----- | ------------- | --------------- | ---------------- |
 | STM32 Nucleo-F429ZI | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | [blinky](templates/blinky/nucleo-f429zi), [cli](templates/cli/nucleo-f429zi), [webui](step-7-webserver/nucleo-f429zi/) |
@@ -34,6 +30,8 @@ go ahead and download the "mcu datasheet" and the "board datasheet" for it.
 | RP2040 Pico-W5500 | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | [webui](step-7-webserver/pico-w5500/) |
 
 Feel free to [suggest a board](https://github.com/cpq/bare-metal-programming-guide/issues/new) you work with.
+In this tutorial we'll use the Nucleo-F429ZI development board, so
+go ahead and download the "mcu datasheet" and the "board datasheet" for it.
 
 Note: all code in this tutorial is MIT licensed. ARM and ST CMSIS headers
 are Apache-2.0 licensed. The "lfs" template is using an external library
