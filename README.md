@@ -1117,17 +1117,17 @@ mechanism. We use newlib, so let's modify `_write()` syscall to print to the
 UART3.
 
 Before that, let's organise our source code in the following way:
-- move all API definitions to the file `mcu.h`
+- move all API definitions to the file `hal.h` (Harware Abstraction Layer)
 - move startup code to `startup.c`
 - create an empty file `syscalls.c` for newlib "syscalls"
 - modify Makefile to add `syscalls.c` and `startup.c` to the build
 
-After moving all API definitions to the `mcu.h`, our `main.c` file becomes
+After moving all API definitions to the `hal.h`, our `main.c` file becomes
 quite compact. Note that it does not have any mention of the low-level
 registers, just a high level API functions that are easy to understand:
 
 ```c
-#include "mcu.h"
+#include "hal.h"
 
 static volatile uint32_t s_ticks;
 void SysTick_Handler(void) {
@@ -1157,7 +1157,7 @@ Great, now let's retarget printf to the UART3. In the empty syscalls.c,
 copy/paste the following code:
 
 ```c
-#include "mcu.h"
+#include "hal.h"
 
 int _write(int fd, char *ptr, int len) {
   (void) fd, (void) ptr, (void) len;
@@ -1272,7 +1272,7 @@ Choose our firmware.elf file:
 <img src="images/ozone3.png" width="50%" />
 
 Leave the defaults on the next screen, click Finish, and we've got our
-debugger loaded (note the mcu.h source code is picked up):
+debugger loaded (note the hal.h source code is picked up):
 
 ![](images/ozone4.png)
 
@@ -1329,8 +1329,8 @@ The ST CMSIS package also provides startup files for all their MCUs. We
 can use those instead of hand-writing the startup.c. The ST-provided startup
 file calls `SystemInit()` function, so we define it in the `main.c`.
 
-Now, let's replace our API functions in the `mcu.h` using CMSIS definitions,
-and leave the rest of the firmware intact.  From the `mcu.h`, remove all
+Now, let's replace our API functions in the `hal.h` using CMSIS definitions,
+and leave the rest of the firmware intact.  From the `hal.h`, remove all
 peripheral API and definitions, and leave only standard C inludes, vendor CMSIS
 include, defines to PIN, BIT, FREQ, and `timer_expired()` helper function.
 
@@ -1343,7 +1343,7 @@ Let's start from `systick_init()`. ARM core CMSIS headers provide a
 
 Next goes `gpio_set_mode()` function. The  `stm32f429xx.h` header has
 `GPIO_TypeDef` structure, identical to our `struct gpio`. Let's use it:
-https://github.com/cpq/bare-metal-programming-guide/blob/785aa2ead0432fc67327781c82b9c41149fba158/step-5-cmsis/mcu.h#L24-L33
+https://github.com/cpq/bare-metal-programming-guide/blob/785aa2ead0432fc67327781c82b9c41149fba158/step-5-cmsis/hal.h#L24-L33
 
 The `gpio_set_af()` and `gpio_write()` functions is also trivial -
 simply replace `struct gpio` with `GPIO_TypeDef`, and that's all.

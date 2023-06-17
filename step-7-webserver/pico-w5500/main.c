@@ -1,7 +1,7 @@
 // Copyright (c) 2023 Cesanta Software Limited
 // All rights reserved
 
-#include "mcu.h"
+#include "hal.h"
 #include "mongoose.h"
 
 enum { LED = 25 };                                             // LED pins

@@ -894,15 +894,15 @@ newlib实现了一些标准C函数，特别是文件输入输出操作，并且�
 
 在那之前，我们先重新组织下源码结构：
 
-- 把所有API定义放到 `mcu.h` 文件中
+- 把所有API定义放到 `hal.h` 文件中
 - 把启动代码放到 `startup.c` 文件中
 - 为newlib的系统调用创建一个空文件 `syscalls.c`
 - 修改Makefile，把 `syscalls.c` 和 `startup.c` 加到build中
 
-将所有 API 定义移动到 `mcu.h` 后，`main.c` 文件变得相当紧凑。注意我们还没提到底层寄存器，高级API函数很容易理解：
+将所有 API 定义移动到 `hal.h` 后，`main.c` 文件变得相当紧凑。注意我们还没提到底层寄存器，高级API函数很容易理解：
 
 ```c
-#include "mcu.h"
+#include "hal.h"
 
 static volatile uint32_t s_ticks;
 void SysTick_Handler(void) {
@@ -931,7 +931,7 @@ int main(void) {
 现在我们把 `printf()` 重定向到串口3，在空的 `syscalls.c` 文件中拷入一下内容：
 
 ```c
-#include "mcu.h"
+#include "hal.h"
 
 int _write(int fd, char *ptr, int len) {
   (void) fd, (void) ptr, (void) len;
@@ -1027,7 +1027,7 @@ LED: 0, tick: 1000
 
 <img src="images/ozone3.png" width="50%" />
 
-接下来的步骤保持默认，点击“完成”，调试器已经载入（可以看到`mcu.h`源码被拾取）：
+接下来的步骤保持默认，点击“完成”，调试器已经载入（可以看到`hal.h`源码被拾取）：
 
 <img src="images/ozone3.png" width="50%" />
 
@@ -1060,7 +1060,7 @@ LED: 0, tick: 1000
 
 CMSIS代表通用微控制器软件接口标准（Common Microcontroller Software Interface Standard），因此它是MCU制造商指定外设API的共同基础。 因为CMSIS是一种ARM标准，并且CMSIS头文件由MCU厂商提供，所以是权威的来源。因此，使用供应商头文件是首选方法，而不是手动编写定义。
 
-在这一节，我们将使用供应商CMSIS头文件替换 `mcu.h` 中的API函数，并保持固件其它部分不变。
+在这一节，我们将使用供应商CMSIS头文件替换 `hal.h` 中的API函数，并保持固件其它部分不变。
 
 STM32 F4系列的CMSIS头文件在这个[仓库](https://github.com/STMicroelectronics/cmsis_device_f4)，从那里将以下文件拷到我们的固件文件夹[step-5-cmsis](step-5-cmsis)：
 
@@ -1074,7 +1074,7 @@ Those two files depend on a standard ARM CMSIS includes, download them too:
 - [cmsis_compiler.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/cmsis_compiler.h)
 - [mpu_armv7.h](https://raw.githubusercontent.com/STMicroelectronics/STM32CubeF4/master/Drivers/CMSIS/Core/Include/mpu_armv7.h)
 
-然后移除 `mcu.h` 中所有外设API和定义，只留下标准C包含、供应商CMSIS包含，引脚定义等：
+然后移除 `hal.h` 中所有外设API和定义，只留下标准C包含、供应商CMSIS包含，引脚定义等：
 
 ```c
 #pragma once

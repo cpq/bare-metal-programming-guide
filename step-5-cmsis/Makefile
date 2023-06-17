@@ -15,7 +15,7 @@ endif
 
 build: firmware.bin
 
-firmware.elf: cmsis_core cmsis_f4 mcu.h link.ld Makefile $(SOURCES) 
+firmware.elf: cmsis_core cmsis_f4 hal.h link.ld Makefile $(SOURCES) 
 	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(CFLAGS_EXTRA) $(LDFLAGS) -o $@
 
 firmware.bin: firmware.elf

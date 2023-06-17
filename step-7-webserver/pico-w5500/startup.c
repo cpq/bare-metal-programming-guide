@@ -1,7 +1,7 @@
 // Copyright (c) 2022 Cesanta Software Limited
 // All rights reserved
 
-#include "mcu.h"
+#include "hal.h"
 
 // Startup code
 __attribute__((naked, section(".boot"))) void _reset(void) {

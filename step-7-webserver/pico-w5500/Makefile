@@ -20,7 +20,7 @@ $(BIN2UF2): tools/bin2uf2.c
 	$(CC) -W -Wall $< -o $@
 endif
 
-firmware.elf: $(SOURCES) mcu.h
+firmware.elf: $(SOURCES) hal.h
 	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(LDFLAGS) -o $@
 
 firmware.bin: firmware.elf
