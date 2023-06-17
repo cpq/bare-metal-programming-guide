@@ -18,7 +18,8 @@ template projects for different architectures:
 - **cli** - UART command line interface. Implements commands to set LED status and hexdump RAM
 - **lfs** - implement file functions `mkdir()/opendir()/...`,
   `fopen()/fprintf()/...` using
-  [littlefs](https://github.com/littlefs-project/littlefs). Store device boot
+  [littlefs](https://github.com/littlefs-project/littlefs) in the upper
+  region of buit-in flash memory. Store device boot
   count in a file, increment on each boot, and print on debug log
 - **webui** - web server with device dashboard
 
