@@ -11,8 +11,8 @@ framework. This guide explains the fundamentals, and helps to understand how
 embedded frameworks like Cube, Keil, Arduino, and others, work.
 
 Every chapter in this guide comes with a complete source code which gradually
-progress in functionality and completeness. In the end, we provide bare metal
-template projects on different architectures, summarised in the table below.
+progress in functionality and completeness. In the end, I provide bare metal
+template projects for different architectures, summarised in the table below.
 The list of projects is as follows:
 
 - **blinky** - classic, blink an LED and print a debug message periodically:
