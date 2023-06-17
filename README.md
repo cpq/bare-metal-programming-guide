@@ -30,6 +30,10 @@ The list of projects is as follows:
     reboot
   enter command:
   ```
+- **lfs** - implement file functions mkdir, opendir, readdir, closedir,
+  fopen/fclose/... using
+  [littlefs](https://github.com/littlefs-project/littlefs). Store device boot
+  count in a file, increment on each boot, and print on debug log
 - **webui** - web server with device dashboard
 
 In this tutorial we'll use the Nucleo-F429ZI development board, so
@@ -38,13 +42,16 @@ go ahead and download the "mcu datasheet" and the "board datasheet" for it.
 | Board | MCU datasheet | Board datasheet | Template project |
 | ----- | ------------- | --------------- | ---------------- |
 | STM32 Nucleo-F429ZI | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | [blinky](templates/blinky/nucleo-f429zi), [cli](templates/cli/nucleo-f429zi), [webui](step-7-webserver/nucleo-f429zi/) |
+| STM32 Nucleo-FL432KC | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00151940-stm32l41xxx42xxx43xxx44xxx45xxx46xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/datasheet/stm32l432kc.pdf) | [blinky](templates/blinky/nucleo-l432kc), [cli](templates/cli/nucleo-l432kc), [lfs](templates/lfs/nucleo-l432kc) |
 | TI EK-TM4C1294XL | [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | [webui](step-7-webserver/ek-tm4c1294xl) | 
 | RP2040 Pico-W5500 | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | [webui](step-7-webserver/pico-w5500/) |
 
 Feel free to [suggest a board](https://github.com/cpq/bare-metal-programming-guide/issues/new) you work with.
 
-Note: all code in this tutorial is MIT licensed. The downloaded CMSIS headers
-are Apache-2.0 licensed. The "webui" template is using an external library
+Note: all code in this tutorial is MIT licensed. ARM and ST CMSIS headers
+are Apache-2.0 licensed. The "lfs" template is using an external library
+[littlefs](https://github.com/littlefs-project/littlefs), which is BSD-3
+licensed.  The "webui" template is using an external library
 [mongoose](https://github.com/cesanta/mongoose), which is dual-licensed
 (GPLv2/commercial).
 
