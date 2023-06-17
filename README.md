@@ -16,20 +16,7 @@ template projects for different architectures, summarised in the table below.
 The list of projects is as follows:
 
 - **blinky** - classic, blink an LED and print a debug message periodically:
-  ```text
-  tick:  1000, CPU 180 MHz
-  tick:  2000, CPU 180 MHz
-  ...
-  ```
 - **cli** - UART command line interface. Implements commands to set LED status and hexdump RAM
-  ```text
-  Boot complete. CPU 180 MHz
-  COMMANDS:
-    hexdump ADDR LENGTH
-    led <on|off|blink MILLIS>
-    reboot
-  enter command:
-  ```
 - **lfs** - implement file functions mkdir, opendir, readdir, closedir,
   fopen/fclose/... using
   [littlefs](https://github.com/littlefs-project/littlefs). Store device boot
