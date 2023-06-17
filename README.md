@@ -15,8 +15,21 @@ progress in functionality and completeness. In the end, we provide bare metal
 template projects on different architectures, summarised in the table below.
 The list of projects is as follows:
 
-- **blinky** - classic, blink an LED and print a debug message periodically
+- **blinky** - classic, blink an LED and print a debug message periodically:
+  ```text
+  tick:  1000, CPU 180 MHz
+  tick:  2000, CPU 180 MHz
+  ...
+  ```
 - **cli** - UART command line interface. Implements commands to set LED status and hexdump RAM
+  ```text
+  Boot complete. CPU 180 MHz
+  COMMANDS:
+    hexdump ADDR LENGTH
+    led <on|off|blink MILLIS>
+    reboot
+  enter command:
+  ```
 - **webui** - web server with device dashboard
 
 In this tutorial we'll use the Nucleo-F429ZI development board, so
@@ -30,9 +43,10 @@ go ahead and download the "mcu datasheet" and the "board datasheet" for it.
 
 Feel free to [suggest a board](https://github.com/cpq/bare-metal-programming-guide/issues/new) you work with.
 
-Note: all code in this tutorial is MIT licensed. However the "webui" template
-is using an external library [mongoose](https://github.com/cesanta/mongoose),
-which is dual-licensed (GPLv2/commercial).
+Note: all code in this tutorial is MIT licensed. The downloaded CMSIS headers
+are Apache-2.0 licensed. The "webui" template is using an external library
+[mongoose](https://github.com/cesanta/mongoose), which is dual-licensed
+(GPLv2/commercial).
 
 ## Tools setup
 
