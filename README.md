@@ -1343,7 +1343,7 @@ Let's start from `systick_init()`. ARM core CMSIS headers provide a
 
 Next goes `gpio_set_mode()` function. The  `stm32f429xx.h` header has
 `GPIO_TypeDef` structure, identical to our `struct gpio`. Let's use it:
-https://github.com/cpq/bare-metal-programming-guide/blob/785aa2ead0432fc67327781c82b9c41149fba158/step-5-cmsis/hal.h#L24-L33
+https://github.com/cpq/bare-metal-programming-guide/blob/52e1a8acd30e60eba4c119e22b609571e39a86e0/step-5-cmsis/hal.h#L24-L28
 
 The `gpio_set_af()` and `gpio_write()` functions is also trivial -
 simply replace `struct gpio` with `GPIO_TypeDef`, and that's all.
