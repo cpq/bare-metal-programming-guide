@@ -1410,7 +1410,7 @@ CubeMX can automate the process and make it easy and visual.
 enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
 enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 180, PLL_P = 2 };  // Run at 180 Mhz
 #define PLL_FREQ (PLL_HSI * PLL_N / PLL_M / PLL_P)
-#define FREQ (PLL_FREQ * 1000000)
+#define SYS_FREQUENCY (PLL_FREQ * 1000000)
 ```
 
 Now we're ready for a simple algorithm to set up the clock for CPU and peripheral buses
@@ -1420,24 +1420,11 @@ may look like this:
 - Set flash latency
 - Decide on a clock source, and PLL, APB1 and APB2 prescalers
 - Configure RCC by setting respective values:
+- Move clock inititialization into a separate file `sysinit.c`, function
+  `SystemInit()` which is automatically called by the startup code
 
-```c
-static inline void clock_init(void) {                 // Set clock frequency
-  SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
-  FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, caches
-  RCC->PLLCFGR &= ~((BIT(17) - 1));                   // Clear PLL multipliers
-  RCC->PLLCFGR |= (((PLL_P - 2) / 2) & 3) << 16;      // Set PLL_P
-  RCC->PLLCFGR |= PLL_M | (PLL_N << 6);               // Set PLL_M and PLL_N
-  RCC->CR |= BIT(24);                                 // Enable PLL
-  while ((RCC->CR & BIT(25)) == 0) spin(1);           // Wait until done
-  RCC->CFGR = (APB1_PRE << 10) | (APB2_PRE << 13);    // Set prescalers
-  RCC->CFGR |= 2;                                     // Set clock source to PLL
-  while ((RCC->CFGR & 12) == 0) spin(1);              // Wait until done
-}
-```
 
-What is left, is to call `clock_init()` from main, then rebuild and reflash.
-And our board runs at its maximum speed, 180MHz!
+Rebuild and reflash, and our board runs at its maximum speed, 180MHz!
 A complete project source code you can find in [step-6-clock](step-6-clock)
 
 ## Web server with device dashboard
