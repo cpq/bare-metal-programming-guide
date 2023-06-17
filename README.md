@@ -24,7 +24,7 @@ go ahead and download the "mcu datasheet" and the "board datasheet" for it.
 
 | Board | MCU datasheet | Board datasheet | Template project |
 | ----- | ------------- | --------------- | ---------------- |
-| STM32 Nucleo-F429ZI | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | [blinky](templates/blinky/nucleo-f429zi) [cli](templates/cli/nucleo-f429zi) [webui](step-7-webserver/nucleo-f429zi/) |
+| STM32 Nucleo-F429ZI | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | [blinky](templates/blinky/nucleo-f429zi), [cli](templates/cli/nucleo-f429zi), [webui](step-7-webserver/nucleo-f429zi/) |
 | TI EK-TM4C1294XL | [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | [webui](step-7-webserver/ek-tm4c1294xl) | 
 | RP2040 Pico-W5500 | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | [webui](step-7-webserver/pico-w5500/) |
 
