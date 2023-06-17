@@ -16,8 +16,8 @@ template projects for different architectures:
 
 - **blinky** - classic, blink an LED and print a debug message periodically:
 - **cli** - UART command line interface. Implements commands to set LED status and hexdump RAM
-- **lfs** - implement file functions mkdir, opendir, readdir, closedir,
-  fopen/fclose/... using
+- **lfs** - implement file functions `mkdir()/opendir()/...`,
+  `fopen()/fprintf()/...` using
   [littlefs](https://github.com/littlefs-project/littlefs). Store device boot
   count in a file, increment on each boot, and print on debug log
 - **webui** - web server with device dashboard
