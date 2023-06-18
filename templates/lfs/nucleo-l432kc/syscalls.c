@@ -104,7 +104,7 @@ static int lfs_driver_prog(const struct lfs_config *cfg, lfs_block_t block,
   uint8_t *fs = &s_fs[block * cfg->block_size + off];
   uint32_t *dst = (uint32_t *) fs;
   uint32_t *src = (uint32_t *) buf, *end = (uint32_t *) ((char *) buf + len);
-  printf("%s(%p, %lu, %lu, %p, %lu)\n", __func__, cfg, block, off, buf, len);
+  printf("LFS> %s(%p,%lu,%lu,%p,%lu)\n", __func__, cfg, block, off, buf, len);
 #if MEM
   memmove(&s_fs[block * cfg->block_size + off], buf, len);
   return 0;
@@ -125,7 +125,7 @@ static int lfs_driver_prog(const struct lfs_config *cfg, lfs_block_t block,
 
 static int lfs_driver_erase(const struct lfs_config *cfg, lfs_block_t block) {
   uint8_t *fs = &s_fs[block * cfg->block_size];
-  printf("%s(%p, block %lu, addr %p)\n", __func__, cfg, block, fs);
+  printf("LFS> %s(%p, block %lu, addr %p)\n", __func__, cfg, block, fs);
 #if MEM
   memset(&s_fs[block * cfg->block_size], 0xff, cfg->block_size);
   return 0;
@@ -135,7 +135,7 @@ static int lfs_driver_erase(const struct lfs_config *cfg, lfs_block_t block) {
   flash_unlock();
   FLASH->CR |= FLASH_CR_PER | (page << 3);  // Set PER bit and page no
   FLASH->CR |= FLASH_CR_STRT;               // Start erasing
-  printf("Erasing page %lu, CR %#lx SR %#lx ...\n", page, FLASH->CR, FLASH->SR);
+  // printf(" -->%lu, CR %#lx SR %#lx ...\n", page, FLASH->CR, FLASH->SR);
   while (FLASH->SR & FLASH_SR_BSY) spin(1);  // Wait until erased
   if (is_flash_err()) hexdump(fs, 64), printf("  ERR SR: %#lx\n", FLASH->SR);
   return 0;
@@ -205,7 +205,7 @@ int _open(const char *path, int flags, mode_t mode) {
   if (flags & O_APPEND) lfs_flags |= LFS_O_APPEND;
   err = lfs_file_open(&s_lfs, &s_fds[fd - 3].file, path, lfs_flags);
   if (err < 0) close_fd(fd), fd = -1;
-  printf("%s(%s, %d, %ld)->%d, err %d\n", __func__, path, flags, mode, fd, err);
+  //printf("LFS> %s(%s,%d,%ld)->%d %d\n", __func__, path, flags, mode, fd, err);
   return fd;
 }
 

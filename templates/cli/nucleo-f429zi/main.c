@@ -96,7 +96,7 @@ static void cli_hexdump(const char *addr, const char *len) {
 
 static void cli_exec(const char *command, const char *arg1, const char *arg2) {
   if (strcmp(command, "reboot") == 0) {
-    SCB->AIRCR = ((0x5FA << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk);
+    NVIC_SystemReset();
   } else if (strcmp(command, "led") == 0) {
     cli_led(arg1, arg2);
   } else if (strcmp(command, "hexdump") == 0) {

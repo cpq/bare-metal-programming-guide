@@ -22,6 +22,7 @@ template projects for different architectures:
   region of buit-in flash memory. Store device boot
   count in a file, increment on each boot, and print on debug log
 - **webui** - embedded web server with a professional device dashboard UI
+  using [mongoose library](https://github.com/cesanta/mongoose)
 
 | Board | MCU datasheet | Board datasheet | Template project |
 | ----- | ------------- | --------------- | ---------------- |

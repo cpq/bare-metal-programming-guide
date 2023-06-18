@@ -35,7 +35,7 @@ static long read_boot_count(const char *path) {
   long count = 0;
   FILE *fp = fopen(path, "r");
   if (fp != NULL) {
-    //fscanf(fp, "%ld", &count);
+    fscanf(fp, "%ld", &count);
     fclose(fp);
   } else {
     printf("Error opening %s: %d\n", path, errno);
@@ -44,11 +44,10 @@ static long read_boot_count(const char *path) {
 }
 
 static void write_boot_count(const char *path, long count) {
-  return;
   mkdir(DATA_DIR, 0644);
   FILE *fp = fopen(path, "w+");
   if (fp != NULL) {
-    //fprintf(fp, "%ld", count);
+    fprintf(fp, "%ld", count);
     (void) count;
     fclose(fp);
   } else {
@@ -66,12 +65,11 @@ static void led_task(void) {  // Blink LED every BLINK_PERIOD_MS
 static void log_task(void) {  // Print a log every LOG_PERIOD_MS
   static uint64_t timer = 0;
   if (timer_expired(&timer, LOG_PERIOD_MS, s_ticks)) {
-    printf("aaa!\n");
-    return;
     printf("tick: %5lu, CPU %lu MHz, boot count: %ld, files: ",
            (unsigned long) s_ticks, SystemCoreClock / 1000000,
            read_boot_count(DATA_FILE));
     list_files("/");
+    list_files("/data");
     putchar('\n');
   }
 }
