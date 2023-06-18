@@ -21,7 +21,7 @@ template projects for different architectures:
   [littlefs](https://github.com/littlefs-project/littlefs) in the upper
   region of buit-in flash memory. Store device boot
   count in a file, increment on each boot, and print on debug log
-- **webui** - web server with device dashboard
+- **webui** - embedded web server with a professional device dashboard UI
 
 | Board | MCU datasheet | Board datasheet | Template project |
 | ----- | ------------- | --------------- | ---------------- |
