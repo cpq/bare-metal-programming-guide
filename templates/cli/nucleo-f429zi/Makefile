@@ -40,6 +40,6 @@ update: firmware.bin
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/ota --data-binary @$<
 test: update
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=5 | tee /tmp/output.txt
-	egrep '^tick:.*CPU 180 MHz' /tmp/output.txt
+	egrep '^COMMANDS' /tmp/output.txt
 watch: update
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=999
