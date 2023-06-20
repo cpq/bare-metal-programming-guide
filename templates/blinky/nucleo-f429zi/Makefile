@@ -1,9 +1,10 @@
-CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
-            -Wformat-truncation -fno-common -Wconversion \
-            -g3 -Os -ffunction-sections -fdata-sections \
-            -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_f4/Include \
-            -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
+CFLAGS ?= -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion
+CFLAGS += -Wformat-truncation -fno-common -Wconversion
+CFLAGS += -g3 -Os -ffunction-sections -fdata-sections
+CFLAGS += -I. -Icmsis_core/CMSIS/Core/Include -Icmsis_f4/Include
+CFLAGS += -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
+
 SOURCES = main.c syscalls.c
 SOURCES += cmsis_f4/Source/Templates/gcc/startup_stm32f429xx.s # ST startup file. Compiler-dependent!
 

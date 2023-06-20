@@ -1,19 +1,18 @@
 // Copyright (c) 2022 Cesanta Software Limited
-// All rights reserved
 // https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf
+// SPDX-License-Identifier: MIT
+
+#ifndef LED_PIN
+#define LED_PIN PIN('B', 7)  // Blue onboard LED on Nucleo-F429ZI
+#endif
 
 #pragma once
-
 #include <stm32f429xx.h>
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
-#ifndef LED_PIN
-#define LED_PIN PIN('B', 7)  // Blue onboard LED on Nucleo-F4 boards
-#endif
 
 #define BIT(x) (1UL << (x))
 #define SETBITS(R, CLEARMASK, SETMASK) (R) = ((R) & ~(CLEARMASK)) | (SETMASK)
@@ -159,7 +158,7 @@ static inline bool timer_expired(volatile uint64_t *t, uint64_t prd,
   return true;                                   // Expired, return true
 }
 
-static inline void hal_system_init(void) {
+static inline void clock_init(void) {
   SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
   FLASH->ACR |= FLASH_ACR_LATENCY_5WS | FLASH_ACR_PRFTEN | FLASH_ACR_ICEN;
   RCC->PLLCFGR &= ~((BIT(17) - 1));                 // Clear PLL multipliers

@@ -1,9 +1,9 @@
-CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -fno-common \
-            -g3 -Os -ffunction-sections -fdata-sections -Wno-shadow \
-            -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_l4/Include \
-            -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
+CFLAGS ?= -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -fno-common
+CFLAGS += -g3 -Os -ffunction-sections -fdata-sections -Wno-shadow
+CFLAGS += -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_l4/Include
+CFLAGS += -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
-SOURCES = main.c syscalls.c sysinit.c
+SOURCES = main.c syscalls.c
 SOURCES += cmsis_l4/Source/Templates/gcc/startup_stm32l432xx.s # ST startup file. Compiler-dependent!
 
 ifeq ($(OS),Windows_NT)
@@ -39,6 +39,7 @@ update: firmware.bin
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/ota --data-binary @$<
 test: update
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=5 | tee /tmp/output.txt
-	egrep '^tick:.*CPU 16 MHz' /tmp/output.txt
+	egrep '^tick:' /tmp/output.txt
+#	egrep '^tick:.*CPU 16 MHz' /tmp/output.txt
 watch: update
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=999

@@ -3,9 +3,13 @@
 
 #include "hal.h"
 
-#define LED PIN('B', 3)      // Onbloard green LED
 #define BLINK_PERIOD_MS 500  // LED blinking period in millis
 #define LOG_PERIOD_MS 1000   // Info log period in millis
+
+uint32_t SystemCoreClock;  // Required by CMSIS. Holds system core cock value
+void SystemInit(void) {    // Called automatically by startup code
+  clock_init();            // Sets SystemCoreClock
+}
 
 static volatile uint64_t s_ticks;  // Milliseconds since boot
 void SysTick_Handler(void) {       // SyStick IRQ handler, triggered every 1ms
@@ -15,7 +19,7 @@ void SysTick_Handler(void) {       // SyStick IRQ handler, triggered every 1ms
 static void led_task(void) {  // Blink LED every BLINK_PERIOD_MS
   static uint64_t timer = 0;
   if (timer_expired(&timer, BLINK_PERIOD_MS, s_ticks)) {
-    gpio_toggle(LED);
+    gpio_toggle(LED_PIN);
   }
 }
 
@@ -28,8 +32,8 @@ static void log_task(void) {  // Print a log every LOG_PERIOD_MS
 }
 
 int main(void) {
-  gpio_output(LED);               // Setup green LED
-  uart_init(UART_DEBUG, 115200);  // Initialise debug printf
+  gpio_output(LED_PIN);
+  uart_init(UART_DEBUG, 115200);
 
   for (;;) {
     led_task();

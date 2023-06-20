@@ -8,7 +8,7 @@
 
 uint32_t SystemCoreClock;  // Required by CMSIS. Holds system core cock value
 void SystemInit(void) {    // Called automatically by startup code
-  hal_system_init();       // Sets SystemCoreClock
+  clock_init();            // Sets SystemCoreClock
 }
 
 static volatile uint64_t s_ticks;  // Milliseconds since boot
