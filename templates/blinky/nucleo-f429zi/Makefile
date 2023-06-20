@@ -4,7 +4,7 @@ CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
             -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_f4/Include \
             -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
-SOURCES = main.c syscalls.c sysinit.c
+SOURCES = main.c syscalls.c
 SOURCES += cmsis_f4/Source/Templates/gcc/startup_stm32f429xx.s # ST startup file. Compiler-dependent!
 
 ifeq ($(OS),Windows_NT)

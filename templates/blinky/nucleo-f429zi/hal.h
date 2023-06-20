@@ -11,6 +11,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef LED_PIN
+#define LED_PIN PIN('B', 7)  // Blue onboard LED on Nucleo-F4 boards
+#endif
+
 #define BIT(x) (1UL << (x))
 #define SETBITS(R, CLEARMASK, SETMASK) (R) = ((R) & ~(CLEARMASK)) | (SETMASK)
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
@@ -22,7 +26,6 @@
 // 33.4: The AHB clock must be at least 25 MHz when Ethernet is used
 enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
 enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 180, PLL_P = 2 };  // Run at 180 Mhz
-#define FLASH_LATENCY 5
 #define SYS_FREQUENCY ((PLL_HSI * PLL_N / PLL_M / PLL_P) * 1000000)
 #define APB2_FREQUENCY (SYS_FREQUENCY / (BIT(APB2_PRE - 3)))
 #define APB1_FREQUENCY (SYS_FREQUENCY / (BIT(APB1_PRE - 3)))
@@ -37,7 +40,9 @@ enum { GPIO_SPEED_LOW, GPIO_SPEED_MEDIUM, GPIO_SPEED_HIGH, GPIO_SPEED_INSANE };
 enum { GPIO_PULL_NONE, GPIO_PULL_UP, GPIO_PULL_DOWN };
 #define GPIO(N) ((GPIO_TypeDef *) (0x40020000 + 0x400 * (N)))
 
-static GPIO_TypeDef *gpio_bank(uint16_t pin) { return GPIO(PINBANK(pin)); }
+static GPIO_TypeDef *gpio_bank(uint16_t pin) {
+  return GPIO(PINBANK(pin));
+}
 static inline void gpio_toggle(uint16_t pin) {
   GPIO_TypeDef *gpio = gpio_bank(pin);
   uint32_t mask = BIT(PINNO(pin));
@@ -152,4 +157,21 @@ static inline bool timer_expired(volatile uint64_t *t, uint64_t prd,
   if (*t > now) return false;                    // Not expired yet, return
   *t = (now - *t) > prd ? now + prd : *t + prd;  // Next expiration time
   return true;                                   // Expired, return true
+}
+
+static inline void hal_system_init(void) {
+  SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
+  FLASH->ACR |= FLASH_ACR_LATENCY_5WS | FLASH_ACR_PRFTEN | FLASH_ACR_ICEN;
+  RCC->PLLCFGR &= ~((BIT(17) - 1));                 // Clear PLL multipliers
+  RCC->PLLCFGR |= (((PLL_P - 2) / 2) & 3) << 16;    // Set PLL_P
+  RCC->PLLCFGR |= PLL_M | (PLL_N << 6);             // Set PLL_M and PLL_N
+  RCC->CR |= BIT(24);                               // Enable PLL
+  while ((RCC->CR & BIT(25)) == 0) spin(1);         // Wait until done
+  RCC->CFGR = (APB1_PRE << 10) | (APB2_PRE << 13);  // Set prescalers
+  RCC->CFGR |= 2;                                   // Set clock source to PLL
+  while ((RCC->CFGR & 12) == 0) spin(1);            // Wait until done
+
+  SystemCoreClock = SYS_FREQUENCY;
+  RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG
+  SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
 }
