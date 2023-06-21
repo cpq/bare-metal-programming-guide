@@ -32,8 +32,8 @@ template projects for different architectures:
 | TI EK-TM4C1294XL    | Cortex-M4F | [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | [webui](step-7-webserver/ek-tm4c1294xl) | 
 | RP2040 Pico-W5500   | Cortex-M0+ | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | [webui](step-7-webserver/pico-w5500/) |
 
-In this tutorial we'll use the Nucleo-F429ZI development board, so
-go ahead and download the "mcu datasheet" and the "board datasheet" for it.
+In this tutorial we'll use the **Nucleo-F429ZI** development board, so
+go ahead and download the mcu datasheet and the board datasheet for it.
 
 
 ## About me
