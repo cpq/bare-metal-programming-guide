@@ -2,8 +2,11 @@
 // https://www.st.com/resource/en/reference_manual/dm00151940-stm32l41xxx42xxx43xxx44xxx45xxx46xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf
 // SPDX-License-Identifier: MIT
 
-#pragma once
+#ifndef LED_PIN
+#define LED_PIN PIN('B', 3)  // Green onboard LED on Nucleo-L432KC
+#endif
 
+#pragma once
 #include <stm32l432xx.h>
 
 #include <stdbool.h>
@@ -150,4 +153,39 @@ static inline long stack_usage(void) {
   uint32_t *sp = (uint32_t *) &_estack, *end = (uint32_t *) &_end, *p = sp - 1;
   while (p > end && *p != 0xa5a5a5a5) p--;
   return (sp - p) * sizeof(*p);
+}
+
+static inline void clock_init(void) {
+  SCB->CPACR |= 15 << 20;  // Enable FPU
+  FLASH->ACR |= FLASH_ACR_LATENCY_4WS | FLASH_ACR_ICEN | FLASH_ACR_DCEN;
+#if 0
+#if 0
+  SETBITS(RCC->PLLCFGR, RCC_PLLCFGR_PLLM, (PLL_M - 1) << RCC_PLLCFGR_PLLM_Pos);
+  SETBITS(RCC->PLLCFGR, RCC_PLLCFGR_PLLN, PLL_N << RCC_PLLCFGR_PLLN_Pos);
+  SETBITS(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC, RCC_PLLCFGR_PLLSRC_HSI);
+  RCC->PLLCFGR |= RCC_PLLCFGR_PLLREN;
+#else
+  RCC->PLLCFGR = BIT(24) | BIT(20) | (PLL_N << 8) | RCC_PLLCFGR_PLLSRC_HSI |
+    (7 << 27) | BIT(16);
+  RCC->CR |= RCC_CR_PLLON;
+#endif
+  while (!(RCC->CR & RCC_CR_PLLRDY)) spin(1);
+#if 0
+  SETBITS(RCC->CFGR, RCC_CFGR_PPRE1, (3 + APB1_DIV / 2) << RCC_CFGR_PPRE1_Pos);
+  SETBITS(RCC->CFGR, RCC_CFGR_PPRE2, (3 + APB2_DIV / 2) << RCC_CFGR_PPRE1_Pos);
+#endif
+  RCC->CFGR |= RCC_CFGR_SW_PLL;
+  while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) spin(1);
+#else
+  RCC->CR |= RCC_CR_HSION;
+  while (!(RCC->CR & RCC_CR_HSIRDY)) spin(1);
+  RCC->CFGR &= ~(RCC_CFGR_SW);
+  RCC->CFGR |= (RCC_CFGR_SW_HSI);
+  while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI) spin(1);
+#endif
+
+  rng_init();                              // Initialise random number generator
+  RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG
+  SystemCoreClock = SYS_FREQUENCY;         // Required by CMSIS
+  SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
 }

@@ -1,10 +1,10 @@
 CFLAGS ?= -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -fno-common
 CFLAGS += -g3 -Os -ffunction-sections -fdata-sections -Wno-shadow
-CFLAGS += -I. -Icmsis_core/CMSIS/Core/Include -Icmsis_l4/Include -Ilittlefs
+CFLAGS += -I. -Icmsis_core/CMSIS/Core/Include -Icmsis_f3/Include -Ilittlefs
 CFLAGS += -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
 SOURCES = main.c syscalls.c littlefs/lfs.c littlefs/lfs_util.c
-SOURCES += cmsis_l4/Source/Templates/gcc/startup_stm32l432xx.s # ST startup file. Compiler-dependent!
+SOURCES += cmsis_f3/Source/Templates/gcc/startup_stm32f303x8.s # ST startup file. Compiler-dependent!
 
 ifeq ($(OS),Windows_NT)
   RM = cmd /C del /Q /F
@@ -14,7 +14,7 @@ endif
 
 build: firmware.bin
 
-firmware.elf: cmsis_core cmsis_l4 hal.h link.ld Makefile $(SOURCES) 
+firmware.elf: cmsis_core cmsis_f3 hal.h link.ld Makefile $(SOURCES) 
 	arm-none-eabi-gcc $(SOURCES) $(CFLAGS) $(CFLAGS_EXTRA) $(LDFLAGS) -o $@
 
 firmware.bin: firmware.elf
@@ -26,8 +26,8 @@ flash: firmware.bin
 cmsis_core:
 	git clone --depth 1 -b 5.9.0 https://github.com/ARM-software/CMSIS_5 $@
 
-cmsis_l4:
-	git clone --depth 1 -b v1.7.2 https://github.com/STMicroelectronics/cmsis_device_l4 $@
+cmsis_f3:
+	git clone --depth 1 -b v2.3.7 https://github.com/STMicroelectronics/cmsis_device_f3 $@
 
 littlefs/lfs.c: littlefs
 littlefs:
@@ -37,12 +37,12 @@ clean:
 	$(RM) firmware.* cmsis_* littlefs
 
 # Automated test via https://vcon.io/automated-firmware-tests/. Set VCON_API_KEY and update DEVICE_URL
-DEVICE_URL ?= https://dash.vcon.io/api/v3/devices/7
+DEVICE_URL ?= https://dash.vcon.io/api/v3/devices/10
 update: CFLAGS += -DUART_DEBUG=USART1
 update: firmware.bin
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/ota --data-binary @$<
 test: update
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=5 | tee /tmp/output.txt
-	egrep '^tick:.*CPU 16 MHz' /tmp/output.txt
+	egrep '^tick:.*CPU 64 MHz' /tmp/output.txt
 watch: update
 	curl --fail-with-body -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=999
