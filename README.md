@@ -26,11 +26,11 @@ template projects for different architectures:
 
 | Board | Arch | MCU datasheet | Board datasheet | Template project |
 | ----- | ---- | ------------- | --------------- | ---------------- |
-| STM32 Nucleo-F429ZI | Cortex-M4  | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | [blinky](templates/blinky/nucleo-f429zi), [cli](templates/cli/nucleo-f429zi), [webui](step-7-webserver/nucleo-f429zi/) |
+| STM32 Nucleo-F429ZI | Cortex-M4  | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf) | [blinky](templates/blinky/nucleo-f429zi), [cli](templates/cli/nucleo-f429zi), [webui](steps/step-7-webserver/nucleo-f429zi/) |
 | STM32 Nucleo-F303K8 | Cortex-M4  | [mcu datasheet](https://www.st.com/resource/en/reference_manual/DM00043574-.pdf) | [board datasheet](https://www.st.com/resource/en/datasheet/stm32f303k8.pdf) | [lfs](templates/lfs/nucleo-f303k8) |
 | STM32 Nucleo-L432KC | Cortex-M4  | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00151940-stm32l41xxx42xxx43xxx44xxx45xxx46xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/datasheet/stm32l432kc.pdf) | [blinky](templates/blinky/nucleo-l432kc), [cli](templates/cli/nucleo-l432kc), [lfs](templates/lfs/nucleo-l432kc) |
-| TI EK-TM4C1294XL    | Cortex-M4F | [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | [webui](step-7-webserver/ek-tm4c1294xl) | 
-| RP2040 Pico-W5500   | Cortex-M0+ | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | [webui](step-7-webserver/pico-w5500/) |
+| TI EK-TM4C1294XL    | Cortex-M4F | [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | [webui](steps/step-7-webserver/ek-tm4c1294xl) | 
+| RP2040 Pico-W5500   | Cortex-M0+ | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | [webui](steps/step-7-webserver/pico-w5500/) |
 
 In this tutorial we'll use the **Nucleo-F429ZI** development board, so
 go ahead and download the mcu datasheet and the board datasheet for it.
@@ -92,7 +92,7 @@ enter the following commands to download this repository and build an example:
 
 ```sh
 git clone https://github.com/cpq/bare-metal-programming-guide
-cd bare-metal-programming-guide/step-0-minimal
+cd bare-metal-programming-guide/steps/step-0-minimal
 make
 ```
 
@@ -418,7 +418,7 @@ address space, and which symbols to create.
 ### Linker script
 
 Create a file `link.ld`, and copy-paste contents from
-[step-0-minimal/link.ld](step-0-minimal/link.ld). Below is the explanation:
+[steps/step-0-minimal/link.ld](steps/step-0-minimal/link.ld). Below is the explanation:
 
 ```
 ENTRY(_reset);
@@ -693,7 +693,7 @@ clean:
 	rm -rf firmware.*
 ```
 
-A complete project source code you can find in [step-0-minimal](step-0-minimal) folder.
+A complete project source code you can find in [steps/step-0-minimal](steps/step-0-minimal) folder.
 
 ## Blinky LED
 
@@ -804,7 +804,7 @@ Finally, we're ready to modify our main loop to implement LED blinking:
 ```
 
 Run `make flash` and enjoy blue LED flashing.
-A complete project source code you can find in [step-1-blinky](step-1-blinky).
+A complete project source code you can find in [steps/step-1-blinky](steps/step-1-blinky).
 
 ## Blinky with SysTick interrupt
 
@@ -947,7 +947,7 @@ main loop (also called superloop) non-blocking. That means that inside that
 loop we can perform many actions - for example, have different timers with
 different periods, and they all will be triggered in time.
 
-A complete project source code you can find in [step-2-systick](step-2-systick) folder.
+A complete project source code you can find in [steps/step-2-systick](steps/step-2-systick) folder.
 
 ## Add UART debug output
 
@@ -1097,7 +1097,7 @@ hi
 hi
 ```
 
-A complete project source code you can find in [step-3-uart](step-3-uart) folder.
+A complete project source code you can find in [steps/step-3-uart](steps/step-3-uart) folder.
 
 ## Redirect printf() to UART
 
@@ -1259,7 +1259,7 @@ LED: 0, tick: 1000
 
 Congratulations! We learned how IO retargeting works, and
 can now printf-debug our firmware.
-A complete project source code you can find in [step-4-printf](step-4-printf) folder.
+A complete project source code you can find in [steps/step-4-printf](steps/step-4-printf) folder.
 
 ## Debug with Segger Ozone
 
@@ -1388,7 +1388,7 @@ https://github.com/cpq/bare-metal-programming-guide/blob/785aa2ead0432fc67327781
 
 We have left with a project template that can be reused for the future
 projects.  A complete project source code you can find in
-[step-5-cmsis](step-5-cmsis)
+[steps/step-5-cmsis](steps/step-5-cmsis)
 
 
 ## Setting up clocks
@@ -1445,7 +1445,7 @@ adjust the baud rate calculation for the UART:
 https://github.com/cpq/bare-metal-programming-guide/blob/9a3f9bc7b07d6a2a114581979e5b6715754c87c1/step-6-clock/hal.h#L90-L107
 
 Rebuild and reflash, and our board runs at its maximum speed, 180MHz!
-A complete project source code you can find in [step-6-clock](step-6-clock)
+A complete project source code you can find in [steps/step-6-clock](steps/step-6-clock)
 
 ## Web server with device dashboard
 
@@ -1596,7 +1596,7 @@ for more details.
 ![Device dashboard](https://raw.githubusercontent.com/cesanta/mongoose/master/examples/device-dashboard/screenshots/dashboard.png)
 
 A complete project source code you can find in
-[step-7-webserver](step-7-webserver) directory.
+[steps/step-7-webserver](steps/step-7-webserver) directory.
 
 ## Automated firmware builds (software CI)
 
