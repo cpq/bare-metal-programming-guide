@@ -14,13 +14,12 @@ Every chapter in this guide comes with a complete source code which gradually
 progress in functionality and completeness. In the end, I provide bare metal
 template projects for different architectures:
 
-- **blinky** - classic, blink an LED and print a debug message periodically:
+- **blinky** - classic, blink an LED and print a debug message periodically
 - **cli** - UART command line interface. Implements commands to set LED status and hexdump RAM
-- **lfs** - implement file functions `mkdir()/opendir()/...`,
-  `fopen()/fprintf()/...` using
+- **lfs** - implement file functions `mkdir(),readdir(),fopen(),...` using
   [littlefs](https://github.com/littlefs-project/littlefs) in the upper
   region of buit-in flash memory. Store device boot
-  count in a file, increment on each boot, and print on debug log
+  count in a file, increment on each boot, and print periodically
 - **webui** - embedded web server with a professional device dashboard UI
   using [mongoose library](https://github.com/cesanta/mongoose)
 
@@ -31,6 +30,7 @@ template projects for different architectures:
 | STM32 Nucleo-L432KC | Cortex-M4  | [mcu datasheet](https://www.st.com/resource/en/reference_manual/dm00151940-stm32l41xxx42xxx43xxx44xxx45xxx46xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) | [board datasheet](https://www.st.com/resource/en/datasheet/stm32l432kc.pdf) | [blinky](templates/blinky/nucleo-l432kc), [cli](templates/cli/nucleo-l432kc), [lfs](templates/lfs/nucleo-l432kc) |
 | TI EK-TM4C1294XL    | Cortex-M4F | [mcu datasheet](https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf) | [board datasheet](https://www.ti.com/lit/ug/spmu365c/spmu365c.pdf) | [webui](steps/step-7-webserver/ek-tm4c1294xl) | 
 | RP2040 Pico-W5500   | Cortex-M0+ | [mcu datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf) | [board datasheet](https://docs.wiznet.io/Product/iEthernet/W5500/w5500-evb-pico) | [webui](steps/step-7-webserver/pico-w5500/) |
+| ESP32-C3            | RISCV      | [mcu datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-c3_technical_reference_manual_en.pdf) | | [blinky](templates/blinky/esp32-c3) |
 
 In this tutorial we'll use the **Nucleo-F429ZI** development board, so
 go ahead and download the mcu datasheet and the board datasheet for it.
