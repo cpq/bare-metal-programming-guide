@@ -30,27 +30,9 @@ static void log_task(void) {  // Print a log every LOG_PERIOD_MS
   }
 }
 
-static inline uint64_t systick2(void) {
-  REG(C3_SYSTIMER)[2] = BIT(30);  // TRM 10.5
-  spin(1);
-  // return ((uint64_t) REG(C3_SYSTIMER)[18]<< 32) | REG(C3_SYSTIMER + 0x4c);
-  return ((uint64_t) REG(C3_SYSTIMER)[18] << 32) | REG(C3_SYSTIMER)[19];
-}
-
 int main(void) {
   gpio_output(LED_PIN);
   uart_init(UART_DEBUG, 115200);
-
-  // STILL WORK IN PROGRESS!
-  // TRM 10.20. SYSTIMER_TARGET1_CONF ->  ??
-  R(C3_SYSTIMER + 0x38) = BIT(30) | clock_sys_freq() / 1000;
-  R(C3_SYSTIMER + 0x64) = BIT(1);  // SYSTIMER_TARGET1_INT_ENA
-
-  // TODO(cpq) - make systick interrupt work!
-  for (;;) {
-    printf("LED: %lu\n", (unsigned long) systick2());
-    delay_ms(500);
-  }
 
   for (;;) {
     led_task();

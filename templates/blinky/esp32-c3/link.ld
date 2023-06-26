@@ -133,4 +133,20 @@ PROVIDE(uart_rx_one_char = 0x40000070);
 PROVIDE(uart_rx_one_char_block = 0x40000074);
 PROVIDE(uart_rx_readbuff = 0x40000078);
 
+/*
+PROVIDE(esprv_intc_int_set_priority = 0x400005e0);
+PROVIDE(esprv_intc_int_set_threshold = 0x400005e4);
+PROVIDE(esprv_intc_int_enable = 0x400005e8);
+PROVIDE(esprv_intc_int_disable = 0x400005ec);
+*/
+
+esprv_intc_int_set_priority = 0x400005e0;
+esprv_intc_int_set_threshold = 0x400005e4;
+esprv_intc_int_enable = 0x400005e8;
+esprv_intc_int_disable = 0x400005ec;
+esprv_intc_int_set_type = 0x400005f0;
+intr_matrix_set = 0x400005f4;
+ets_intr_lock = 0x400005f8;
+ets_intr_unlock = 0x400005fc;
+
 PROVIDE(__divdi3 = 0x400007b4);

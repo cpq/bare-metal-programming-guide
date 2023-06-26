@@ -7,6 +7,10 @@
 #define LED_PIN 2  // Default LED pin
 #endif
 
+#ifndef BUTTON_PIN
+#define BUTTON_PIN 9  // Default Button pin
+#endif
+
 #ifndef UART_DEBUG
 #define UART_DEBUG C3_UART
 #endif
@@ -22,7 +26,7 @@
 
 #define BIT(x) ((uint32_t) 1U << (x))
 #define REG(x) ((volatile uint32_t *) (x))
-#define R(x) REG(x)[0]
+#define SETBITS(R, CLEARMASK, SETMASK) (R) = ((R) & ~(CLEARMASK)) | (SETMASK)
 
 #define C3_SYSTEM 0x600c0000
 #define C3_SENSITIVE 0x600c1000
@@ -67,6 +71,45 @@
 #define C3_APB_SARADC 0x60040000
 #define C3_AES_XTS 0x600CC000
 
+#define CSR_WRITE(reg, val) ({ asm volatile("csrw " #reg ", %0" ::"rK"(val)); })
+#define CSR_READ(reg)                          \
+  ({                                           \
+    unsigned long v_;                          \
+    asm volatile("csrr %0, " #reg : "=r"(v_)); \
+    v_;                                        \
+  })
+#define CSR_SETBITS(reg, cm, sm) CSR_WRITE(reg, (CSR_READ(reg) & ~(cm)) | (sm))
+
+struct sysreg {  // System registers. 16.4 (incomplete)
+  volatile uint32_t CPU_PERI_CLK_EN, CPU_PERI_RST_EN, RESERVED0[2],
+      PERIPH_CLK_EN0, PERIPH_CLK_EN1, PERIPH_RST_EN0, PERIPH_RST_EN1;
+};
+#define SYSREG ((struct sysreg *) C3_SYSTEM)
+
+struct systimer {  // 10.6 (complete)
+  volatile uint32_t CONF, UNIT0_OP, UNIT1_OP, UNIT0_LOAD_HI, UNIT0_LOAD_LO,
+      UNIT1_LOAD_HI, UNIT1_LOAD_LO, TARGET0_HI, TARGET0_LO, TARGET1_HI,
+      TARGET1_LO, TARGET2_HI, TARGET2_LO, TARGET0_CONF, TARGET1_CONF,
+      TARGET2_CONF, UNIT0_VALUE_HI, UNIT0_VALUE_LO, UNIT1_VALUE_HI,
+      UNIT1_VALUE_LO, COMP0_LOAD, COMP1_LOAD, COMP2_LOAD, UNIT0_LOAD,
+      UNIT1_LOAD, INT_ENA, INT_RAW, INT_CLR, INT_ST, RESERVED0[34], DATE;
+};
+#define SYSTIMER ((struct systimer *) C3_SYSTIMER)
+
+struct gpio {  // 5.14 (incomplete)
+  volatile uint32_t BT_SELECT, OUT, OUT_W1TS, OUT_W1TC, RESERVED0[4], ENABLE,
+      ENABLE_W1TS, ENABLE_W1TC, RESERVED1[3], STRAP, IN, RESERVED2[1], STATUS,
+      STATUS_W1TS, STATUS_W1TC, RESERVED3[3], PCPU_INT, PCPU_NMI_INT,
+      // TODO(cpq): complete next
+      STATUS_NEXT, PIN[22], FUNC_IN[128], FUNC_OUT[22], DATE, CLOCK_GATE;
+};
+#define GPIO ((struct gpio *) C3_GPIO)
+
+struct io_mux {  // 5.14 (incomplete)
+  volatile uint32_t PIN_CTRL, IO[22];
+};
+#define IO_MUX ((struct io_mux *) C3_IO_MUX)
+
 enum { GPIO_OUT_EN = 8, GPIO_OUT_FUNC = 341, GPIO_IN_FUNC = 85 };
 
 // Perform `count` "NOP" operations
@@ -75,9 +118,9 @@ static inline void spin(volatile unsigned long count) {
 }
 
 static inline uint64_t systick(void) {
-  REG(C3_SYSTIMER)[1] = BIT(30);  // TRM 10.5
+  SYSTIMER->UNIT0_OP = BIT(30);  // TRM 10.5
   spin(1);
-  return ((uint64_t) REG(C3_SYSTIMER)[16] << 32) | REG(C3_SYSTIMER)[17];
+  return ((uint64_t) SYSTIMER->UNIT0_VALUE_HI << 32) | SYSTIMER->UNIT0_VALUE_LO;
 }
 
 static inline uint64_t uptime_us(void) {
@@ -115,13 +158,17 @@ static inline void wifi_get_mac_addr(uint8_t mac[6]) {
   mac[3] = (a >> 16) & 255, mac[4] = (a >> 8) & 255, mac[5] = a & 255;
 }
 
+static inline void set_irq_handler(void (*fn)(void)) {
+  CSR_WRITE(mtvec, (uintptr_t) fn);
+}
+
 static inline void soc_init(void) {
   // Init clock. TRM 6.2.4.1
-  REG(C3_SYSTEM)[2] &= ~3U;
-  REG(C3_SYSTEM)[2] |= BIT(0) | BIT(2);
-  REG(C3_SYSTEM)[22] = BIT(19) | (40U << 12) | BIT(10);
+  // REG(C3_SYSTEM)[2] &= ~3U;
+  // REG(C3_SYSTEM)[2] |= BIT(0) | BIT(2);
+  // REG(C3_SYSTEM)[22] = BIT(19) | (40U << 12) | BIT(10);
   // REG(C3_RTCCNTL)[47] = 0; // RTC_APB_FREQ_REG -> freq >> 12
-  ((void (*)(int)) 0x40000588)(160);  // ets_update_cpu_frequency(160)
+  //((void (*)(int)) 0x40000588)(160);  // ets_update_cpu_frequency(160)
   wdt_disable();
 
 #if 0
@@ -135,8 +182,9 @@ static inline void soc_init(void) {
 // API GPIO
 
 static inline void gpio_output_enable(int pin, bool enable) {
-  REG(C3_GPIO)[GPIO_OUT_EN] &= ~BIT(pin);
-  REG(C3_GPIO)[GPIO_OUT_EN] |= (enable ? 1U : 0U) << pin;
+  GPIO->ENABLE &= ~BIT(pin);
+  GPIO->ENABLE |= (enable ? 1U : 0U) << pin;
+  //SETBITS(GPIO->ENABLE, BIT(pin), (enable ? BIT(pin) : 0U));
 }
 
 static inline void gpio_output(int pin) {
@@ -145,21 +193,21 @@ static inline void gpio_output(int pin) {
 }
 
 static inline void gpio_write(int pin, bool value) {
-  REG(C3_GPIO)[1] &= ~BIT(pin);                 // Clear first
-  REG(C3_GPIO)[1] |= (value ? 1U : 0U) << pin;  // Then set
+  GPIO->OUT &= ~BIT(pin);                 // Clear first
+  GPIO->OUT |= (value ? 1U : 0U) << pin;  // Then set
 }
 
 static inline void gpio_toggle(int pin) {
-  REG(C3_GPIO)[1] ^= BIT(pin);
+  GPIO->OUT ^= BIT(pin);
 }
 
 static inline void gpio_input(int pin) {
   gpio_output_enable(pin, 0);                 // Disable output
-  REG(C3_IO_MUX)[1 + pin] = BIT(9) | BIT(8);  // Enable pull-up
+  IO_MUX->IO[pin] = BIT(9) | BIT(8);  // Enable pull-up
 }
 
 static inline bool gpio_read(int pin) {
-  return REG(C3_GPIO)[15] & BIT(pin) ? 1 : 0;
+  return GPIO->IN & BIT(pin) ? 1 : 0;
 }
 
 // API SPI
@@ -240,4 +288,45 @@ static inline bool timer_expired(volatile uint64_t *t, uint64_t prd,
   if (*t > now) return false;                    // Not expired yet, return
   *t = (now - *t) > prd ? now + prd : *t + prd;  // Next expiration time
   return true;                                   // Expired, return true
+}
+
+extern void uart_tx_one_char(uint8_t);
+extern void esprv_intc_int_enable(uint32_t mask);
+extern void esprv_intc_int_disable(uint32_t mask);
+extern void esprv_intc_int_set_priority(uint32_t num, uint32_t prio);
+extern void esprv_intc_int_set_type(uint32_t num, int type);
+
+#define NIBBLE(c) ((c) < 10 ? (c) + '0' : (c) + 'W')
+#define PUTCHAR(c) uart_tx_one_char(c)
+static inline void hexdump(const void *buf, size_t len) {
+  const uint8_t *p = (const uint8_t *) buf;
+  char ascii[16];
+  size_t i, j, n = 0;
+  for (i = 0; i < len; i++) {
+    if ((i % 16) == 0) {
+      // Print buffered ascii chars
+      if (i > 0) {
+        PUTCHAR(' '), PUTCHAR(' ');
+        for (j = 0; j < sizeof(ascii); j++) PUTCHAR(ascii[j]);
+        PUTCHAR('\n'), n = 0;
+      }
+      // Print hex address, then \t
+      PUTCHAR(NIBBLE((i >> 12) & 15)), PUTCHAR(NIBBLE((i >> 8) & 15));
+      PUTCHAR(NIBBLE((i >> 4) & 15)), PUTCHAR('0');
+      PUTCHAR(' '), PUTCHAR(' '), PUTCHAR(' ');
+    }
+    PUTCHAR(NIBBLE(p[i] >> 4)), PUTCHAR(NIBBLE(p[i] & 15));
+    PUTCHAR(' ');  // Space after hex number
+    if (p[i] >= ' ' && p[i] <= '~') {
+      ascii[n++] = (char) p[i];  // Printable
+    } else {
+      ascii[n++] = '.';  // Non-printable
+    }
+  }
+  if (n > 0) {
+    while (n < 16) PUTCHAR(' '), PUTCHAR(' '), PUTCHAR(' '), ascii[n++] = ' ';
+    PUTCHAR(' '), PUTCHAR(' ');
+    for (j = 0; j < sizeof(ascii); j++) PUTCHAR(ascii[j]);
+  }
+  PUTCHAR('\n');
 }
