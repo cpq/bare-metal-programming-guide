@@ -5,7 +5,7 @@ MEMORY {
 }
 
 _eram = ORIGIN(dram) + LENGTH(dram);
-ENTRY(_reset)
+ENTRY(Reset_Handler)
 
 SECTIONS {
   .text     : { *(.text) *(.text*) } > iram

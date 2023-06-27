@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2023 Cesanta Software Limited
+// SPDX-FileCopyrightText: 2022-2023 Cesanta Software Limited
 // SPDX-License-Identifier: MIT
 //
 // https://www.espressif.com/sites/default/files/documentation/esp32-c3_technical_reference_manual_en.pdf
@@ -81,25 +81,24 @@
 #define CSR_SETBITS(reg, cm, sm) CSR_WRITE(reg, (CSR_READ(reg) & ~(cm)) | (sm))
 
 struct sysreg {  // System registers. 16.4 (incomplete)
-  volatile uint32_t CPU_PERI_CLK_EN, CPU_PERI_RST_EN, RESERVED0[2],
-      PERIPH_CLK_EN0, PERIPH_CLK_EN1, PERIPH_RST_EN0, PERIPH_RST_EN1;
+  volatile uint32_t CPU_PERI_CLK_EN, CPU_PERI_RST_EN, RESERVED0[2], PERIPH_CLK_EN0, PERIPH_CLK_EN1,
+      PERIPH_RST_EN0, PERIPH_RST_EN1;
 };
 #define SYSREG ((struct sysreg *) C3_SYSTEM)
 
 struct systimer {  // 10.6 (complete)
-  volatile uint32_t CONF, UNIT0_OP, UNIT1_OP, UNIT0_LOAD_HI, UNIT0_LOAD_LO,
-      UNIT1_LOAD_HI, UNIT1_LOAD_LO, TARGET0_HI, TARGET0_LO, TARGET1_HI,
-      TARGET1_LO, TARGET2_HI, TARGET2_LO, TARGET0_CONF, TARGET1_CONF,
-      TARGET2_CONF, UNIT0_VALUE_HI, UNIT0_VALUE_LO, UNIT1_VALUE_HI,
-      UNIT1_VALUE_LO, COMP0_LOAD, COMP1_LOAD, COMP2_LOAD, UNIT0_LOAD,
-      UNIT1_LOAD, INT_ENA, INT_RAW, INT_CLR, INT_ST, RESERVED0[34], DATE;
+  volatile uint32_t CONF, UNIT0_OP, UNIT1_OP, UNIT0_LOAD_HI, UNIT0_LOAD_LO, UNIT1_LOAD_HI,
+      UNIT1_LOAD_LO, TARGET0_HI, TARGET0_LO, TARGET1_HI, TARGET1_LO, TARGET2_HI, TARGET2_LO,
+      TARGET0_CONF, TARGET1_CONF, TARGET2_CONF, UNIT0_VALUE_HI, UNIT0_VALUE_LO, UNIT1_VALUE_HI,
+      UNIT1_VALUE_LO, COMP0_LOAD, COMP1_LOAD, COMP2_LOAD, UNIT0_LOAD, UNIT1_LOAD, INT_ENA, INT_RAW,
+      INT_CLR, INT_ST, RESERVED0[34], DATE;
 };
 #define SYSTIMER ((struct systimer *) C3_SYSTIMER)
 
 struct gpio {  // 5.14 (incomplete)
-  volatile uint32_t BT_SELECT, OUT, OUT_W1TS, OUT_W1TC, RESERVED0[4], ENABLE,
-      ENABLE_W1TS, ENABLE_W1TC, RESERVED1[3], STRAP, IN, RESERVED2[1], STATUS,
-      STATUS_W1TS, STATUS_W1TC, RESERVED3[3], PCPU_INT, PCPU_NMI_INT,
+  volatile uint32_t BT_SELECT, OUT, OUT_W1TS, OUT_W1TC, RESERVED0[4], ENABLE, ENABLE_W1TS,
+      ENABLE_W1TC, RESERVED1[3], STRAP, IN, RESERVED2[1], STATUS, STATUS_W1TS, STATUS_W1TC,
+      RESERVED3[3], PCPU_INT, PCPU_NMI_INT,
       // TODO(cpq): complete next
       STATUS_NEXT, PIN[22], FUNC_IN[128], FUNC_OUT[22], DATE, CLOCK_GATE;
 };
@@ -184,7 +183,7 @@ static inline void soc_init(void) {
 static inline void gpio_output_enable(int pin, bool enable) {
   GPIO->ENABLE &= ~BIT(pin);
   GPIO->ENABLE |= (enable ? 1U : 0U) << pin;
-  //SETBITS(GPIO->ENABLE, BIT(pin), (enable ? BIT(pin) : 0U));
+  // SETBITS(GPIO->ENABLE, BIT(pin), (enable ? BIT(pin) : 0U));
 }
 
 static inline void gpio_output(int pin) {
@@ -202,7 +201,7 @@ static inline void gpio_toggle(int pin) {
 }
 
 static inline void gpio_input(int pin) {
-  gpio_output_enable(pin, 0);                 // Disable output
+  gpio_output_enable(pin, 0);         // Disable output
   IO_MUX->IO[pin] = BIT(9) | BIT(8);  // Enable pull-up
 }
 
@@ -281,8 +280,7 @@ static inline bool uart_init(uint32_t uart, int baud) {
 }
 
 // t: expiration time, prd: period, now: current time. Return true if expired
-static inline bool timer_expired(volatile uint64_t *t, uint64_t prd,
-                                 uint64_t now) {
+static inline bool timer_expired(volatile uint64_t *t, uint64_t prd, uint64_t now) {
   if (now + prd < *t) *t = 0;                    // Time wrapped? Reset timer
   if (*t == 0) *t = now + prd;                   // Firt poll? Set expiration
   if (*t > now) return false;                    // Not expired yet, return
@@ -290,11 +288,35 @@ static inline bool timer_expired(volatile uint64_t *t, uint64_t prd,
   return true;                                   // Expired, return true
 }
 
+struct irq_data {
+  void (*fn)(void *);   // User-defined handler function
+  void *arg;            // User-defined handler function param
+  void (*clr)(void *);  // Interrupt clearance function
+  void *clr_arg;        // Interrupt clearance function param
+};
+
+extern struct irq_data g_irq_data[32];
+extern int cpu_alloc_interrupt(uint8_t prio /* 1..15 */);
+
+static inline void gpio_clear_interrupt(void *param) {
+  uint16_t pin = (uint16_t) (uintptr_t) param;
+  GPIO->STATUS &= ~BIT(pin);
+  //printf("clearing pin %d irq\n", pin);
+}
+
+static inline void gpio_set_irq_handler(uint16_t pin, void (*fn)(void *), void *arg) {
+  int no = cpu_alloc_interrupt(1);
+  g_irq_data[no].fn = fn;
+  g_irq_data[no].arg = arg;
+  g_irq_data[no].clr = gpio_clear_interrupt;
+  g_irq_data[no].clr_arg = (void *) (uintptr_t) pin;
+  REG(C3_INTERRUPT)[0xf8 / 4] |= BIT(16);  // Enable CPU IRQ
+  REG(C3_GPIO)
+  [0x74 / 4 + pin] |= (3U << 7) | BIT(13);      // Enable intr, any edge
+  REG(C3_INTERRUPT)[0x40 / 4] = (uint32_t) no;  // LAST: Map GPIO IRQ to CPU
+}
+
 extern void uart_tx_one_char(uint8_t);
-extern void esprv_intc_int_enable(uint32_t mask);
-extern void esprv_intc_int_disable(uint32_t mask);
-extern void esprv_intc_int_set_priority(uint32_t num, uint32_t prio);
-extern void esprv_intc_int_set_type(uint32_t num, int type);
 
 #define NIBBLE(c) ((c) < 10 ? (c) + '0' : (c) + 'W')
 #define PUTCHAR(c) uart_tx_one_char(c)

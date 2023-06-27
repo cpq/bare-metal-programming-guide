@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2023 Cesanta Software Limited
+// SPDX-FileCopyrightText: 2022-2023 Cesanta Software Limited
 // SPDX-License-Identifier: MIT
 
 #include "hal.h"
@@ -30,9 +30,17 @@ static void log_task(void) {  // Print a log every LOG_PERIOD_MS
   }
 }
 
+static void button_handler(void *param) {
+  uint16_t pin = (uint16_t) (uintptr_t) param;
+  printf("Button %u %s\n", pin, gpio_read(pin) ? "pressed" : "released");
+}
+
 int main(void) {
+  gpio_input(BUTTON_PIN);
   gpio_output(LED_PIN);
   uart_init(UART_DEBUG, 115200);
+
+  gpio_set_irq_handler(BUTTON_PIN, button_handler, (void *) BUTTON_PIN);
 
   for (;;) {
     led_task();
