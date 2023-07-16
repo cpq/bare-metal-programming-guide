@@ -6,7 +6,7 @@ In order to build this firmware,
 - Install esputil from https://github.com/cpq/esputil
 
 Use any ESP32-C3 board, for example ESP32-C3-DevKITM-1.
-Attach LED to the pin 2. Then,
+Attach LED to pin 2. Then,
 
 ```sh
 $ export PORT=/dev/SERIAL_PORT

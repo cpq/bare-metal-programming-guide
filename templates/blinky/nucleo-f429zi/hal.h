@@ -39,7 +39,7 @@ enum { GPIO_SPEED_LOW, GPIO_SPEED_MEDIUM, GPIO_SPEED_HIGH, GPIO_SPEED_INSANE };
 enum { GPIO_PULL_NONE, GPIO_PULL_UP, GPIO_PULL_DOWN };
 #define GPIO(N) ((GPIO_TypeDef *) (0x40020000 + 0x400 * (N)))
 
-static GPIO_TypeDef *gpio_bank(uint16_t pin) {
+static inline GPIO_TypeDef *gpio_bank(uint16_t pin) {
   return GPIO(PINBANK(pin));
 }
 static inline void gpio_toggle(uint16_t pin) {
