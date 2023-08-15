@@ -329,7 +329,7 @@ firmware entry point).
 
 So now we know, that we must make sure that our firmware should be composed in
 a way that the 2nd 32-bit value in the flash should contain an address of
-out boot function. When MCU boots, it'll read that address from flash, and
+our boot function. When MCU boots, it'll read that address from flash, and
 jump to our boot function.
 
 
@@ -359,7 +359,7 @@ For function `_reset()`, we have used GCC-specific attributes `naked` and
 be created by the compiler, and that function does not return.
 
 The `void (*const tab[16 + 91])(void)` expression means: define an array of 16
-+ 91 pointers to functions which return nothing (void) and take to arguments.
+\+ 91 pointers to functions which return nothing (void) and take no arguments (void).
 Each such function is an IRQ handler (Interrupt ReQuest handler). An array of
 those handlers is called a vector table.
 
@@ -398,7 +398,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
 
 Note that VMA/LMA addresses for sections are set to 0 - meaning, `main.o`
 is not yet a complete firmware, because it does not contain the information
-where those section should be loaded in the address space. We need to use
+where those sections should be loaded in the address space. We need to use
 a linker to produce a full firmware `firmware.elf` from `main.o`.
 
 The section .text contains firmware code, in our case it is just a _reset()
@@ -515,7 +515,7 @@ sections were built according to the linker script: `.vectors` lies at the very
 beginning of flash, then `.text` follows immediately after, and `.data` lies
 far above. Addresses in `.text` are in the flash region, and addresses in
 `.data` are in the RAM region.  If some function has address e.g. `0x8000100`,
-then it it located exactly at that address on flash. But if the code accesses
+then it is located exactly at that address on flash. But if the code accesses
 some variable in the `.data` section by the address e.g. `0x20000200`, then
 there is nothing at that address, because at boot, `.data` section in the
 `firmware.bin` resides in flash! That's why the startup code must relocate
@@ -756,8 +756,8 @@ struct rcc {
 #define RCC ((struct rcc *) 0x40023800)
 ```
 
-In the AHB1ENR register documentation we see that bits from 0 to 8 inclusive
-set the clock for GPIO banks GPIOA - GPIOE:
+In the AHB1ENR register documentation we see that bits from 0 to 10 inclusive
+set the clock for GPIO banks GPIOA - GPIOK:
 
 ```c
 int main(void) {
@@ -870,12 +870,12 @@ called to increment `s_tick` variable. Here how it looks like on a time scale:
 ![](images/systick.svg)
 
 
-The `volatile` specifier is required here becase `s_ticks` is modified by the
+The `volatile` specifier is required here because `s_ticks` is modified by the
 interrupt handler. `volatile` prevents the compiler to optimise/cache `s_ticks`
 value in a CPU register: instead, generated code always accesses memory.  That
 is why `volatile` keywords is present in the peripheral struct definitions,
 too. Since this is important to understand, let's demonstrate that on a simple
-function: Arduino's `delay()`. Let is use our `s_ticks` variable:
+function: Arduino's `delay()`. Let it use our `s_ticks` variable:
 
 ```c
 void delay(unsigned ms) {            // This function waits "ms" milliseconds
@@ -899,7 +899,7 @@ and compare generated machine code:
  bx      lr                             |  bx      lr
 ```
 
-If there is no `volalile`, the `delay()` function will loop forever and never
+If there is no `volatile`, the `delay()` function will loop forever and never
 return. That is because it caches (optimises) the value of `s_ticks` in a
 register and never updates it. A compiler does that because it doesn't know
 that `s_ticks` can be updated elsewhere - by the interrupt handler!  The
@@ -929,7 +929,7 @@ bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
 ```
 
 Now we are ready to update our main loop and use a precise timer for LED blink.
-For example, let's use 250 milliseconds blinking interval:
+For example, let's use 500 milliseconds blinking interval:
 
 ```c
   uint32_t timer, period = 500;          // Declare timer and 500ms period
@@ -1134,7 +1134,7 @@ mechanism. We use newlib, so let's modify `_write()` syscall to print to the
 UART3.
 
 Before that, let's organise our source code in the following way:
-- move all API definitions to the file `hal.h` (Harware Abstraction Layer)
+- move all API definitions to the file `hal.h` (Hardware Abstraction Layer)
 - move startup code to `startup.c`
 - create an empty file `syscalls.c` for newlib "syscalls"
 - modify Makefile to add `syscalls.c` and `startup.c` to the build
@@ -1454,7 +1454,7 @@ The Nucleo-F429ZI comes with Ethernet on-board. Ethernet hardware needs
 two components: a PHY (which transmits/receives electrical signals to the
 media like copper, optical cable, etc) and MAC (which drives PHY controller).
 On our Nucleo, the MAC controller is built-in, and the PHY is external
-(specifically, is is Microchip's LAN8720a).
+(specifically, it is Microchip's LAN8720a).
 
 MAC and PHY can talk several interfaces, we'll use RMII. For that, a bunch
 of pins must be configured to use their Alternative Function (AF).
@@ -1761,8 +1761,8 @@ bc3 2 main.c:65:main                    Ethernet: up
 fab 2 main.c:65:main                    Ethernet: up
 ```
 
-Done! Now, our automatic tests ensure that the firmware can be built, that is
-it bootable, that it initialises the network stack correctly.  This mechanism
+Done! Now, our automatic tests ensure that the firmware can be built, that
+it is bootable, that it initialises the network stack correctly.  This mechanism
 can be easily extended: just add more complex actions in your firmware binary,
 print the result to the UART, and check for the expected output in the test.
 
