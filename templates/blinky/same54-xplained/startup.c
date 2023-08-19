@@ -43,8 +43,8 @@ __attribute__((section(".vectors"))) void (*const tab[16 + 138])(void) = {
 __attribute__((naked, noreturn)) void Reset_Handler(void) {
   // Clear BSS section, and copy data section from flash to RAM
   extern long _sbss, _ebss, _sdata, _edata, _sidata;
-  for (long *src = &_sbss; src < &_ebss; src++) *src = 0;
-  for (long *src = &_sdata, *dst = &_sidata; src < &_edata;) *src++ = *dst++;
+  for (long *dst = &_sbss; dst < &_ebss; dst++) *dst = 0;
+  for (long *dst = &_sdata, *src = &_sidata; dst < &_edata;) *dst++ = *src++;
 
   SCB->VTOR = (uint32_t) &tab;
   SystemInit();
