@@ -474,8 +474,8 @@ int main(void) {
 __attribute__((naked, noreturn)) void _reset(void) {
   // .bss'e 0 ata ve .data'yı RAM'e kopyala
   extern long _sbss, _ebss, _sdata, _edata, _sidata;
-  for (long *src = &_sbss; src < &_ebss; src++) *src = 0;
-  for (long *src = &_sdata, *dst = &_sidata; src < &_edata;) *src++ = *dst++;
+  for (long *dst = &_sbss; dst < &_ebss; dst++) *dst = 0;
+  for (long *dst = &_sdata, *src = &_sidata; dst < &_edata;) *dst++ = *src++;
 
   main();             // main()' çağır
   for (;;) (void) 0;  // main'den return gelene kadar sonsuz döngü
