@@ -36,19 +36,6 @@ template projects for different architectures:
 In this tutorial we'll use the **Nucleo-F429ZI** development board, so
 go ahead and download the mcu datasheet and the board datasheet for it.
 
-
-## About me
-
-I am Sergey Lyubka, an engineer and entrepreneur. I hold a MSc in Physics from
-Kyiv State University, Ukraine. I am a director and co-founder at Cesanta - a
-technology company based in Dublin, Ireland. Cesanta develops embedded solutions:
-- https://mongoose.ws - an open source HTTP/MQTT/Websocket network library
-- https://vcon.io - a remote firmware update / serial monitor framework
-
-You are welcome
-to [register for my free webinar on embedded network programming](https://mongoose.ws/webinars/).
-
-
 ## Tools setup
 
 To proceed, the following tools are required:
@@ -1767,3 +1754,14 @@ can be easily extended: just add more complex actions in your firmware binary,
 print the result to the UART, and check for the expected output in the test.
 
 Happy testing!
+
+## About me
+
+I am Sergey Lyubka, an engineer and entrepreneur. I hold a MSc in Physics from
+Kyiv State University, Ukraine. I am a director and co-founder at Cesanta - a
+technology company based in Dublin, Ireland. Cesanta develops embedded solutions:
+- https://mongoose.ws - an open source HTTP/MQTT/Websocket network library
+- https://vcon.io - a remote firmware update / serial monitor framework
+
+You are welcome
+to [register for my free webinar on embedded network programming](https://mongoose.ws/webinars/).
