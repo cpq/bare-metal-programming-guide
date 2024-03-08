@@ -1353,7 +1353,7 @@ tanımlamalarını kullanarak değiştirelim ve bırakalım firmware
 gerisini halletsin. `hal.h` dosyasından tüm çevre birimi API'larını ve
 tanımlamaları kaldırıyoruz ve sadece standart C include'larını, vendor CMSIS include'larını, PIN/BIT/FREQ tanımlamalarını ve `timer_expired()` yardımcı fonksiyonunu bırakıyoruz.
 
-Eğer `make clean build` ile yeniden derlemeye çalışırsak GCC `systich_init()`, `GPIO_MODE_UOTPUT`, `uart_init()` ve `UART3`'ü bulamadığını söyleyecektir. Bunları hemen STM32 CMSIS dosyaları ile ekleyelim.
+Eğer `make clean build` ile yeniden derlemeye çalışırsak GCC `systick_init()`, `GPIO_MODE_OUTPUT`, `uart_init()` ve `UART3`'ü bulamadığını söyleyecektir. Bunları hemen STM32 CMSIS dosyaları ile ekleyelim.
 
 
 `systick_init()` fonksiyonuyla yola çıkalım. ARM core CMSIS başlığı bize
@@ -1514,7 +1514,7 @@ ile Ethernet RMII pinlerini alıyoruz ve RCC içinden Etherneti aktifleştiriyor
 
 Mongoose'un sürücüsü Ethernet kesmesini kullanır, bu da `startup.c`'yi güncelleyip
 `ETH_IRQHandler`'o vektör tablosuna eklememize ihtiyacı var demek oluyor.
-`startup.c`'deki vektör tablosunu kesme honksiyonunda bir değişikliğe ihtiyaç duymadan
+`startup.c`'deki vektör tablosunu kesme fonksiyonunda bir değişikliğe ihtiyaç duymadan
 tekrardan organize edelim. "weak symbol" konsepti ana fikrimiz olacak
 
 "weak/zayıf" olarak işaretlenen fonksiyonlar aynı normal fonksiyonlar gibi çalışır.
@@ -1526,8 +1526,8 @@ yeni bir fonksiyonla o fonksiyonu ezerek kendi işleyişinizi yazabilirsiniz.
 
 İşte karşınızda bizim için bu konunun kullanımı. Vektör tablosuna varsayılan bir handler
 atamak istiyoruz ama kullanıcı da bunu istediği handler'la ezebilmeli. Bunun için
-`DefaultIRQHandler()` adında me weak olan bir fonksiyon oluşturuyoruz ardından
-her IRQ handler'ı için handler ismi tanımlıyor ve `DefaultIRQHandler()`'la alias
+`DefaultIRQHandler()` adında weak olan bir fonksiyon oluşturuyoruz ardından
+her bir IRQ handler için handler ismi tanımlıyor ve `DefaultIRQHandler()`'la alias
 oluşturuyoruz.
 
 ```c
