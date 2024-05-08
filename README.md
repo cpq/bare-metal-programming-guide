@@ -1776,13 +1776,13 @@ uint16_t pin2 = PIN('G', 11);   // G11  - GPIOG pin 11
 
 Let's look first at what happens for `PIN('A', 3)`:
 
-- `(bank) - 'A'` results in `'A' - 'A'` which equals ``. As a 16 bit binary value this would be `0b00000000,00000000`.
+- `(bank) - 'A'` results in `'A' - 'A'` which will evaluate to `0`. As a 16 bit binary value this would be `0b00000000,00000000`.
 - Next we bit shift this value left by 8 bits because we want to store `bank` in the upper byte of this 16 bit, or 2 byte value. In this case the result remains the same: `0b00000000,00000000`.
 - Finally we bitwise OR the value above with `num`, in our case `3` which has a 16 bit binary representation of `0b00000000,00000011`. The result in binary is `0b00000000,00000011`  
 
 Let's take a look at what happens for `PIN('G',11)`
 
-- `(bank) - 'G'` results in `'G' - 'A'` which equals `6`. As a 16 bit binary value this would be `0b00000000,00000110`.
+- `(bank) - 'G'` results in `'G' - 'A'` which will evaluate to `6`. As a 16 bit binary value this would be `0b00000000,00000110`.
 - Next we bit shift this value left by 8 bits because we want to store `bank` in the upper byte of this 16 bit, or 2 byte value. This results in a binary value of: `0b00000110,00000000`.
 - Finally we bitwise OR the value above with `num`, in our case `11` which has a 16 bit binary representation of `0b00000000,00001011`. The result of the bitwise OR in binary is `0b00000110,00001011` which is a combination of `bank` in the upper byte and `pin` in the lower byte.  
 
