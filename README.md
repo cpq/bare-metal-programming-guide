@@ -257,7 +257,7 @@ GPIOA is at address 0x40020000, GPIOB is at 0x40020400, and so on:
 
 We can create pin numbering that includes the bank and the pin number.
 To do that, we use 2-byte `uint16_t` value, where upper byte indicates
-GPIO bank, and lower byte indicates pin number (see the [appendix](### PIN function) for further explanation of the functions below):
+GPIO bank, and lower byte indicates pin number (see the [appendix](#pin-function) for further explanation of the functions below):
 
 ```c
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
