@@ -257,7 +257,7 @@ GPIOA is at address 0x40020000, GPIOB is at 0x40020400, and so on:
 
 We can create pin numbering that includes the bank and the pin number.
 To do that, we use 2-byte `uint16_t` value, where upper byte indicates
-GPIO bank, and lower byte indicates pin number:
+GPIO bank, and lower byte indicates pin number (see the [appendix](##Appendix) for further explanation of the functions below):
 
 ```c
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
@@ -270,7 +270,7 @@ This way, we can specify pins for any GPIO bank:
 ```c
   uint16_t pin1 = PIN('A', 3);    // A3   - GPIOA pin 3
   uint16_t pin2 = PIN('G', 11);   // G11  - GPIOG pin 11
-```
+``` 
 
 Let's rewrite the `gpio_set_mode()` function to take our pin specification:
 
@@ -1754,6 +1754,37 @@ can be easily extended: just add more complex actions in your firmware binary,
 print the result to the UART, and check for the expected output in the test.
 
 Happy testing!
+
+## Appendix
+
+In this section you will find some further explanations for select points in this guide. 
+
+### PIN function
+
+We defined `PIN` as below:
+
+```c
+#define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
+```
+
+This function is perhaps most easily understood through a worked example. Let's take pins `A3` and `G11` and see what is happening in the function above, step by step.
+
+```c
+uint16_t pin1 = PIN('A', 3);    // A3   - GPIOA pin 3
+uint16_t pin2 = PIN('G', 11);   // G11  - GPIOG pin 11
+```
+
+Let's look first at what happens for `PIN('A', 3)`:
+
+- `(bank) - 'A'` results in `'A' - 'A'` which equals ``. As a 16 bit binary value this would be `0b00000000,00000000`.
+- Next we bit shift this value left by 8 bits because we want to store `bank` in the upper byte of this 16 bit, or 2 byte value. In this case the result remains the same: `0b00000000,00000000`.
+- Finally we bitwise OR the value above with `num`, in our case `3` which has a 16 bit binary representation of `0b00000000,00000011`. The result in binary is `0b00000000,00000011`  
+
+Let's take a look at what happens for `PIN('G',11)`
+
+- `(bank) - 'G'` results in `'G' - 'A'` which equals `6`. As a 16 bit binary value this would be `0b00000000,00000110`.
+- Next we bit shift this value left by 8 bits because we want to store `bank` in the upper byte of this 16 bit, or 2 byte value. This results in a binary value of: `0b00000110,00000000`.
+- Finally we bitwise OR the value above with `num`, in our case `11` which has a 16 bit binary representation of `0b00000000,00001011`. The result of the bitwise OR in binary is `0b00000110,00001011` which is a combination of `bank` in the upper byte and `pin` in the lower byte.  
 
 ## About me
 
