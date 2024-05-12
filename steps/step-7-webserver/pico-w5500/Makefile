@@ -33,7 +33,7 @@ firmware.uf2: firmware.bin $(BIN2UF2)
 DEVICE_URL ?= https://dash.vcon.io/api/v3/devices/3
 test: update
 	curl --fail -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=5 | tee /tmp/output.txt
-	grep 'Ethernet: up' /tmp/output.txt
+	grep 'Ethernet: ready' /tmp/output.txt
 
 update: build
 	curl --fail -su :$(VCON_API_KEY) $(DEVICE_URL)/ota --data-binary @firmware.bin
