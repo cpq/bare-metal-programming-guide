@@ -2,12 +2,21 @@
 #include "hal.h"
 
 int main(void) {
-  set_gpio_mode(P0, BUILD_IN_LED_1, GPIO_MODE_OUTPUT);
+  set_gpio_mode(P0, BUILD_IN_LED_1_PIN, GPIO_MODE_OUTPUT, 0);
+  set_gpio_mode(P0, BUILD_IN_LED_2_PIN, GPIO_MODE_OUTPUT, 0);
+  set_gpio_mode(P0, BUILD_IN_LED_3_PIN, GPIO_MODE_OUTPUT, 0);
+  set_gpio_mode(P0, BUILD_IN_LED_4_PIN, GPIO_MODE_OUTPUT, 0);
 
   while (1) {
-    gpio_write(P0, BUILD_IN_LED_1, HIGH);
+    gpio_write(P0, BUILD_IN_LED_1_PIN, HIGH);
+    gpio_write(P0, BUILD_IN_LED_2_PIN, HIGH);
+    gpio_write(P0, BUILD_IN_LED_3_PIN, HIGH);
+    gpio_write(P0, BUILD_IN_LED_4_PIN, HIGH);
     spin(9999999);
-    gpio_write(P0, BUILD_IN_LED_1, LOW);
+    gpio_write(P0, BUILD_IN_LED_4_PIN, LOW);
+    gpio_write(P0, BUILD_IN_LED_3_PIN, LOW);
+    gpio_write(P0, BUILD_IN_LED_2_PIN, LOW);
+    gpio_write(P0, BUILD_IN_LED_1_PIN, LOW);
     spin(9999999);
   }
 }
