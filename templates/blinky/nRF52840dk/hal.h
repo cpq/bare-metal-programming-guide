@@ -1,14 +1,14 @@
 #define P0 ((struct gpio *) 0x50000000)
 #define P1 ((struct gpio *) 0x50000300)
 
-#define BUILD_IN_BUTTON_4_PIN 25
-#define BUILD_IN_BUTTON_3_PIN 24
-#define BUILD_IN_BUTTON_2_PIN 12
-#define BUILD_IN_BUTTON_1_PIN 11
-#define BUILD_IN_LED_1_PIN 13
-#define BUILD_IN_LED_2_PIN 14
-#define BUILD_IN_LED_3_PIN 15
-#define BUILD_IN_LED_4_PIN 16
+#define BUILT_IN_BUTTON_4_PIN 25
+#define BUILT_IN_BUTTON_3_PIN 24
+#define BUILT_IN_BUTTON_2_PIN 12
+#define BUILT_IN_BUTTON_1_PIN 11
+#define BUILT_IN_LED_1_PIN 13
+#define BUILT_IN_LED_2_PIN 14
+#define BUILT_IN_LED_3_PIN 15
+#define BUILT_IN_LED_4_PIN 16
 
 enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT };
 enum { LOW, HIGH };
