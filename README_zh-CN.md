@@ -954,7 +954,7 @@ fstatr.c:(.text._fstat_r+0xe): undefined reference to `_fstat'
 isattyr.c:(.text._isatty_r+0xc): undefined reference to `_isatty'
 ```
 
-这是因为我们使用了newlib的标准输入输出函数，那么就需要把newlib中其它的系统调用也实现。加入一些简单的什么都不做的桩函数：
+这是因为我们使用了newlib的标准输入输出函数，那么就需要把newlib中其它的系统调用也实现。除了_sbrk之外我们可以加入一些简单的什么都不做的桩函数。而_sbrk会在printf()函数中使用malloc()的时候被调用到，所以它需要被实现：
 
 ```c
 int _fstat(int fd, struct stat *st) {
@@ -963,8 +963,13 @@ int _fstat(int fd, struct stat *st) {
 }
 
 void *_sbrk(int incr) {
-  (void) incr;
-  return NULL;
+  extern char _end;
+  static unsigned char *heap = NULL;
+  unsigned char *prev_heap;
+  if (heap == NULL) heap = (unsigned char *) &_end;
+  prev_heap = heap;
+  heap += incr;
+  return prev_heap;
 }
 
 int _close(int fd) {
