@@ -1,28 +1,21 @@
 #include <stdint.h>
 #include "hal.h"
 
-int main(void) {
-  set_gpio_mode(P0, BUILT_IN_LED_1_PIN, GPIO_MODE_OUTPUT, 0);
-  set_gpio_mode(P0, BUILT_IN_LED_2_PIN, GPIO_MODE_OUTPUT, 0);
-  set_gpio_mode(P0, BUILT_IN_LED_3_PIN, GPIO_MODE_OUTPUT, 0);
-  set_gpio_mode(P0, BUILT_IN_LED_4_PIN, GPIO_MODE_OUTPUT, 0);
+#define LED1 19
 
+int main(void) {
+  set_gpio_mode(P0, LED1, GPIO_MODE_OUTPUT, 0);
+
+  int level = 0;
   while (1) {
-    gpio_write(P0, BUILT_IN_LED_1_PIN, HIGH);
-    gpio_write(P0, BUILT_IN_LED_2_PIN, HIGH);
-    gpio_write(P0, BUILT_IN_LED_3_PIN, HIGH);
-    gpio_write(P0, BUILT_IN_LED_4_PIN, HIGH);
+    gpio_write(P0, LED1, level);
     spin(9999999);
-    gpio_write(P0, BUILT_IN_LED_4_PIN, LOW);
-    gpio_write(P0, BUILT_IN_LED_3_PIN, LOW);
-    gpio_write(P0, BUILT_IN_LED_2_PIN, LOW);
-    gpio_write(P0, BUILT_IN_LED_1_PIN, LOW);
-    spin(9999999);
+    level = !level;
   }
 }
 
 // Startup code
-__attribute__((naked, noreturn)) void _reset(void) {
+__attribute__((naked, noreturn)) void Reset_Handler(void) {
   // memset .bss to zero, and copy .data section to RAM region
   extern long _sbss, _ebss, _sdata, _edata, _sidata;
   for (long *dst = &_sbss; dst < &_ebss; dst++) *dst = 0;
@@ -36,5 +29,4 @@ extern void _estack(void);  // Defined in link.ld
 
 // 16 standard and 42 nRF-specific handlers
 __attribute__((section(".vectors"))) void (*const tab[16 + 42])(void) = {
-    _estack, _reset};
-
+    _estack, Reset_Handler};
