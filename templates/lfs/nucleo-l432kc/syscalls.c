@@ -56,7 +56,8 @@ static void flash_lock(void) {
 static uint8_t s_fs[FLASH_BLOCK_SIZE * LFS_BLOCKS];  // Keep FS in this memory
 #else
 // Allocate FS at the end of the flash memory
-static uint8_t *s_fs = ((uint8_t *) &_eflash) - FLASH_BLOCK_SIZE * LFS_BLOCKS;
+static uint8_t *s_fs =
+    (uint8_t *) (((unsigned long) &_eflash) - FLASH_BLOCK_SIZE * LFS_BLOCKS);
 #endif
 
 static inline char nibble(char c) {
