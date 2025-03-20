@@ -1,25 +1,24 @@
-#include <stdint.h>
 #include "hal.h"
 
-#define LED1 19
+#define LED1 PIN('A', 17)
 
 int main(void) {
-  set_gpio_mode(P0, LED1, GPIO_MODE_OUTPUT, 0);
+  gpio_init(LED1, GPIO_MODE_OUTPUT, 0);
 
-  int level = 0;
-  while (1) {
-    gpio_write(P0, LED1, level);
+  for (;;) {
+    gpio_write(LED1, true);
     spin(9999999);
-    level = !level;
+    gpio_write(LED1, false);
+    spin(9999999);
   }
 }
 
 // Startup code
 __attribute__((naked, noreturn)) void Reset_Handler(void) {
   // memset .bss to zero, and copy .data section to RAM region
-  extern long _sbss, _ebss, _sdata, _edata, _sidata;
-  for (long *dst = &_sbss; dst < &_ebss; dst++) *dst = 0;
-  for (long *dst = &_sdata, *src = &_sidata; dst < &_edata;) *dst++ = *src++;
+  extern uint32_t _sbss, _ebss, _sdata, _edata, _sidata;
+  for (uint32_t *dst = &_sbss; dst < &_ebss; dst++) *dst = 0;
+  for (uint32_t *dst = &_sdata, *src = &_sidata; dst < &_edata;) *dst++ = *src++;
 
   main();             // Call main()
   for (;;) (void) 0;  // Infinite loop in the case if main() returns

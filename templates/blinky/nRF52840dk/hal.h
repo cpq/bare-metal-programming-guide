@@ -1,38 +1,44 @@
-#define P0 ((struct gpio *) 0x50000000)
-#define P1 ((struct gpio *) 0x50000300)
+#pragma once
 
-enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT };
-enum { LOW, HIGH };
+#include <stdbool.h>
+#include <stdint.h>
 
-struct gpio {
-  volatile uint32_t RESERVED[321], OUT, OUTSET, OUTCLR, IN, DIR, DIRSET, DIRCLR,
-      LATCH, DETECTMODE, RESERVED_SECOND[118], PIN_CNF[32];
-};
+#include "nrf52.h"
 
-void set_gpio_mode(struct gpio *port, int pin, int mode, int pull) {
-  if (pull == 0) {
-    port->PIN_CNF[pin] = mode << 0;
-  } else {
-    port->PIN_CNF[pin] = mode << 0 | pull << 2;
-  }
-}
-
-int gpio_read(struct gpio *port, int pin) {
-  uint32_t button = ~(port->IN);
-  if (button & (1 << pin)) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-void gpio_write(struct gpio *port, int pin, int value) {
-  if (value == 0) {
-    port->OUTSET = 1 << pin;
-  } else {
-    port->OUTCLR = 1 << pin;
-  }
-}
+#define BIT(x) (1UL << (x))
+#define CLRSET(R, CLEARMASK, SETMASK) (R) = ((R) & ~(CLEARMASK)) | (SETMASK)
+#define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
+#define PINNO(pin) (pin & 255)
+#define PINBANK(pin) (pin >> 8)
 
 static inline void spin(volatile uint32_t count) {
   while (count--) (void) 0;
+}
+
+#define GPIO(N) ((NRF_GPIO_Type *) ((NRF_P0_BASE) + 0x300 * (N)))
+
+static inline NRF_GPIO_Type *gpio_bank(uint16_t pin) {
+  return GPIO(PINBANK(pin));
+}
+
+enum { GPIO_MODE_INPUT = 0, GPIO_MODE_OUTPUT = 1 };
+enum { GPIO_PULL_NONE = 0, GPIO_PULL_DOWN = 1, GPIO_PULL_UP = 3U };
+
+void gpio_init(uint16_t pin, uint8_t mode, uint8_t pull) {
+  NRF_GPIO_Type *gpio = gpio_bank(pin);
+  gpio->PIN_CNF[pin] = (mode & 1U) << 0 | (pull & 3U) << 2U;
+}
+
+static inline bool gpio_read(uint16_t pin) {
+  NRF_GPIO_Type *gpio = gpio_bank(pin);
+  return ~(gpio->IN) & BIT(PINNO(pin));
+}
+
+static inline void gpio_write(uint16_t pin, bool value) {
+  NRF_GPIO_Type *gpio = gpio_bank(pin);
+  if (value) {
+    gpio->OUTSET = BIT(PINNO(pin));
+  } else {
+    gpio->OUTCLR = BIT(PINNO(pin));
+  }
 }
