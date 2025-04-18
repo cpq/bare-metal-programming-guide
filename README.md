@@ -333,6 +333,7 @@ jump to our boot function.
 
 
 ## Minimal firmware
+Note: The startup code here is written in C, and included in the main.c file. Usually we have a startup.s file which is written in assembly language for initialization. 
 
 Let's create a file `main.c`, and specify our boot function that initially does
 nothing (falls into infinite loop), and specify a vector table that contains 16
@@ -353,7 +354,7 @@ __attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = {
 };
 ```
 
-For function `_reset()`, we have used GCC-specific attributes `naked` and
+Here the reset() function is the Reset_Handler. For function `_reset()`, we have used GCC-specific attributes `naked` and
 `noreturn` - they mean, standard function's prologue and epilogue should not
 be created by the compiler, and that function does not return.
 
