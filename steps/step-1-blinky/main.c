@@ -56,9 +56,9 @@ int main(void) {
 }
 
 // Startup code
-__attribute__((naked, noreturn)) void _reset(void) {
+__attribute__((naked, noreturn)) void _reset(void) {          //naked=don't generate prologue/epilogue  //noreturn=it will never exit
   // memset .bss to zero, and copy .data section to RAM region
-  extern long _sbss, _ebss, _sdata, _edata, _sidata;
+  extern long _sbss, _ebss, _sdata, _edata, _sidata;          //linker symbols declared in the .ld file
   for (long *dst = &_sbss; dst < &_ebss; dst++) *dst = 0;
   for (long *dst = &_sdata, *src = &_sidata; dst < &_edata;) *dst++ = *src++;
 
@@ -69,5 +69,5 @@ __attribute__((naked, noreturn)) void _reset(void) {
 extern void _estack(void);  // Defined in link.ld
 
 // 16 standard and 91 STM32-specific handlers
-__attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = {
+__attribute__((section(".vectors"))) void (*const tab[16 + 91])(void) = { // defines the interrupt vector table and dumps it into .vectors via the linker script
     _estack, _reset};
