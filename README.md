@@ -333,7 +333,6 @@ jump to our boot function.
 
 
 ## Minimal firmware
-Note: The startup code here is written in C, and included in the main.c file. Usually we have a startup.s file which is written in assembly language for initialization. 
 
 Let's create a file `main.c`, and specify our boot function that initially does
 nothing (falls into infinite loop), and specify a vector table that contains 16
@@ -368,6 +367,9 @@ need later to tell the linker to put that section right at the beginning of the
 generated firmware - and consecutively, at the beginning of flash memory. The
 first two entries are: the value of the stack pointer register, and the
 firmware's entry point.  We leave the rest of vector table filled with zeroes.
+
+NOTE: The startup code here is written in C, and included in the main.c file.
+Oftentimes, device SDKs have a startup.s file written in assembly.
 
 ### Compilation
 
