@@ -32,7 +32,7 @@ cmsis_h5:
 
 littlefs/lfs.c: littlefs
 littlefs:
-	git clone -q -c advice.detachedHead=false --depth 1 -b v2.6.1 https://github.com/littlefs-project/littlefs $@
+	git clone -q -c advice.detachedHead=false --depth 1 -b v2.11.0 https://github.com/littlefs-project/littlefs $@
 
 clean:
 	rm -rf firmware.* cmsis_* littlefs
