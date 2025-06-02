@@ -105,11 +105,15 @@ int lfs_driver_init() {
   return result;
 }
 
+static bool initialise(void) {
+  static bool done = false;
+  if (!done && (lfs_driver_init() == 0)) done = true;
+  return done;
+}
+
 static int open_fd(void) {
-  static int initialized = 0;
   int i, fd = -1;
-  if (!initialized && (lfs_driver_init() == 0)) initialized = 1;
-  if (initialized) {
+  if (initialise()) {
     for (i = 0; i < LFS_MAX_FDS; i++) {
       if (s_fds[i].isopen == 0) {
         s_fds[i].isopen = 1;
@@ -201,6 +205,14 @@ struct dirent *readdir(DIR *dir) {
   return &dirent;
 }
 
+int _stat(char *path, struct stat *st) {
+  struct lfs_info info;
+  if (lfs_stat(&s_lfs, path, &info) != 0) return -1;
+  st->st_mode = info.type == LFS_TYPE_DIR ? S_IFDIR : S_IFREG;
+  st->st_size = info.size;
+  return 0;
+}
+
 int _fstat(int fd, struct stat *st) {
   if (fd < 0 && fd > LFS_MAX_FDS + 2) return -1;
   st->st_mode = S_IFCHR;
@@ -210,5 +222,5 @@ int _fstat(int fd, struct stat *st) {
 int mkdir(const char *path, mode_t mode) {
   // printf("%s(%s, %u)\n", __func__, path, mode);
   (void) path, (void) mode;
-  return lfs_mkdir(&s_lfs, path);
+  return initialise() ? lfs_mkdir(&s_lfs, path) : -1;
 }
