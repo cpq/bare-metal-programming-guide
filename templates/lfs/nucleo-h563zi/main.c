@@ -41,10 +41,10 @@ static void list_files(const char *path) {
     struct dirent *dp;
     while ((dp = readdir(dirp)) != NULL) {
       if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) continue;
-      printf("  %s%s%s\n", path, dp->d_name, (dp->d_type & DT_DIR) ? "/" : "");
+      printf("  %s/%s%s\n", path, dp->d_name, (dp->d_type & DT_DIR) ? "/" : "");
       if (dp->d_type & DT_DIR) {
         char dir[strlen(path) + strlen(dp->d_name) + 2];
-        snprintf(dir, sizeof(dir), "%s%s/", path, dp->d_name);
+        snprintf(dir, sizeof(dir), "%s/%s", path, dp->d_name);
         list_files(dir);
       }
     }
