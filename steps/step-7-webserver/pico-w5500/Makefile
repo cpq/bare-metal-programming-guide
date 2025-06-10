@@ -32,7 +32,7 @@ firmware.uf2: firmware.bin $(BIN2UF2)
 # Requires env variable VCON_API_KEY set
 DEVICE_URL ?= https://dash.vcon.io/api/v3/devices/3
 test: update
-	curl --fail -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=5 | tee /tmp/output.txt
+	curl --fail -su :$(VCON_API_KEY) $(DEVICE_URL)/tx?t=20 | tee /tmp/output.txt
 	grep 'READY, IP:' /tmp/output.txt
 
 update: build
