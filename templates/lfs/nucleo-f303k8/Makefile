@@ -21,17 +21,17 @@ firmware.bin: firmware.elf
 	arm-none-eabi-objcopy -O binary $< $@
 
 flash: firmware.bin
-	st-flash --reset write $< 0x8000000
+	STM32_Programmer_CLI -c port=swd -e all -w $< 0x8000000 -hardRst
 
 cmsis_core:
-	git clone --depth 1 -b 5.9.0 https://github.com/ARM-software/CMSIS_5 $@
+	git clone -q -c advice.detachedHead=false --depth 1 -b 5.9.0 https://github.com/ARM-software/CMSIS_5 $@
 
 cmsis_f3:
-	git clone --depth 1 -b v2.3.7 https://github.com/STMicroelectronics/cmsis_device_f3 $@
+	git clone -q -c advice.detachedHead=false --depth 1 -b v2.3.7 https://github.com/STMicroelectronics/cmsis_device_f3 $@
 
 littlefs/lfs.c: littlefs
 littlefs:
-	git clone --depth 1 -b v2.6.1 https://github.com/littlefs-project/littlefs $@
+	git clone -q -c advice.detachedHead=false --depth 1 -b v2.6.1 https://github.com/littlefs-project/littlefs $@
 
 clean:
 	$(RM) firmware.* cmsis_* littlefs

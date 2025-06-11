@@ -28,12 +28,11 @@ flash: firmware.bin
 	bossac -p /dev/cu.usb* -w -v -b $<
 
 cmsis_core:
-	git clone --depth 1 -b 5.9.0 https://github.com/ARM-software/CMSIS_5 $@
+	git clone -q -c advice.detachedHead=false --depth 1 -b 5.9.0 https://github.com/ARM-software/CMSIS_5 $@
 
 cmsis_sam:
 	curl -sL https://packs.download.microchip.com/Microchip.SAME54_DFP.3.8.234.pack -o $@.zip
 	mkdir $@ && cd $@ && unzip ../$@.zip
-#	git clone --depth 1 -b master https://github.com/modm-io/cmsis-header-sam $@
 
 clean:
 	$(RM) firmware.* cmsis_* *.zip
