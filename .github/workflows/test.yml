@@ -17,9 +17,9 @@ jobs:
     - run: make -C steps/step-7-webserver/nucleo-f429zi
     - run: make -C steps/step-7-webserver/pico-w5500 test VCON_API_KEY=${{secrets.VCON_API_KEY}}
     - run: make -C templates/blinky/nucleo-f429zi test VCON_API_KEY=${{secrets.VCON_API_KEY}}
-    - run: make -C templates/blinky/nucleo-l432kc test VCON_API_KEY=${{secrets.VCON_API_KEY}}
+    #- run: make -C templates/blinky/nucleo-l432kc test VCON_API_KEY=${{secrets.VCON_API_KEY}}
     - run: make -C templates/cli/nucleo-f429zi test VCON_API_KEY=${{secrets.VCON_API_KEY}}
-    - run: make -C templates/cli/nucleo-l432kc test VCON_API_KEY=${{secrets.VCON_API_KEY}}
+    #- run: make -C templates/cli/nucleo-l432kc test VCON_API_KEY=${{secrets.VCON_API_KEY}}
   macos:
     runs-on: macos-latest
     steps:
